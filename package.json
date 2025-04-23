@@ -2,11 +2,11 @@
   "name": "watchteam",
   "version": "1.0.0",
   "description": "security guard app",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "app.js"
-
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+   
   },
   "author": "",
   "license": "ISC",
