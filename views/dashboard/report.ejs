@@ -1,0 +1,538 @@
+<%- include("../includes/header"); -%>
+
+        <!-- Start::app-content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Start::page-header -->
+                <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+                    <div>
+                        <p class="fw-medium fs-18 mb-0">Hello Farouk Dev.</p>
+                        <p class="fs-13 text-muted mb-0">Let's make today a productive one!</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex gap-2">
+                            <div class="position-relative">
+                                <button class="btn btn-primary btn-wave" type="button"
+                                    id="dropdownMenuClickableInside" data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside" aria-expanded="false">
+                                    Filter By <i class="ri-arrow-down-s-fill ms-1"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickableInside">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Yesterday</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 30 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-secondary btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download">
+                                <i class="ti ti-download"></i>
+                            </button>
+                            <button class="btn btn-success btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Share">
+                                <i class="ti ti-share-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- End::page-header -->
+
+                <!-- Start:: row-1 -->
+                <div class="row">
+                    <div class="col-xxl-9">
+                        <div class="row">
+                            <!-- Clients -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-lg bg-primary bg-opacity-25">
+                                                <span class="avatar avatar-md bg-primary svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="84" cy="108" r="52" opacity="0.2"/><path d="M10.23,200a88,88,0,0,1,147.54,0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M172,160a87.93,87.93,0,0,1,73.77,40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="84" cy="108" r="52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M152.69,59.7A52,52,0,1,1,172,160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Clients 
+                                                </p><br>
+                                                <h4 class="mb-4 fw-semibold">2</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div  class="mb-0 fs-12 text-muted">
+                                                
+                                               
+                                            </div>
+                                            Active Clients
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-primary">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Post Stiles -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-lg bg-secondary bg-opacity-25">
+                                                <span class="avatar avatar-md bg-secondary svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M40,192a16,16,0,0,0,16,16H216a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H56A16,16,0,0,1,40,64Z" opacity="0.2"/><path d="M40,64V192a16,16,0,0,0,16,16H216a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H56A16,16,0,0,1,40,64h0A16,16,0,0,1,56,48H192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="180" cy="140" r="12"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Post Sites
+                                                </p><br>
+                                                <h4 class="mb-4 fw-semibold">1</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="mb-0 fs-12 text-muted">
+                                                
+                                            </div>
+                                            Active Post Sites
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-secondary">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Security Guards -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-rounded bg-success bg-opacity-25">
+                                                <span class="avatar avatar-md bg-success svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M88,216a24,24,0,0,0,24-24c0-10-8-16-8-16H216s8,6,8,16a24,24,0,0,1-24,24Z" opacity="0.2"/><path d="M200,176V64a24,24,0,0,0-24-24H40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="104" y1="104" x2="168" y2="104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="104" y1="136" x2="168" y2="136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M24,80s-8-6-8-16a24,24,0,0,1,48,0V192a24,24,0,0,0,48,0c0-10-8-16-8-16H216s8,6,8,16a24,24,0,0,1-24,24H88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Security Guards
+                                                </p>
+                                                <h4 class="mb-4 fw-semibold">7</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="mb-0 fs-12 text-muted">
+                                                
+                                            </div>
+                                            Active Guards
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-success">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Back Office Team -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-lg bg-pink bg-opacity-25">
+                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Back Office Team
+                                                </p>
+                                                <h4 class="mb-4 fw-semibold">2</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="mb-0 fs-12 text-muted">
+                                                
+                                            </div>
+                                            Active User
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Check INs -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-lg bg-info bg-opacity-25">
+                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Checked-Ins
+                                                </p>
+                                                <h4 class="mb-4 fw-semibold">0</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="mb-0 fs-12 text-muted">
+                                                
+                                            </div>
+                                            Today
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Clocked ins -->
+                            <div class="col-xl-2">
+                                <div class="card custom-card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div class="avatar avatar-lg bg-info bg-opacity-25">
+                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="mb-2 fs-15 fw-medium text-muted">Clocked-Ins
+                                                </p>
+                                                <h4 class="mb-4 fw-semibold">17</h4>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="mb-0 fs-12 text-muted">
+                                               
+                                            </div>
+                                            Today
+                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END of 6 cards top -->
+                    
+                    <!-- Another -->
+                    <div class="col-xxl-3 col-xl-12 col-lg-12 col-md-6 col-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Top Incidence
+                                </div>
+                                <a href="javascript:void(0);" class="fs-12 text-primary"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a>
+                            </div>
+                            <div style="margin: auto;">
+                                <img src="assets/images/brand-logos/no-rec.png" width="250px" alt="">
+                                </div>
+                            <div class="card-body">
+                                <!-- This is for the chart, import the JS to work -->
+                                <!-- <div id="activecustomers"></div> -->
+                                    
+                                  <!-- <div style="margin-bottom: 100px;"></div> -->
+                            </div>
+                            <div class="card-footer">
+                                <div class="row mt-0">
+                                    <div class="col-6 border-end border-inline-end-dashed text-center">
+                                        <p class="text-muted mb-1 fs-12">Added</p>
+                                        <h6 class="text-secondary">0</h6>
+                                    </div>
+                                    <div class="col-6 text-center">
+                                        <p class="text-muted mb-1 fs-12">Closed</p>
+                                        <h6 class="text-primary">0</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- bar chart -->
+                    <div class="col-xl-6">
+                        <div class="card custom-card">
+                            <div class="card-header">
+                                <div class="card-title">Distributed Columns Chart</div>
+                            </div>
+                            <div class="card-body">
+                                <div id="columns-distributed"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- repoty num -->
+                    <div class="col-xl-6">
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Revenue</div>
+                                                <div class="fs-22 fw-semibold text-success">$1,24,624</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,72v41.61A184,184,0,0,1,128,136a184.07,184.07,0,0,1-88-22.38V72Zm0,128H40V131.64A200.19,200.19,0,0,0,128,152a200.25,200.25,0,0,0,88-20.37V200ZM104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-danger-transparent text-danger me-2"><i class="ri-arrow-left-down-line fs-11"></i></span>
+                                                    <span class="fs-14">7%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Customers</div>
+                                                <div class="fs-22 fw-semibold text-pink">1,032</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-pink svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a28,28,0,0,1-28,28h-4v8a8,8,0,0,1-16,0v-8H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h4V72a8,8,0,0,1,16,0v8h16a8,8,0,0,1,0,16H116a12,12,0,0,0,0,24h24A28,28,0,0,1,168,148Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-success-transparent me-2"><i class="ri-arrow-left-up-line fs-11"></i></span>
+                                                    <span class="fs-14">6%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Revenue</div>
+                                                <div class="fs-22 fw-semibold text-success">$1,24,624</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,72v41.61A184,184,0,0,1,128,136a184.07,184.07,0,0,1-88-22.38V72Zm0,128H40V131.64A200.19,200.19,0,0,0,128,152a200.25,200.25,0,0,0,88-20.37V200ZM104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-danger-transparent text-danger me-2"><i class="ri-arrow-left-down-line fs-11"></i></span>
+                                                    <span class="fs-14">7%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Customers</div>
+                                                <div class="fs-22 fw-semibold text-pink">1,032</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-pink svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a28,28,0,0,1-28,28h-4v8a8,8,0,0,1-16,0v-8H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h4V72a8,8,0,0,1,16,0v8h16a8,8,0,0,1,0,16H116a12,12,0,0,0,0,24h24A28,28,0,0,1,168,148Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-success-transparent me-2"><i class="ri-arrow-left-up-line fs-11"></i></span>
+                                                    <span class="fs-14">6%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Revenue</div>
+                                                <div class="fs-22 fw-semibold text-success">$1,24,624</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,72v41.61A184,184,0,0,1,128,136a184.07,184.07,0,0,1-88-22.38V72Zm0,128H40V131.64A200.19,200.19,0,0,0,128,152a200.25,200.25,0,0,0,88-20.37V200ZM104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-danger-transparent text-danger me-2"><i class="ri-arrow-left-down-line fs-11"></i></span>
+                                                    <span class="fs-14">7%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-3"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                <div class="flex-fill fs-13 text-muted">Total Customers</div>
+                                                <div class="fs-22 fw-semibold text-pink">1,032</div>
+                                            </div>
+                                            <div class="avatar avatar-md avatar-rounded bg-pink svg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256">
+                                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a28,28,0,0,1-28,28h-4v8a8,8,0,0,1-16,0v-8H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h4V72a8,8,0,0,1,16,0v8h16a8,8,0,0,1,0,16H116a12,12,0,0,0,0,24h24A28,28,0,0,1,168,148Z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge rounded-pill bg-success-transparent me-2"><i class="ri-arrow-left-up-line fs-11"></i></span>
+                                                    <span class="fs-14">6%</span>
+                                                </div>
+                                                <p class="fs-11 text-muted mb-0">This Month</p>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div id="chart-4"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                   
+                   
+                    
+                    
+                    
+
+  
+                    
+                </div>
+                <!-- End:: row-1 -->
+
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="../assets/js/apexcharts-column.js"></script>
+    
+</body>
+
+</html> 

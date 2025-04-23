@@ -1,0 +1,217 @@
+<%- include("../includes/header"); -%>
+
+<style>
+    .iti {
+        width: 100% !important; /* Expands the intl-tel-input container */
+    }
+  
+    .iti input {
+        width: 100% !important; /* Ensures the input fills the container */
+    }
+  </style>
+        <!-- Start::app-content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Start::page-header -->
+                <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+                    <div>
+                        <div>
+                            <!-- <h1 class="page-title fw-medium fs-18 mb-2">Activities</h1> -->
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="/dashboard">
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">New User</li>
+                            </ol>
+                        </div>
+                    </div>
+
+
+
+                    
+                   
+                </div>
+                <!-- End::page-header -->
+
+                <!-- Start:: row-2 -->
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="card custom-card">
+                            <div class="card-header justify-content-between">
+                                <div class="card-title">
+                                    Back Office User
+                                </div>
+                                <!-- <div class="prism-toggle">
+                                    <button class="btn btn-sm btn-primary-light">Show Code<i class="ri-code-line ms-2 d-inline-block align-middle"></i></button>
+                                </div> -->
+                            </div>
+                            <div class="card-body">
+                                <div class="row gy-4">
+                                        
+                                        
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                        <div class="form-floating mb-3">
+                                            <input type="email" class="form-control" id="floatingInput"
+                                                placeholder="name@example.com">
+                                            <label for="floatingInput">Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                        <div class="form-floating mb-3">
+                                            <input type="email" class="form-control" id="floatingInput"
+                                                placeholder="name@example.com">
+                                            <label for="floatingInput">Email</label>
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="floatingSelect"
+                                                aria-label="Floating label select example">
+                                                <option value="1" selected >Admin</option>
+                                                <!-- <option value="1">SMS</option> -->
+                                                <option value="2">Dispatch Operator</option>
+                                                <option value="3">Manager</option>
+                                                <option value="4">Supervisor</option>
+                                                <!-- <option value="3">Three</option> -->
+                                            </select>
+                                            <label for="floatingSelect">Access Level</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="floatingSelect"
+                                                aria-label="Floating label select example">
+                                                <option value="1" selected >EFCC</option>
+                                                <!-- <option value="1">SMS</option> -->
+                                                <option value="2">POLICE</option>
+                                                <!-- <option value="3">Three</option> -->
+                                            </select>
+                                            <label for="floatingSelect">Assign Client</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="floatingSelect"
+                                                aria-label="Floating label select example">
+                                                <option value="1" selected >GTB</option>
+                                                <!-- <option value="1">SMS</option> -->
+                                                <option value="2">Eco</option>
+                                                <!-- <option value="3">Three</option> -->
+                                            </select>
+                                            <label for="floatingSelect">Assign Post Site</label>
+                                        </div>
+                                    </div>
+                                    <!-- <button type="button"  class="btn btn-primary-light btn-wave">Add New Guard</button> -->
+                                    
+                                </div>
+                               
+
+                                
+                            </div>
+                            <button type="button" class="btn btn-teal-gradient btn-wave mt-4">Add New User</button>
+                            <div class="card-footer d-none border-top-0">
+        </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-2 -->
+
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <script src="assets/libs/intl-tel-input/build/js/intlTelInput.min.js"></script>
+    <script src="assets/js/form-advanced.js"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+    
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    
+</body>
+
+</html> 

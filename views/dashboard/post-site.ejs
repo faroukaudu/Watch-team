@@ -1,0 +1,292 @@
+<%- include("../includes/header"); -%>
+
+        <!-- Start::app-content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Start::page-header -->
+                <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+                    <div>
+                        <div>
+                            <h1 class="page-title fw-medium fs-18 mb-2">Post Sites</h1>
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="/dashboard">
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Post-Sites</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <p>oidne</p>
+                   
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex gap-2">
+                            <div class="position-relative" >
+                                <a  href="/new-post-site"  class="small-space btn btn-secondary btn-wave" type="button"
+                                   >
+                                    New Post-Site <i class="ri-user-add-fill ms-1"></i>
+                                </a>
+                                <button class="btn btn-outline-primary btn-wave" type="button"
+                                    id="dropdownMenuClickableInside" data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside" aria-expanded="false">
+                                    Filter By <i class="ri-filter-line ms-1"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickableInside">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Active</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Inactive</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Archive</a></li>
+                                   
+                                </ul>
+                            </div>
+                            <div class="dropdown ">
+                                <a aria-label="anchor" href="javascript:void(0);"
+                                    class="btn btn-primary  btn-icon btn-sm text-muted" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <i class="fe fe-more-vertical"></i>
+                                </a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-upload"></i> &nbsp; import</a></li>
+                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="far fa-file-excel"></i> &nbsp; Export Excel</a></li>
+                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="far fa-file-pdf"></i> &nbsp; &nbsp;Export PDF</a>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                            <!-- <button class="btn btn-secondary btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download">
+                                <i class="ti ti-download"></i>
+                            </button>
+                            <button class="btn btn-success btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Share">
+                                <i class="ti ti-share-3"></i>
+                            </button> -->
+                        </div>
+                    </div>
+                </div>
+                <!-- End::page-header -->
+
+                <!-- Start:: row-1 -->
+                <div class="row">
+                    
+                   <!-- MAP -->
+                   
+                    <!-- MAP END -->
+                    <!-- Latest Activity -->
+                    <div class="col-xxl-3">
+                        <div class="card custom-card">
+                            <div class="card-header  justify-content-between">
+                                <div class="card-title" style="font-size: large;">
+                                    My Post Sites
+                                </div>
+                                <!-- <a href="javascript:void(0);" class="fs-12 text-muted fw-medium bg-light rounded p-1" > View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a> -->
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table text-nowrap">
+                                    <thead >
+                                        <tr>
+                                            <th scope="col"><input class="form-check-input" type="checkbox" id="checkboxNoLabel" value="" aria-label="..."></th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;">Post Sites</th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;">Address</th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;">Email</th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;">Phone Number</th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;">Status</th>
+                                            <th scope="col" style="font-weight: 700; font-size: 16px;"></th>
+                                            
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row"><input class="form-check-input" type="checkbox" id="checkboxNoLabel1" value="" aria-label="..."></th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs me-2 online avatar-rounded">
+                                                        <img src="../assets/images/faces/3.jpg" alt="img">
+                                                    </span>Mayor Kelly
+                                                </div>
+                                            </td>
+                                            <td>Manufacturer</td>
+                                            
+                                            <td>mayorkrlly@gmail.com</td>
+                                            <td>+234567896
+                                            </td>
+                                            <td><span class="badge bg-primary-transparent">Team Lead</span></td>
+                                            
+                                            <td>
+                                                <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);"
+                                                    class="btn btn-light btn-icon btn-sm text-muted" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fe fe-more-vertical"></i>
+                                                </a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-eye"></i> &nbsp; View Details</a></li>
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Archive</a>
+                                                    </li>
+                                                    
+                                                </ul>
+                                            </div></td>
+                                            
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th scope="row"><input class="form-check-input" type="checkbox" id="checkboxNoLabel3" value="" aria-label="..."></th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs me-2 online avatar-rounded">
+                                                        <img src="../assets/images/faces/14.jpg" alt="img">
+                                                    </span>Simon Cowel
+                                                </div>
+                                            </td>
+                                            <td>Service Manager</td>
+                                           
+                                            <td>simoncowel234@gmail.com</td>
+                                            <td>+234567896
+                                            </td>
+                                            <td><span class="badge bg-success-transparent">Active</span></td>
+                                            
+                                            <td><div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);"
+                                                    class="btn btn-light btn-icon btn-sm text-muted" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fe fe-more-vertical"></i>
+                                                </a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-eye"></i> &nbsp; View Details</a></li>
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Archive</a>
+                                                    </li>
+                                                   
+                                                </ul>
+                                            </div></td>
+                                            
+                                        </tr>
+                                        <tr>
+                                            <th scope="row"><input class="form-check-input" type="checkbox" id="checkboxNoLabel13" value="" aria-label="..."></th>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs me-2 online avatar-rounded">
+                                                        <img src="../assets/images/faces/5.jpg" alt="img">
+                                                    </span>Mirinda Hers
+                                                </div>
+                                            </td>
+                                            <td>Recruiter</td>
+                                            
+                                            <td>mirindahers@gmail.com</td>
+                                            <td>
+                                                +321456987
+                                            </td>
+                                            <td><span class="badge bg-danger-transparent">Inactive</span></td>
+                                            
+                                            <td><div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);"
+                                                    class="btn btn-light btn-icon btn-sm text-muted" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fe fe-more-vertical"></i>
+                                                </a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-eye"></i> &nbsp; View Details</a></li>
+                                                    <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Archive</a>
+                                                    </li>
+                                                    
+                                            </div></td>
+                                           
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                     
+                    
+                    
+                </div>
+                <!-- End:: row-1 -->
+
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    
+</body>
+
+</html> 

@@ -1,0 +1,427 @@
+<%- include("../includes/header"); -%>
+
+
+<style>
+
+.scroll-link {
+    width: 300px;  /* Set a fixed width */
+      white-space: nowrap;  /* Prevent text from wrapping */
+      overflow-x: auto;  /* Enable horizontal scrolling */
+     
+      padding: 10px;
+      scrollbar-width: none;
+   
+
+}
+.sub-button {
+    /* margin-bottom: -15px; */
+    width: 100%;
+}
+
+    .iti {
+        width: 100% !important; /* Expands the intl-tel-input container */
+        height: 100%;
+    }
+  
+    .iti input {
+        width: 100% !important; /* Ensures the input fills the container */
+        height: 100%;
+    }
+
+    .share-code {
+        font-size: 30px;
+        color: white;
+        /* border-style: dashed; */
+        
+        border:dashed #0d6efd ;
+        text-align: center;
+        width: 260px;
+        /* margin: auto; */
+        
+        /* border-color: beige; */
+    }
+
+    .my-icons {
+        font-size: 23px;
+        margin-left: 30px;
+        display: flex;
+        gap: 10px; /* Adjust the spacing between items */
+        
+        /* padding: 10px 20px; */
+        /* position: relative; */
+        /* float:left; */
+            }
+
+        .cont {
+        display: flex;
+      justify-content:center; /* Left & right alignment */
+      align-items: center; /* Centers them vertically */
+    
+      padding: 10px; /* Prevents touching edges */
+        }
+  </style>
+        <!-- Start::app-content -->
+        <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Start::page-header -->
+                <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+                    <div>
+                        <div>
+                            <!-- <h1 class="page-title fw-medium fs-18 mb-2">Activities</h1> -->
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="/dashboard">
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">New Guard</li>
+                            </ol>
+                        </div>
+                    </div>
+
+
+
+                    
+                   
+                </div>
+                <!-- End::page-header -->
+
+                <!-- Start:: row-2 -->
+                <div class="col-xl-12">
+                    <div class="card custom-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                Invite Guard
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-pills mb-3 nav-justified tab-style-5 d-sm-flex d-block" id="pills-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
+                                        data-bs-target="#pills-home" type="button" role="tab"
+                                        aria-controls="pills-home" aria-selected="true">Invite via SMS or Email</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
+                                        data-bs-target="#pills-profile" type="button" role="tab"
+                                        aria-controls="pills-profile" aria-selected="false">Join By Code</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                                        data-bs-target="#pills-contact" type="button" role="tab"
+                                        aria-controls="pills-contact" aria-selected="false">Invite By Link</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill"
+                                        data-bs-target="#pills-disabled" type="button" role="tab"
+                                        aria-controls="pills-disabled" aria-selected="false">Create Profile</button>
+                                </li>
+                            </ul>
+                            <!-- Invite By SMS or Email -->
+                            <div class="tab-content" id="pills-tabContent">
+                                <div class="tab-pane show active text-muted" id="pills-home" role="tabpanel"
+                                    aria-labelledby="pills-home-tab" tabindex="0"> 
+                                        <div class="row gy-4">
+                                        
+                                        
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                                <div class="form-floating mb-3">
+                                                    <input type="email" class="form-control" id="floatingInput"
+                                                        placeholder="name@example.com">
+                                                    <label for="floatingInput">First Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                                <div class="form-floating mb-3">
+                                                    <input type="email" class="form-control" id="floatingInput"
+                                                        placeholder="name@example.com">
+                                                    <label for="floatingInput">Last Name</label>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                        
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                                <div class="form-floating">
+                                                    <select class="form-select" id="floatingSelect"
+                                                        aria-label="Floating label select example">
+                                                        <option value="1" selected >SMS</option>
+                                                        <!-- <option value="1">SMS</option> -->
+                                                        <option value="2">Email</option>
+                                                        <!-- <option value="3">Three</option> -->
+                                                    </select>
+                                                    <label for="floatingSelect">Invite By</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 ">
+                                                <div style="height: 100%; margin-top: -26px;">
+                                                    <label for="phone" class="form-label ">Mobile Number</label>
+                                                    <input type="text" class="form-control w-100" id="phone" type="tel">
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                                <div class="form-floating">
+                                                    <select class="form-select" id="floatingSelect"
+                                                        aria-label="Floating label select example">
+                                                        <option value="1" selected >EFCC</option>
+                                                        <!-- <option value="1">SMS</option> -->
+                                                        <option value="2">POLICE</option>
+                                                        <!-- <option value="3">Three</option> -->
+                                                    </select>
+                                                    <label for="floatingSelect">Select Clients</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                                                <div class="form-floating">
+                                                    <select class="form-select" id="floatingSelect"
+                                                        aria-label="Floating label select example">
+                                                        <option value="1" selected >GTB</option>
+                                                        <!-- <option value="1">SMS</option> -->
+                                                        <option value="2">Eco</option>
+                                                        <!-- <option value="3">Three</option> -->
+                                                    </select>
+                                                    <label for="floatingSelect">Assign Post</label>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-primary-light btn-wave">Add New Guard</button>
+                                            
+                                        </div>
+                                        
+                                </div>
+                                <!-- JOIN BY CODE -->
+                                <div class="tab-pane text-muted" id="pills-profile" role="tabpanel"
+                                    aria-labelledby="pills-profile-tab" tabindex="0">
+                                    <!-- <b>Lorem Ipsum is simplyzaza dummy</b>  -->
+                                   <p style="text-align: center;"> Share the unique company code along with the app download link. The guard can use the code to join the company.</p>
+                                   <div class=" ">
+                                    <div class="cont">
+                                    <div class="share-code ">703961</div>
+                                   <div class="my-icons">
+                                    <a href="#code-refresh"><i class="ri-restart-line" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-primary"
+                                    data-bs-placement="top" title="Refresh"></i></a>
+                                    <a href="#code-refresh"><i class="ri-file-copy-fill" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-secondary"
+                                    data-bs-placement="top" title="Copy"></i></a></div>
+                                   </div>
+                                   </div>
+                                   <hr style="margin-bottom: 30px;">
+                                   <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 ">
+                                    <div style="height: 100%; ">
+                                        <label for="phone-validation" class="form-label d-block">Mobile Number</label>
+                                        <input id="phone-validation" type="tel"  class="form-control">
+                                       
+                                    </div>
+                                    </div>
+                                    <div class="sub-button">
+                                        <button type="button"  class="btn btn-primary-light btn-wave w-100 mt-4 pb">Add New Guard</button>
+                                    </div>
+                                </div>
+                                <!-- JOIN BY CODE END -->
+                                 <!-- INVITE BY LINK -->
+                                <div class="tab-pane text-muted" id="pills-contact" role="tabpanel"
+                                    aria-labelledby="pills-contact-tab" tabindex="0">
+                                    <p style="text-align: center;"> Share the unique company code along with the app download link. The guard can use the code to join the company.</p>
+                                   <div class=" ">
+                                    <div class="cont">
+                                    <div class="share-code scroll-link ">https://watchTeam.com/guards-registration/Efcc/tokencode</div>
+                                   <div class="my-icons">
+                                    <!-- <a href="#code-refresh"><i class="ri-restart-line" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-primary"
+                                    data-bs-placement="top" title="Refresh"></i></a> -->
+                                    <a href="#code-refresh"><i class="ri-file-copy-fill" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-secondary"
+                                    data-bs-placement="top" title="Copy"></i></a></div>
+                                   </div>
+                                   </div>
+                                   <hr style="margin-bottom: 30px;">
+                                   <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 ">
+                                    <div style="height: 100%; ">
+                                        <label for="phone-show-selected-dial-code" class="form-label d-block">Mobile Number</label>
+                                        <input class="phone-input form-control" id="phone1" type="tel">
+                                       
+                                    </div>
+                                    </div>
+                                    <div class="sub-button">
+                                        <button type="button"  class="btn btn-primary-light btn-wave w-100 mt-4 pb">Add New Guard</button>
+                                    </div>
+                                </div>
+                                <!-- CREATE A GUARD PROFILE -->
+                                <div class="tab-pane text-muted" id="pills-disabled" role="tabpanel"
+                                    aria-labelledby="pills-disabled-tab" tabindex="0">
+                                    <div class="row gy-4">
+                                        
+                                        
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="email" class="form-control" id="floatingInput"
+                                                    placeholder="name@example.com">
+                                                <label for="floatingInput">First Name</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl- col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="email" class="form-control" id="floatingInput"
+                                                    placeholder="name@example.com">
+                                                <label for="floatingInput">Last Name</label>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                    
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="email" class="form-control" id="floatingInput"
+                                                    placeholder="name@example.com">
+                                                <label for="floatingInput">Email</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 ">
+                                            <div style="height: 75%; margin-top: -26px;">
+                                                <label for="phone" class="form-label ">Mobile Number</label>
+                                                <input type="text" class="form-control phone-input w-100" id="phone2" type="tel">
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="password" id="inputPassword5" class="form-control"
+                                                    aria-describedby="passwordHelpBlock">
+                                                <label for="floatingInput">Password</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="password" id="inputPassword5" class="form-control"
+                                                    aria-describedby="passwordHelpBlock">
+                                                <label for="floatingInput">Re-type Password</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="floatingSelect"
+                                                    aria-label="Floating label select example">
+                                                    <option value="1" selected >EFCC</option>
+                                                    <!-- <option value="1">SMS</option> -->
+                                                    <option value="2">POLICE</option>
+                                                    <!-- <option value="3">Three</option> -->
+                                                </select>
+                                                <label for="floatingSelect">Select Clients</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="floatingSelect"
+                                                    aria-label="Floating label select example">
+                                                    <option value="1" selected >GTB</option>
+                                                    <!-- <option value="1">SMS</option> -->
+                                                    <option value="2">Eco</option>
+                                                    <!-- <option value="3">Three</option> -->
+                                                </select>
+                                                <label for="floatingSelect">Assign Post</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <button type="button" class="btn btn-primary-light btn-wave w-100">Add New Guard</button>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                            <button type="button" class="btn btn-teal-light btn-wave w-100">Add New Guard & Send Details</button>
+                                        </div>
+                                        
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End:: row-2 -->
+
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <script src="assets/libs/intl-tel-input/build/js/intlTelInput.min.js"></script>
+    <script src="assets/js/form-advanced.js"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="assets/js/all-phone.js"></script>
+    
+</body>
+
+</html> 

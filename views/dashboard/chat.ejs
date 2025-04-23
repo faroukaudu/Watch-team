@@ -1,0 +1,1321 @@
+<%- include("../includes/header"); -%>
+
+         <!-- Start::app-content -->
+         <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Page Header -->
+                <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h1 class="page-title fw-medium fs-18 mb-2">Chat</h1>
+                        <div class="">
+                            <nav>
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="javascript:void(0);">Pages</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Chat</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex gap-2">
+                            <div class="position-relative">
+                                <button class="btn btn-primary btn-wave" type="button"
+                                    id="dropdownMenuClickableInside" data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside" aria-expanded="false">
+                                    Filter By <i class="ri-arrow-down-s-fill ms-1"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickableInside">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Yesterday</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 30 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-secondary btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download">
+                                <i class="ti ti-download"></i>
+                            </button>
+                            <button class="btn btn-success btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Share">
+                                <i class="ti ti-share-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Page Header Close -->
+                
+                <div class="main-chart-wrapper gap-lg-2 gap-0 mb-2 d-lg-flex">
+                    <div class="chat-info border">
+                        <div class="chat-search p-3 border-bottom"> 
+                            <div class="input-group"> 
+                                <input type="text" class="form-control" placeholder="Search Chat" aria-describedby="button-addon01"> 
+                                <button aria-label="button" class="btn btn-primary" type="button" id="button-addon01">
+                                    <i class="ri-search-line"></i>
+                                </button> 
+                            </div> 
+                        </div>
+                        <ul class="nav nav-tabs tab-style-8 scaleX nav-justified mb-0 border-bottom d-flex"
+                            id="myTab1" role="tablist">
+                            <li class="nav-item me-0" role="presentation">
+                                <button class="nav-link active p-3" id="users-tab" data-bs-toggle="tab"
+                                    data-bs-target="#users-tab-pane" type="button" role="tab"
+                                    aria-controls="users-tab-pane" aria-selected="true">Chat</button>
+                            </li>
+                            <li class="nav-item me-0" role="presentation">
+                                <button class="nav-link p-3" id="groups-tab" data-bs-toggle="tab"
+                                    data-bs-target="#groups-tab-pane" type="button" role="tab"
+                                    aria-controls="groups-tab-pane" aria-selected="false">Groups</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link p-3" id="contacts-tab" data-bs-toggle="tab"
+                                    data-bs-target="#contacts-tab-pane" type="button" role="tab"
+                                    aria-controls="contacts-tab-pane" aria-selected="false">Contacts</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane show active border-0 chat-users-tab" id="users-tab-pane"
+                                role="tabpanel" aria-labelledby="users-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0 mt-2 chat-users-tab" id="chat-msg-scroll">
+                                    <li class="pb-0">
+                                        <p class="text-muted fs-11 fw-medium mb-2 op-7">Active Chats</p>
+                                    </li>
+                                    <li class="checkforactive">
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Emma Johnson','5','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/5.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Emma Johnson <span
+                                                            class="float-end text-muted fw-normal fs-11">1:32PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Hey there! How's your day going? &#128522;</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-msg-unread checkforactive">
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Amelia Turner','2','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/2.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Amelia Turner <span
+                                                            class="float-end text-muted fw-normal fs-11">12:24PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0 chat-msg-typing ">
+                                                        <span class="chat-msg text-truncate">Typing...</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                        <span
+                                                            class="badge bg-pink rounded-pill float-end">5</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Samuel Harris','10','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/10.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Samuel Harris <span
+                                                            class="float-end text-muted fw-normal fs-11">1:16PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Just had the best coffee ever! &#9749;</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="checkforactive active">
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Aria Robinson','8','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/8.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Aria Robinson <span
+                                                            class="float-end text-muted fw-normal fs-11">12:45PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Guess what? I aced that test!</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="pb-0">
+                                        <p class="text-muted fs-11 fw-medium mb-2 op-7">All Chats</p>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Logan Brooks','11','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded" >
+                                                        <img  src="../assets/images/faces/11.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Logan Brooks <span
+                                                            class="float-end text-muted fw-normal fs-11">11:54AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Movie night tonight? &#127916;</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Evelyn Adams','3','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/3.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Evelyn Adams <span
+                                                            class="float-end text-muted fw-normal fs-11">9:45AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Work is dragging...</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Lily Brown','6','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/6.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Lily Brown <span
+                                                            class="float-end text-muted fw-normal fs-11">8:31AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Meet for lunch tomorrow?</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Chloe Lewis','4','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/4.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Chloe Lewis <span
+                                                            class="float-end text-muted fw-normal fs-11">7:23AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Weekend plans?</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Leo Phillips','13','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/13.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Leo Phillips <span
+                                                            class="float-end text-muted fw-normal fs-11">10:22AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Craving pizza right now! &#127829;</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'Lucas Hayes','15','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/15.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        Lucas Hayes <span
+                                                            class="float-end text-muted fw-normal fs-11">9:10AM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate">Got any Netflix recommendations? </span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane border-0 chat-groups-tab" id="groups-tab-pane"
+                                role="tabpanel" aria-labelledby="groups-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0 mt-2 ">
+                                    <li class="pb-0">
+                                        <p class="text-muted fs-11 fw-medium mb-1 op-7">My Groups</p>
+                                    </li>
+                                    <li>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0">1) ChatMingle Collective</p>
+                                                <p class="mb-0"><span class="badge bg-success-transparent">4
+                                                        Online</span></p>
+                                            </div>
+                                            <div class="avatar-list-stacked my-auto">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/2.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/8.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/2.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/10.jpg" alt="img">
+                                                </span>
+                                                <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                                    href="javascript:void(0);">
+                                                    +19
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0">2) ConnectHub Crew </p>
+                                                <p class="mb-0"><span class="badge bg-secondary-transparent">32
+                                                        Online</span></p>
+                                            </div>
+                                            <div class="avatar-list-stacked my-auto">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/1.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/7.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/3.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/9.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/12.jpg" alt="img">
+                                                </span>
+                                                <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                                    href="javascript:void(0);">
+                                                    +123
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0">3) TalkTide Tribe</p>
+                                                <p class="mb-0"><span class="badge bg-warning-transparent">3
+                                                        Online</span></p>
+                                            </div>
+                                            <div class="avatar-list-stacked my-auto">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/4.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/8.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/13.jpg" alt="img">
+                                                </span>
+                                                <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                                    href="javascript:void(0);">
+                                                    +15
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0">4) DialogDynasty</p>
+                                                <p class="mb-0"><span class="badge bg-danger-transparent">5
+                                                        Online</span></p>
+                                            </div>
+                                            <div class="avatar-list-stacked my-auto">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/1.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/7.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/14.jpg" alt="img">
+                                                </span>
+                                                <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                                    href="javascript:void(0);">
+                                                    +28
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0">5) NexusChat Nexus</p>
+                                                <p class="mb-0"><span class="badge bg-light text-dark">0 Online</span>
+                                                </p>
+                                            </div>
+                                            <div class="avatar-list-stacked my-auto">
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/5.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/6.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/12.jpg" alt="img">
+                                                </span>
+                                                <span class="avatar avatar-sm avatar-rounded">
+                                                    <img src="../assets/images/faces/3.jpg" alt="img">
+                                                </span>
+                                                <a class="avatar avatar-sm bg-primary text-fixed-white avatar-rounded"
+                                                    href="javascript:void(0);">
+                                                    +53
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="list-unstyled mb-0 mt-2 ">
+                                    <li class="pb-0">
+                                        <p class="text-muted fs-11 fw-medium mb-1 op-7">GROUP CHATS</p>
+                                    </li>
+                                    <li class="checkforactive">
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'ChatMingle Collective &#128525;','17','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/17.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium" >
+                                                        ChatMingle Collective &#128525; <span
+                                                            class="float-end text-muted fw-normal fs-11">12:24PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0 chat-msg-typing ">
+                                                        <span class="chat-msg text-truncate">Hira Typing...</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                        <span
+                                                            class="badge bg-success-transparent rounded-circle float-end">2</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-msg-unread checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'ConnectHub Crew','18','online')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md online me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/18.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium" >
+                                                        ConnectHub Crew <span
+                                                            class="float-end text-muted fw-normal fs-11">1:16PM</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span class="chat-msg text-truncate"><span
+                                                                class="group-indivudial">Rams:</span>Happy to be part of
+                                                            this group</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'TalkTide Tribe &#128526;','19','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/19.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        TalkTide Tribe &#128526; <span
+                                                            class="float-end text-muted fw-normal fs-11">3 days
+                                                            ago</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span
+                                                            class="chat-msg text-truncate">Simon,Melissa,Amanda,Patrick,Siddique</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'DialogDynasty','20','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img  src="../assets/images/faces/20.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        DialogDynasty <span
+                                                            class="float-end text-muted fw-normal fs-11">5 days
+                                                            ago</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span
+                                                            class="chat-msg text-truncate">Kamalan,Subha,Ambrose,Kiara,Jackson</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="chat-inactive checkforactive" >
+                                        <a href="javascript:void(0);" onclick="changeTheInfo(this,'NexusChat Nexus','21','offline')">
+                                            <div class="d-flex align-items-top">
+                                                <div class="me-1 lh-1">
+                                                    <span class="avatar avatar-md offline me-2 avatar-rounded">
+                                                        <img src="../assets/images/faces/21.jpg" alt="img">
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <p class="mb-0 fw-medium">
+                                                        NexusChat Nexus <span
+                                                            class="float-end text-muted fw-normal fs-11">12 days
+                                                            ago</span>
+                                                    </p>
+                                                    <p class="fs-12 mb-0">
+                                                        <span
+                                                            class="chat-msg text-truncate">Subman,Rajen,Kairo,Dibasha,Alexa</span>
+                                                        <span class="chat-read-icon float-end align-middle"><i
+                                                                class="ri-check-double-fill"></i></span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-pane border-0 chat-contacts-tab" id="contacts-tab-pane" role="tabpanel"
+                                aria-labelledby="contacts-tab" tabindex="0">
+                                <ul class="list-unstyled mb-0 chat-contacts-tab">
+                                    <li>
+                                        <span class="text-default fw-semibold">A</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/5.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Ava Taylor
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">B</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/12.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Benjamin Turner
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">C</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/14.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Caleb Rodriguez
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">D</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm bg-primary">
+                                                    DS
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Daniel Sullivan
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">E</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/7.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Emma Johnson
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">J</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/15.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Jackson Rivera
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">L</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm bg-primary">
+                                                    LP
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Leo Phillips
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/2.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Lily Brown
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">N</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/10.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Noah Russell
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span class="text-default fw-semibold">W</span>
+                                    </li>   
+                                    <li>    
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lh-1">
+                                                <span class="avatar avatar-rounded avatar-sm">
+                                                    <img src="../assets/images/faces/16.jpg" alt="">
+                                                </span>
+                                            </div>
+                                            <div class="flex-fill">
+                                                <span class="d-block fw-semibold">
+                                                    Wyatt Thompson
+                                                </span>
+                                            </div>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" data-bs-toggle="dropdown" class="btn btn-icon btn-sm btn-outline-light"> 
+                                                    <i class="ri-more-2-fill"></i>
+                                                </a> 
+                                                <ul class="dropdown-menu" role="menu"> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-message-2-line me-2"></i>Chat</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-phone-line me-2"></i>Audio Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-live-line me-2"></i>Video Call</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-edit-line me-2"></i>Edit</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-spam-2-line me-2"></i>Block</a></li> 
+                                                    <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-line me-2"></i>Delete</a></li> 
+                                                </ul> 
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="main-chat-area border">
+                        <div class="d-flex align-items-center border-bottom main-chat-head flex-wrap">
+                            <div class="me-2 lh-1">
+                                <span class="avatar avatar-md online avatar-rounded chatstatusperson">
+                                    <img class="chatimageperson" src="../assets/images/faces/8.jpg" alt="img">
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <p class="mb-0 fw-medium fs-14 lh-1">
+                                    <a href="javascript:void(0);" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" class="chatnameperson responsive-userinfo-open">Aria Robinson</a>
+                                </p>
+                                <p class="text-muted mb-0 chatpersonstatus">online</p>
+                            </div>
+                            <div class="d-flex flex-wrap rightIcons">
+                                <button aria-label="button" type="button" class="btn btn-icon btn-primary my-1 ms-2 btn-sm">
+                                    <i class="ti ti-phone"></i>
+                                </button>
+                                <button aria-label="button" type="button" class="btn btn-icon btn-secondary my-1 ms-2 btn-sm">
+                                    <i class="ti ti-video"></i>
+                                </button>
+                                <button aria-label="button" type="button" class="btn btn-icon btn-outline my-1 ms-2 responsive-userinfo-open btn-sm">
+                                    <i class="ti ti-user-circle" id="responsive-chat-close"></i>
+                                </button>
+                                <div class="dropdown ms-2">
+                                    <button aria-label="button" class="btn btn-icon btn-success my-1 btn-wave waves-light btn-sm" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="ti ti-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-3-line me-1"></i>Profile</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-format-clear me-1"></i>Clear Chat</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-unfollow-line me-1"></i>Delete User</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-user-forbid-line me-1"></i>Block User</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);"><i class="ri-error-warning-line me-1"></i>Report</a></li>
+                                    </ul>
+                                </div>
+                                <button aria-label="button" type="button" class="btn btn-icon btn-outline-light my-1 ms-2 responsive-chat-close btn-sm">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chat-content" id="main-chat-content">
+                            <ul class="list-unstyled">
+                                <li class="chat-day-label">
+                                    <span>Today</span>
+                                </li>
+                                <li class="chat-item-start">
+                                    <div class="chat-list-inner">
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded chatstatusperson">
+                                                <img class="chatimageperson" src="../assets/images/faces/8.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="chatting-user-info">
+                                                <span class="chatnameperson">Aria Robinson</span> <span class="msg-sent-time">11:48PM</span>
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">Hey there! &#128522; How's it going?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-end">
+                                    <div class="chat-list-inner">
+                                        <div class="me-3">
+                                            <span class="chatting-user-info">
+                                                <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                            class="ri-check-double-line"></i></span>11:50PM</span> You
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">Hey! I'm good, thanks. Just finished some work. How about you?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded">
+                                                <img src="../assets/images/faces/15.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-start">
+                                    <div class="chat-list-inner">
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded chatstatusperson">
+                                                <img class="chatimageperson" src="../assets/images/faces/8.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="chatting-user-info">
+                                                <span class="chatnameperson">Aria Robinson</span> <span class="msg-sent-time">11:51PM</span>
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">Not too bad, just chilling. Have any exciting plans for the weekend?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-end">
+                                    <div class="chat-list-inner">
+                                        <div class="me-3">
+                                            <span class="chatting-user-info">
+                                                <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                            class="ri-check-double-line"></i></span>11:52PM</span> You
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">Not really, just relaxing. Maybe catch up on some movies. You?</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded">
+                                                <img src="../assets/images/faces/15.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-start">
+                                    <div class="chat-list-inner">
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded chatstatusperson">
+                                                <img class="chatimageperson" src="../assets/images/faces/8.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="chatting-user-info">
+                                                <span class="chatnameperson">Aria Robinson</span> <span class="msg-sent-time">11:55PM</span>
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">Same here. Thinking of trying out that new cafe downtown. Heard they have amazing coffee.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-end">
+                                    <div class="chat-list-inner">
+                                        <div class="me-3">
+                                            <span class="chatting-user-info">
+                                                <span class="msg-sent-time"><span class="chat-read-mark align-middle d-inline-flex"><i
+                                                            class="ri-check-double-line"></i></span>11:52PM</span> You
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div class="">
+                                                    <p class="mb-0">Oh, nice! Let me know how it is. I might check it out too.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded">
+                                                <img src="../assets/images/faces/15.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="chat-item-start">
+                                    <div class="chat-list-inner">
+                                        <div class="chat-user-profile">
+                                            <span class="avatar avatar-md online avatar-rounded">
+                                                <img class="chatimageperson" src="../assets/images/faces/8.jpg" alt="img">
+                                            </span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="chatting-user-info chatnameperson">
+                                                Aria Robinson <span class="msg-sent-time">11:45PM</span>
+                                            </span>
+                                            <div class="main-chat-msg">
+                                                <div>
+                                                    <p class="mb-0">No spoilers, promise! Enjoy the binge-watching session. &#128516;</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="chat-footer">
+                            <a aria-label="anchor" class="btn btn-icon me-2 btn-success emoji-picker" href="javascript:void(0)">
+                                <i class="ri-emotion-line"></i>
+                            </a>
+                            <input class="form-control chat-message-space" placeholder="Type your message here..." type="text">
+                            <a aria-label="anchor" class="btn btn-primary ms-2 btn-icon btn-send" href="javascript:void(0)">
+                                <i class="ri-send-plane-2-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- End::app-content -->
+
+        <!-- Start::chat user details offcanvas -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight">
+            <div class="offcanvas-body">
+                <button type="button" class="btn-close btn btn-sm btn-icon btn-outline-light border" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+                <div class="chat-user-details" id="chat-user-details">
+                    <div class="text-center mb-5">
+                        <span class="avatar avatar-rounded online avatar-xxl me-2 mb-3 chatstatusperson">
+                            <img class="chatimageperson" src="../assets/images/faces/2.jpg" alt="img">
+                        </span>
+                        <p class="mb-1 fs-15 fw-medium text-dark lh-1 chatnameperson">Amelia Turner</p>
+                        <p class="fs-12 text-muted"><span class="chatnameperson">emaileyjackson2134</span>@gmail.com</p>
+                        <p class="text-center mb-0">
+                            <button type="button" aria-label="button" class="btn btn-icon rounded-pill btn-primary-light btn-wave"><i
+                                    class="ri-phone-line"></i></button>
+                            <button type="button" aria-label="button" class="btn btn-icon rounded-pill btn-secondary-light ms-2 btn-wave"><i
+                                    class="ri-video-add-line"></i></button>
+                            <button type="button" aria-label="button" class="btn btn-icon rounded-pill btn-success-light ms-2 btn-wave"><i
+                                    class="ri-chat-1-line"></i></button>
+                        </p>
+                    </div>
+                    <div class="mb-5">
+                        <div class="fw-medium mb-4">Shared Files
+                            <span class="badge bg-secondary rounded-pill ms-1">04</span>
+                            <span class="float-end fs-11"><a href="javascript:void(0);" class="fs-12 text-muted"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a></span>
+                        </div>
+                        <ul class="shared-files list-unstyled">
+                            <li>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 bg-primary-transparent rounded">
+                                        <span class="shared-file-icon">
+                                            <i class="ti ti-file-text text-primary"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <p class="fs-12 fw-medium mb-0">Project Details.pdf</p>
+                                        <p class="mb-0 text-muted fs-11">24,Oct 2024 - 14:24PM</p>
+                                    </div>
+                                    <div class="fs-18">
+                                        <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 bg-secondary-transparent rounded">
+                                        <span class="shared-file-icon">
+                                            <i class="ri-image-line text-secondary"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <p class="fs-12 fw-medium mb-0">Img_02.Jpg</p>
+                                        <p class="mb-0 text-muted fs-11">22,Oct 2024 - 10:19AM</p>
+                                    </div>
+                                    <div class="fs-18">
+                                        <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 bg-success-transparent rounded">
+                                        <span class="shared-file-icon">
+                                            <i class="ri-image-line text-success"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <p class="fs-12 fw-medium mb-0">Img_15.Jpg</p>
+                                        <p class="mb-0 text-muted fs-11">22,Oct 2024 - 10:18AM</p>
+                                    </div>
+                                    <div class="fs-18">
+                                        <a aria-label="anchor" href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2 bg-orange-transparent rounded">
+                                        <span class="shared-file-icon">
+                                            <i class="ri-video-line text-orange"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-fill">
+                                        <p class="fs-12 fw-medium mb-0">Video_15_02_2022.MP4</p>
+                                        <p class="mb-0 text-muted fs-11">22,Oct 2024 - 10:18AM</p>
+                                    </div>
+                                    <div class="fs-18">
+                                        <a href="javascript:void(0)"><i class="ri-download-2-line text-muted"></i></a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mb-0">
+                        <div class="fw-medium mb-4">Photos & Media
+                            <span class="badge bg-primary-transparent rounded-circle ms-1">22</span>
+                            <span class="float-end fs-11"><a href="javascript:void(0);" class="fs-12 text-muted"> View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a></span>
+                        </div>
+                        <div class="row gy-3">
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-40.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-40.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-41.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-41.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-42.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-42.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-43.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-43.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-44.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-44.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-45.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-45.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-46.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-46.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-60.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-60.jpg" alt="image" >
+                                </a>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
+                                <a href="../assets/images/media/media-61.jpg" class="glightbox card mb-0" data-gallery="gallery1">
+                                    <img src="../assets/images/media/media-61.jpg" alt="image" >
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::chat user details offcanvas -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- chat -->
+      <!-- Gallery JS -->
+    <script src="assets/libs/glightbox/js/glightbox.min.js"></script>
+      <!-- Chat JS -->
+    <script src="assets/js/chat.js"></script>
+
+    <!-- Custom JS -->
+    <!-- <script src="assets/js/custom.js"></script> -->
+     <!-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+    
+</body>
+
+</html> 
