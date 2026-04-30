@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= report.title || "Report View" %></title>
+
+  <link rel="stylesheet" href="/assets/libs/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: #111827;
+      --card-2: #172033;
+      --muted: #94a3b8;
+      --text: #e5edf7;
+      --line: rgba(255,255,255,.08);
+      --primary: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(34,197,94,.08), transparent 25%),
+        linear-gradient(180deg, #08101c 0%, #0b1220 100%);
+      color: var(--text);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+    }
+
+    .report-shell {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px 40px;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, rgba(59,130,246,.18), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+      margin-bottom: 22px;
+    }
+
+    .hero-top {
+      padding: 28px 28px 20px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: #bfdbfe;
+      margin-bottom: 10px;
+    }
+
+    .hero-title {
+      font-size: 30px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      padding: 0 28px 28px;
+    }
+
+    .meta-box {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .meta-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 8px;
+    }
+
+    .meta-value {
+      font-size: 15px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .section-card {
+      background: rgba(17,24,39,.92);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .section-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-body {
+      padding: 22px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .detail-box {
+      background: var(--card-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 8px;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      text-align: center;
+      padding: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+    }
+
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .media-card {
+      background: var(--card-2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .media-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(0,0,0,.28);
+      border-color: rgba(59,130,246,.35);
+    }
+
+    .media-thumb-wrap {
+      position: relative;
+      background: #020617;
+      cursor: pointer;
+    }
+
+    .media-thumb-wrap img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .media-card video,
+    .media-card audio {
+      width: 100%;
+      display: block;
+      background: #020617;
+    }
+
+    .media-info {
+      padding: 14px;
+    }
+
+    .media-kind {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+
+    .media-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+      margin-bottom: 10px;
+    }
+
+    .media-actions a {
+      text-decoration: none;
+      font-size: 13px;
+      color: #93c5fd;
+    }
+
+    .vidoe-card{
+        max-width: 200px;
+        object-fit: contain;
+        display: block;
+        background: #020617;
+        /* max-height: 800px; */
+    }
+
+.signature-wrap {
+  max-width: 260px;
+  background: var(--card-2);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.signature-wrap img {
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  display: block;
+  background: #fff;
+  padding: 10px;
+}
+
+@media (max-width: 576px) {
+  .company-logo-wrap {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .company-logo {
+    max-height: 44px;
+  }
+
+  .signature-wrap {
+    max-width: 200px;
+  }
+
+  .signature-wrap img {
+    max-height: 110px;
+  }
+}
+
+    .signature-foot {
+      padding: 14px 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-approved {
+      color: #86efac;
+    }
+
+    .status-pending {
+      color: #fcd34d;
+    }
+
+    .lightbox-modal .modal-content {
+      background: #050b16;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .lightbox-modal .modal-header {
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      color: #fff;
+    }
+
+    .lightbox-modal .btn-close {
+      filter: invert(1);
+    }
+
+    .carousel-item img {
+      width: 100%;
+      max-height: 78vh;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .carousel-caption-custom {
+      text-align: center;
+      color: #cbd5e1;
+      font-size: 13px;
+      padding: 12px 10px 18px;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      filter: invert(1);
+    }
+
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 24px;
+      }
+      .section-body,
+      .section-head,
+      .hero-top,
+      .meta-grid {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <%
+    const attachments = Array.isArray(report.attachments) ? report.attachments : [];
+    const signatures = attachments.filter(a => a.kind === "signature" && a.secureUrl);
+    const images = attachments.filter(a => a.secureUrl && a.resourceType === "image" && a.kind !== "signature");
+    const videos = attachments.filter(a => a.secureUrl && a.resourceType === "video" &&a.kind==="video");
+    const audios = attachments.filter(a =>
+      a.secureUrl &&
+      (
+        a.kind === "audio" ||
+        (a.format && ["mp3","wav","ogg","m4a","aac"].includes(String(a.format).toLowerCase()))
+      )
+    );
+    const others = attachments.filter(a =>
+      a.secureUrl &&
+      a.kind !== "signature" &&
+      a.resourceType !== "image" &&
+      a.resourceType !== "video" &&
+      !(
+        a.resourceType === "audio" ||
+        (a.format && ["mp3","wav","ogg","m4a","aac"].includes(String(a.format).toLowerCase()))
+      )
+    );
+  %>
+
+  <div class="report-shell">
+
+    <!-- Hero -->
+    <div class="hero-card">
+      <div class="hero-top d-flex justify-content-between align-items-start flex-wrap gap-3">
+  <div>
+    <div class="eyebrow">
+      <i class="ri-shield-check-line"></i>
+      Client Report View
+    </div>
+    <h1 class="hero-title"><%= report.title || "Untitled Report" %></h1>
+    <p class="hero-sub">
+      A secure shared report view for the client. No sign-in required.
+    </p>
+  </div>
+
+  <div class="company-logo-wrap">
+    <img src="/assets/images/brand-logos/desktop-dark.png" alt="Company Logo" class="company-logo">
+  </div>
+</div>
+
+      <div class="meta-grid">
+        <div class="meta-box">
+          <div class="meta-label">Category</div>
+          <div class="meta-value"><%= report.category || "General" %></div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Submitted By</div>
+          <div class="meta-value"><%= report.fullname || "Unknown Guard" %></div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Status</div>
+          <div class="meta-value <%= report.status === true ? 'status-approved' : 'status-pending' %>">
+            <%= report.status === true ? "Approved" : (report.status || "Pending") %>
+          </div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Date Created</div>
+          <div class="meta-value">
+            <%= report.createdAt ? new Date(report.createdAt).toLocaleString() : "N/A" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-file-list-3-line text-primary"></i>
+          Report Details
+        </h3>
+      </div>
+      <div class="section-body">
+        <% if (report.fields && Object.keys(report.fields).length > 0) { %>
+          <div class="details-grid">
+            <% Object.keys(report.fields).forEach(function(key){ %>
+              <% const value = report.fields[key]; %>
+              <% if (value && typeof value !== "object") { %>
+                <div class="detail-box">
+                  <div class="detail-label"><%= key.replace(/_/g, " ") %></div>
+                  <div class="detail-value"><%= value %></div>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">No report details available.</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Guard Signature -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-quill-pen-line text-info"></i>
+          Guard Signature
+        </h3>
+        <span class="chip"><i class="ri-fingerprint-line"></i> Verification</span>
+      </div>
+      <div class="section-body">
+        <% if (signatures.length > 0) { %>
+          <% signatures.forEach(function(file){ %>
+            <div class="signature-wrap">
+              <img src="<%= file.secureUrl %>" width="150px" alt="Guard Signature">
+              <div class="signature-foot">
+                <div class="media-kind">Signature</div>
+                <div class="media-name">Signed by field personnel</div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="empty-state">No signature uploaded for this report.</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Images -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-image-2-line text-warning"></i>
+          Images
+        </h3>
+        <span class="chip"><i class="ri-gallery-line"></i> Click image to enlarge</span>
+      </div>
+      <div class="section-body">
+        <% if (images.length > 0) { %>
+          <div class="media-grid">
+            <% images.forEach(function(file, index){ %>
+              <div class="media-card">
+                <div
+                  class="media-thumb-wrap"
+                  data-bs-toggle="modal"
+                  data-bs-target="#imageLightboxModal"
+                  data-index="<%= index %>"
+                >
+                  <img src="<%= file.secureUrl %>" alt="Report image">
+                </div>
+                <div class="media-info">
+                  <div class="media-kind">Image</div>
+                  <div class="media-name"><%= file.publicId || ("Image " + (index + 1)) %></div>
+                  <div class="media-actions">
+                    <a href="<%= file.secureUrl %>" target="_blank">Open in new tab</a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">No images attached to this report.</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-video-line text-danger"></i>
+          Video
+        </h3>
+      </div>
+      <div class="section-body">
+        <% if (videos.length > 0) { %>
+          <div class="media-grid">
+            <% videos.forEach(function(file, index){ %>
+              <div class="media-card vidoe-card">
+                <video controls preload="metadata">
+                  <source src="<%= file.secureUrl %>">
+                </video>
+                <div class="media-info">
+                  <div class="media-kind">Video</div>
+                  <div class="media-name"><%= file.publicId || ("Video " + (index + 1)) %></div>
+                  <div class="media-actions">
+                    <a href="<%= file.secureUrl %>" target="_blank">Open in new tab</a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">No video attached to this report.</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Audio -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-mic-line text-success"></i>
+          Audio
+        </h3>
+      </div>
+      <div class="section-body">
+        <% if (audios.length > 0) { %>
+          <div class="media-grid">
+            <% audios.forEach(function(file, index){ %>
+              <div class="media-card">
+                <audio controls preload="metadata">
+                  <source src="<%= file.secureUrl %>">
+                </audio>
+                <div class="media-info">
+                  <div class="media-kind">Audio</div>
+                  <div class="media-name"><%= file.publicId || ("Audio " + (index + 1)) %></div>
+                  <div class="media-actions">
+                    <a href="<%= file.secureUrl %>" target="_blank">Open in new tab</a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">No audio attached to this report.</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Other files -->
+    <div class="section-card">
+      <div class="section-head">
+        <h3 class="section-title">
+          <i class="ri-attachment-2 text-primary"></i>
+          Other Files
+        </h3>
+      </div>
+      <div class="section-body">
+        <% if (others.length > 0) { %>
+          <div class="media-grid">
+            <% others.forEach(function(file, index){ %>
+              <div class="media-card">
+                <div class="media-info">
+                  <div class="media-kind">Attachment</div>
+                  <div class="media-name"><%= file.publicId || ("File " + (index + 1)) %></div>
+                  <div class="media-actions">
+                    <a href="<%= file.secureUrl %>" target="_blank">Open file</a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">No additional files attached.</div>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Image Lightbox / Carousel -->
+  <div class="modal fade lightbox-modal" id="imageLightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Report Images</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-0">
+          <% if (images.length > 0) { %>
+            <div id="reportImageCarousel" class="carousel slide" data-bs-interval="false">
+              <div class="carousel-inner">
+                <% images.forEach(function(file, index){ %>
+                  <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                    <img src="<%= file.secureUrl %>" alt="Report image <%= index + 1 %>">
+                    <div class="carousel-caption-custom">
+                      <%= file.publicId || ("Image " + (index + 1)) %>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+
+              <% if (images.length > 1) { %>
+                <button class="carousel-control-prev" type="button" data-bs-target="#reportImageCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#reportImageCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("imageLightboxModal");
+      const carouselEl = document.getElementById("reportImageCarousel");
+
+      if (modal && carouselEl) {
+        modal.addEventListener("show.bs.modal", function (event) {
+          const trigger = event.relatedTarget;
+          if (!trigger) return;
+
+          const index = Number(trigger.getAttribute("data-index") || 0);
+          const carousel = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+          carousel.to(index);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

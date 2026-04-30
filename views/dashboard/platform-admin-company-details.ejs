@@ -1,0 +1,232 @@
+<%- include("../includes/header"); -%>
+   <script src="../../public/assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+
+       <!-- Color Picker Css -->
+    <link rel="stylesheet" href="../../public/assets/libs/flatpickr/flatpickr.min.css">
+    <link rel="stylesheet" href="../../public/assets/libs/@simonwep/pickr/themes/nano.min.css">
+
+        <!-- Choices Css -->
+    <link rel="stylesheet" href="../../public/assets/libs/choices.js/public/assets/styles/choices.min.css">
+
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Company Details</h1>
+        <div>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/platform-admin-home">Platform Admin</a></li>
+              <li class="breadcrumb-item active" aria-current="page">
+                <%= company ? (company.companyName || company.name || "Company") : "Company" %>
+              </li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      <div class="btn-list">
+        <a href="/platform-admin" class="btn btn-light btn-wave">Back</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xl-4">
+        <div class="card custom-card">
+          <div class="card-header">
+            <div class="card-title">Company & Subscription</div>
+          </div>
+          <div class="card-body">
+            <p><strong>Name:</strong> <%= company ? (company.companyName || company.name || "-") : "-" %></p>
+            <p><strong>Email:</strong> <%= company ? (company.companyEmail || company.email || "-") : "-" %></p>
+            <p><strong>Plan:</strong> <%= subscription ? (subscription.planName || "-") : "-" %></p>
+            <p><strong>Status:</strong> <%= subscription ? (subscription.subscriptionStatus || "-") : "-" %></p>
+            <p><strong>Active:</strong> <%= subscription ? (subscription.isActive ? "Yes" : "No") : "No" %></p>
+            <p><strong>Gateway:</strong> <%= subscription ? (subscription.gateway || "-") : "-" %></p>
+            <p><strong>Expiry:</strong> <%= subscription && subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleString() : "-" %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-8">
+        <div class="card custom-card">
+          <div class="card-header">
+            <div class="card-title">Company Admins</div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (companyAdmins && companyAdmins.length) { %>
+                    <% companyAdmins.forEach(function(admin) { %>
+                      <tr>
+                        <td><%= admin.fullname || "-" %></td>
+                        <td><%= admin.email || "-" %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="2" class="text-center text-muted">No company admins found</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card custom-card">
+          <div class="card-header">
+            <div class="card-title">Clients</div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (clients && clients.length) { %>
+                    <% clients.forEach(function(client) { %>
+                      <tr>
+                        <td><%= client.fullname || "-" %></td>
+                        <td><%= client.email || "-" %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="2" class="text-center text-muted">No clients found</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card custom-card">
+          <div class="card-header">
+            <div class="card-title">Guards</div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (guards && guards.length) { %>
+                    <% guards.forEach(function(guard) { %>
+                      <tr>
+                        <td><%= guard.fullname || "-" %></td>
+                        <td><%= guard.email || "-" %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr><td colspan="2" class="text-center text-muted">No guards found</td></tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>
+
+       <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="/assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="/assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="/assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="/assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="/ssets/libs/simplebar/simplebar.min.js"></script>
+<script src="/assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="/assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="/assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="/assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="/assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="/assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="/assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="/assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="/assets/js/google-maps.js"></script>
+
+    <!-- Toast JS -->
+    <script src="/assets/js/toasts.js"></script>
+    <!-- Custom JS -->
+    <script src="/assets/js/custom.js"></script>
+    
+</body>
+
+</html> 

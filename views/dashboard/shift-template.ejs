@@ -1,0 +1,385 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+
+<style>
+  .scheduler-hero {
+    background: linear-gradient(135deg, #111827, #123458);
+    border-radius: 18px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 14px 35px rgba(0,0,0,.15);
+    margin-bottom: 22px;
+  }
+
+  .shift-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148,163,184,.25);
+    box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    overflow: hidden;
+  }
+
+  .shift-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    background: #f8fafc;
+  }
+
+  .day-pill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 2px;
+  }
+
+  .break-pill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 2px;
+  }
+</style>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <div class="scheduler-hero">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <h2 class="fw-bold text-white mb-1">Shift Template</h2>
+          <p class="text-white-50 mb-0">
+            Create reusable guard shifts by post site, time, repeat days, and duration.
+          </p>
+        </div>
+
+        <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#newShiftModal">
+          <i class="ri-add-line me-1"></i> New Shift
+        </button>
+      </div>
+    </div>
+
+    <div class="card custom-card shift-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="card-title mb-1">Shift Templates</h5>
+          <small class="text-muted">All active and recurring shift templates</small>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 shift-table">
+            <thead>
+              <tr>
+                <th>Template Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Post Site</th>
+                <th>Guard Name</th>
+                <th>Repeat</th>
+                <th>Breaks</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (shiftTemplates && shiftTemplates.length > 0) { %>
+                <% shiftTemplates.forEach(function(item){ %>
+                  <tr>
+                    <td>
+                      <div class="fw-bold"><%= item.shiftTitle || "Untitled Shift" %></div>
+                      <small class="text-muted"><%= item.note || "No note" %></small>
+                    </td>
+
+                    <td><%= item.startTime || "N/A" %></td>
+                    <td><%= item.endTime || "N/A" %></td>
+
+                    <td>
+                      <div class="fw-semibold"><%= item.postSiteName || "N/A" %></div>
+                    </td>
+
+                    <td>
+                      <% if (item.guards && item.guards.length > 0) { %>
+                        <% item.guards.forEach(function(g){ %>
+                          <div class="fw-semibold"><%= g.guardName || "Guard" %></div>
+                        <% }) %>
+                      <% } else { %>
+                        <span class="text-muted">No guard assigned</span>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <% if (item.repeatDays && item.repeatDays.length > 0) { %>
+                        <% item.repeatDays.forEach(function(day){ %>
+                          <span class="day-pill"><%= day %></span>
+                        <% }) %>
+                      <% } %>
+                      <div class="text-muted fs-12 mt-1">
+                        <%= item.repeatFor || "" %>
+                      </div>
+                    </td>
+
+                    <td>
+                      <% if (item.breaks && item.breaks.length > 0) { %>
+                        <% item.breaks.forEach(function(b){ %>
+                          <span class="break-pill"><%= b %></span>
+                        <% }) %>
+                      <% } else { %>
+                        <span class="text-muted">None</span>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <% if (item.status === "Active") { %>
+                        <span class="badge bg-success">Active</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary">Inactive</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" class="text-center py-5">
+                    <i class="ri-calendar-schedule-line" style="font-size:46px;color:#94a3b8;"></i>
+                    <h6 class="mt-2 mb-1">No Shift Template Found</h6>
+                    <p class="text-muted mb-3">Create your first shift template.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newShiftModal">
+                      <i class="ri-add-line me-1"></i> New Shift
+                    </button>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NEW SHIFT MODAL -->
+<div class="modal fade" id="newShiftModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form action="/create-shift-template" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="ri-calendar-schedule-line me-1 text-primary"></i> New Shift Template
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row gy-3">
+
+            <div class="col-md-12">
+              <label class="form-label">Shift Title</label>
+              <input type="text" name="shiftTitle" class="form-control" placeholder="Morning Shift" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Start Time</label>
+              <input type="time" name="startTime" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">End Time</label>
+              <input type="time" name="endTime" class="form-control" required>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Repeat Shift</label>
+              <div class="d-flex flex-wrap gap-3 border rounded p-3">
+                <% ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].forEach(function(day){ %>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="repeatDays" value="<%= day %>" id="day_<%= day %>">
+                    <label class="form-check-label" for="day_<%= day %>"><%= day %></label>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Repeat For</label>
+              <select name="repeatFor" class="form-control" required>
+                <option value="">Select Duration</option>
+                <option value="1 Week">1 Week</option>
+                <option value="2 Weeks">2 Weeks</option>
+                <option value="3 Weeks">3 Weeks</option>
+                <option value="4 Weeks">4 Weeks</option>
+                <option value="5 Weeks">5 Weeks</option>
+                <option value="6 Weeks">6 Weeks</option>
+                <option value="2 Months">2 Months</option>
+                <option value="3 Months">3 Months</option>
+                <option value="4 Months">4 Months</option>
+                <option value="5 Months">5 Months</option>
+                <option value="6 Months">6 Months</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Post Site</label>
+              <select name="postSiteInfo" id="shiftPostSiteSelect" class="form-control" required>
+                <option value="">Select Post Site</option>
+                <% if (postSites && postSites.length > 0) { %>
+                  <% postSites.forEach(function(site){ %>
+                    <option value="<%= site._id || site.id %>&<%= site.siteName || 'Post Site' %>">
+                      <%= site.siteName || 'Unnamed Post Site' %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Guards Assigned to Post Site</label>
+              <select name="guards" id="shiftGuardSelect" class="form-control" multiple required>
+                <option value="">Select post site first</option>
+              </select>
+              <small class="text-muted">Hold CTRL to select multiple guards.</small>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Breaks</label>
+              <div class="d-flex flex-wrap gap-3 border rounded p-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="breaks" value="Tea Break - 15 min" id="teaBreak">
+                  <label class="form-check-label" for="teaBreak">Tea Break - 15 min</label>
+                </div>
+
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="breaks" value="Lunch Break - 30 min" id="lunchBreak">
+                  <label class="form-check-label" for="lunchBreak">Lunch Break - 30 min</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Note</label>
+              <textarea name="note" class="form-control" rows="4" placeholder="Add shift instruction or note..."></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Shift Template</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("shiftPostSiteSelect").addEventListener("change", async function () {
+    const selected = this.value;
+    const guardSelect = document.getElementById("shiftGuardSelect");
+
+    guardSelect.innerHTML = `<option value="">Loading guards...</option>`;
+
+    if (!selected) {
+      guardSelect.innerHTML = `<option value="">Select post site first</option>`;
+      return;
+    }
+
+    const postSiteId = selected.split("&")[0];
+
+    try {
+      const res = await fetch(`/api/post-site-guards/${postSiteId}`);
+      const data = await res.json();
+
+      guardSelect.innerHTML = "";
+
+      if (!data.success || !data.guards || data.guards.length === 0) {
+        guardSelect.innerHTML = `<option value="">No guard assigned to this post site</option>`;
+        return;
+      }
+
+      data.guards.forEach((guard) => {
+        const option = document.createElement("option");
+        option.value = `${guard._id}&${guard.fullname || guard.email || "Guard"}&${guard.email || ""}`;
+        option.textContent = guard.fullname || guard.email || "Unnamed Guard";
+        guardSelect.appendChild(option);
+      });
+
+    } catch (err) {
+      console.error(err);
+      guardSelect.innerHTML = `<option value="">Failed to load guards</option>`;
+    }
+  });
+</script>
+
+<%- include("../includes/footer"); -%>
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="../assets/js/apexcharts-column.js"></script>
+    
+</body>
+
+</html> 

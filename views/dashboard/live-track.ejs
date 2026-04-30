@@ -1,0 +1,360 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+ <style>
+    html, body { height: 100%; margin: 0; }
+    #liveMap { height: 420px; width: 100%; border-radius: 14px; overflow: hidden; }
+
+    .status-badge{
+      font: 12px/1.2 system-ui, Arial;
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      backdrop-filter: blur(6px);
+      z-index: 999;
+    }
+
+    /* ===== DEFAULT LEAFLET PIN + PULSE ===== */
+    .lf-wrap{
+      position: relative;
+      width: 25px;   /* default marker width */
+      height: 41px;  /* default marker height */
+      /* pointer-events: none; */
+      transform: translate(-12px, -41px); /* anchor tip */
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+    }
+
+    /* Big visible pulse at the tip */
+    .lf-pulse{
+      position: absolute;
+      left: 50%;
+      bottom: 2px;
+      width: 18px;
+      height: 18px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: rgba(0, 136, 255, 0.35);
+      box-shadow: 0 0 0 8px rgba(0, 136, 255, 0.18);
+      animation: lfPulse 1.25s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes lfPulse{
+      0%   { transform: translateX(-50%) scale(1); opacity: 0.95; }
+      100% { transform: translateX(-50%) scale(7.2); opacity: 0; }
+    }
+
+    /* the default leaflet marker png */
+    .lf-pin{
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 25px;
+      height: 41px;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+         <!-- Start::app-content -->
+           <div class="main-content app-content">
+            <div class="container-fluid">
+
+                <!-- Page Header -->
+                <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h1 class="page-title fw-medium fs-18 mb-2">Leaflet Maps</h1>
+                        <div class="">
+                            <nav>
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="javascript:void(0);">Maps</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Leaflet Maps</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex gap-2">
+                            <div class="position-relative">
+                                <button class="btn btn-primary btn-wave" type="button"
+                                    id="dropdownMenuClickableInside" data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside" aria-expanded="false">
+                                    Filter By <i class="ri-arrow-down-s-fill ms-1"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickableInside">
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Yesterday</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 30 Days</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a></li>
+                                    <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-secondary btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download">
+                                <i class="ti ti-download"></i>
+                            </button>
+                            <button class="btn btn-success btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Share">
+                                <i class="ti ti-share-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Page Header Close -->
+
+                <!-- Start::row-1 -->
+                <div class="row">
+                   
+                   
+                    <div class="col-xl-12">
+                        <div class="card custom-card">
+                            <div class="card-header">
+                                <div class="card-title">Map With Popup</div>
+                            </div>
+                            <div class="card-body">
+                                <div id="liveMap"></div>
+                                <div class="status-badge">Status: <span id="statusText">waiting…</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <!--End::row-1 -->
+
+            </div>
+        
+        <script>
+    const companyId   = "<%= userInfo.assignedCompanyID %>";
+    const pageGuardId = "<%= guardId || '' %>"; // one guard id (recommended)
+    const allowedGuardIds = <%- JSON.stringify(typeof allowedGuardIds !== "undefined" ? allowedGuardIds : []) %>;
+    const hasGuardFilter = Array.isArray(allowedGuardIds) && allowedGuardIds.length > 0;
+
+    const statusText = document.getElementById("statusText");
+    const setStatus = (t) => statusText.textContent = t;
+
+    // URLs for Leaflet's default marker images
+    const LEAFLET_PIN_URL =
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
+    const LEAFLET_PIN_URL_2X =
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png";
+    const LEAFLET_SHADOW_URL =
+      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png";
+
+    // ===== map =====
+    const map = L.map("liveMap").setView([9.0765, 7.3986], 16);
+
+    const satellite = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      { maxZoom: 19, attribution: "Tiles © Esri" }
+    ).addTo(map);
+
+    const dark = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }
+    );
+
+    L.control.layers({ "Satellite": satellite, "Dark": dark }).addTo(map);
+    setTimeout(() => map.invalidateSize(), 200);
+
+    // ===== marker store =====
+    const markers = new Map();
+
+    // ===== cache last location (ONLY used after guard becomes online) =====
+    function saveLastLoc(guardId, payload) {
+      try { localStorage.setItem("lastLoc:" + guardId, JSON.stringify(payload)); } catch {}
+    }
+    function loadLastLoc(guardId) {
+      try {
+        const s = localStorage.getItem("lastLoc:" + guardId);
+        return s ? JSON.parse(s) : null;
+      } catch { return null; }
+    }
+
+    // ✅ Create a DivIcon that visually uses Leaflet's default pin + pulse
+    function createDefaultPinWithPulse() {
+      // Use srcset so retina devices look crisp
+      const html = `
+        <div class="lf-wrap">
+          <div class="lf-pulse"></div>
+          <img class="lf-pin"
+               src="${LEAFLET_PIN_URL}"
+               srcset="${LEAFLET_PIN_URL_2X} 2x"
+               alt="pin" />
+        </div>
+      `;
+
+      return L.divIcon({
+        className: "",
+        html,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],   // tip of the pin
+        popupAnchor: [0, -36],
+      });
+    }
+
+    const DEFAULT_PIN_ICON = createDefaultPinWithPulse();
+
+    // ✅ Create/update marker using our default-pin-with-pulse icon
+    function upsertMarkerFromPayload(p, { pan = false } = {}) {
+      const lat = Number(p.lat);
+      const lng = Number(p.lng);
+      if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+      const guardId = String(p.guardId);
+      const guardName = (p.guardName && String(p.guardName).trim())
+        ? String(p.guardName).trim()
+        : guardId;
+
+      const latlng = [lat, lng];
+
+      if (!markers.has(guardId)) {
+        const marker = L.marker(latlng, { icon: DEFAULT_PIN_ICON }).addTo(map);
+        marker.bindPopup(`Guard: ${guardName}`);        // <-- popup text here
+        markers.set(guardId, marker);
+      } else {
+        const m = markers.get(guardId);
+        m.setLatLng(latlng);
+        m.setPopupContent(`👮‍♂️: ${guardName}`);       // <-- popup update here
+      }
+
+      if (pan) map.setView(latlng, 18);
+    }
+
+    setStatus("waiting for guard to check in…");
+
+    // ===== socket =====
+    const socket = io();
+
+    socket.on("connect", () => {
+      const joinPayload = { companyId };
+      if (pageGuardId) joinPayload.guardId = pageGuardId;
+      socket.emit("join", joinPayload);
+      setStatus("connected (waiting…)");
+    });
+
+    socket.on("guard:location", (p) => {
+      if (pageGuardId && String(p.guardId) !== String(pageGuardId)) return;
+      if (hasGuardFilter && !allowedGuardIds.includes(String(p.guardId))) return;
+
+      upsertMarkerFromPayload(p, { pan: false });
+      saveLastLoc(String(p.guardId), p);
+      setStatus("online (tracking)");
+    });
+
+    socket.on("guard:online", ({ guardId }) => {
+      const gid = String(guardId);
+      if (pageGuardId && gid !== String(pageGuardId)) return;
+      if (hasGuardFilter && !allowedGuardIds.includes(String(gid))) return;
+      if (hasGuardFilter && !allowedGuardIds.includes(String(gid))) return;
+
+      const cached = loadLastLoc(gid);
+      if (cached) {
+        upsertMarkerFromPayload(cached, { pan: true });
+        setStatus("online (restored last loc)");
+      } else {
+        setStatus("online (waiting for GPS)");
+      }
+    });
+
+    socket.on("guard:offline", ({ guardId }) => {
+      const gid = String(guardId);
+      if (pageGuardId && gid !== String(pageGuardId)) return;
+
+      const m = markers.get(gid);
+      if (m) {
+        map.removeLayer(m);
+        markers.delete(gid);
+      }
+      setStatus("offline (checked out)");
+    });
+  </script>
+       
+        <!-- End::app-content -->
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    
+</body>
+
+</html> 

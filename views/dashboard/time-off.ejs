@@ -1,0 +1,249 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+
+<style>
+  .timeoff-hero {
+    background: linear-gradient(135deg, #111827, #123458);
+    border-radius: 18px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 14px 35px rgba(0,0,0,.15);
+    margin-bottom: 22px;
+  }
+
+  .timeoff-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148,163,184,.25);
+    box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    overflow: hidden;
+  }
+
+  .timeoff-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    background: #f8fafc;
+  }
+</style>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+<%
+  const safeRequests = (typeof requests !== "undefined" && Array.isArray(requests)) ? requests : [];
+
+  const total = safeRequests.length;
+  const pending = safeRequests.filter(r => r.status === "Pending").length;
+  const accepted = safeRequests.filter(r => r.status === "Accepted").length;
+  const rejected = safeRequests.filter(r => r.status === "Rejected").length;
+
+  function formatDate(value) {
+    if (!value) return "N/A";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString([], { month: "short", day: "2-digit", year: "numeric" });
+  }
+%>
+
+    <div class="timeoff-hero">
+      <h2 class="fw-bold  mb-1">Guard Time Off Requests</h2>
+      <p class="text-white-50 mb-4">Review guard availability and approve or reject time off requests.</p>
+
+      <div class="row g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);">
+            <p class="mb-1 text-white-50 fs-12">Total Requests</p>
+            <h3 class="fw-bold text-white mb-0"><%= total %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);">
+            <p class="mb-1 text-white-50 fs-12">Pending</p>
+            <h3 class="fw-bold text-white mb-0"><%= pending %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);">
+            <p class="mb-1 text-white-50 fs-12">Accepted</p>
+            <h3 class="fw-bold text-white mb-0"><%= accepted %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);">
+            <p class="mb-1 text-white-50 fs-12">Rejected</p>
+            <h3 class="fw-bold text-white mb-0"><%= rejected %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card custom-card timeoff-card">
+      <div class="card-header">
+        <div>
+          <!-- <h5 class="card-title mb-1">Guard Time Off</h5> -->
+          <small class="text-muted">Requests submitted from the mobile app</small>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 timeoff-table">
+            <thead>
+              <tr>
+                <th>Guard Name</th>
+                <th>Request Date</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (safeRequests && safeRequests.length > 0) { %>
+                <% safeRequests.forEach(function(item){ %>
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">
+                        <i class="ri-shield-user-line me-1 text-primary"></i>
+                        <%= item.guardName || "Unknown Guard" %>
+                      </div>
+                      <small class="text-muted"><%= item.guardEmail || "" %></small>
+                    </td>
+
+                    <td><%= formatDate(item.requestDate || item.createdAt) %></td>
+                    <td><%= formatDate(item.fromDate) %></td>
+                    <td><%= formatDate(item.toDate) %></td>
+
+                    <td>
+                      <% if (item.status === "Accepted") { %>
+                        <span class="badge bg-success">Accepted</span>
+                      <% } else if (item.status === "Rejected") { %>
+                        <span class="badge bg-danger">Rejected</span>
+                      <% } else { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } %>
+                    </td>
+
+                    <td class="text-end">
+                      <% if (item.status === "Pending") { %>
+                        <div class="dropdown">
+                          <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                            <i class="ri-more-2-fill"></i>
+                          </button>
+
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                              <form action="/time-off/respond" method="POST">
+                                <input type="hidden" name="requestId" value="<%= item._id %>">
+                                <input type="hidden" name="status" value="Accepted">
+                                <button class="dropdown-item text-success" type="submit">
+                                  <i class="ri-check-line me-1"></i> Accept
+                                </button>
+                              </form>
+                            </li>
+
+                            <li>
+                              <form action="/time-off/respond" method="POST">
+                                <input type="hidden" name="requestId" value="<%= item._id %>">
+                                <input type="hidden" name="status" value="Rejected">
+                                <button class="dropdown-item text-danger" type="submit">
+                                  <i class="ri-close-line me-1"></i> Reject
+                                </button>
+                              </form>
+                            </li>
+                          </ul>
+                        </div>
+                      <% } else { %>
+                        <span class="text-muted">Reviewed</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" class="text-center py-5">
+                    <i class="ri-calendar-close-line" style="font-size:48px;color:#94a3b8;"></i>
+                    <h6 class="mt-2 mb-1">No Time Off Request Found</h6>
+                    <p class="text-muted mb-0">Guard time off requests will appear here.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>
+<!-- Footer End -->
+
+
+    
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+   
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="../assets/js/apexcharts-column.js"></script>
+    
+</body>
+
+</html> 

@@ -1,0 +1,2235 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+  <link rel="stylesheet" href="assets/libs/sweetalert2/sweetalert2.min.css">
+
+  <div class="main-content app-content">
+    <div class="container-fluid">
+
+      <!-- Page Header -->
+      <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+          <h1 class="page-title fw-medium fs-18 mb-2">Post Site</h1>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="javascript:void(0);">Client</a></li>
+              <li class="breadcrumb-item active" aria-current="page">View Post Site</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="card custom-card profile-card overflow-hidden">
+            <div class="profile-image">
+              <img src="./assets/images/media/media-3.jpg" class="card-img-top" alt="Post Site Banner">
+            </div>
+
+            <div class="card-body p-4 pb-0 position-relative">
+              <span class="avatar avatar-xxl avatar-rounded bg-info online">
+                <img src="./assets/images/faces/4.jpg" alt="">
+              </span>
+
+              <div class="mt-4 mb-3 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+                <div>
+                  <h5 class="fw-semibold mb-1">
+                    <%= companyInfo?.siteName || "Post Site" %>
+                  </h5>
+                  <span class="d-block fw-medium text-muted mb-1">
+                    <%= companyInfo?.clientName || fullCompInfo?.companyName || "Unknown Client" %>
+                  </span>
+                  <p class="fs-12 mb-0 fw-medium text-muted">
+                    <span class="me-3">
+                      <i class="ri-map-pin-line me-1 align-middle"></i>
+                      <%= companyInfo?.address || "No address available" %>
+                    </span>
+
+                    <% if (companyInfo?.phone) { %>
+                      <span class="me-3">
+                        <i class="ri-phone-line me-1 align-middle"></i>
+                        <%= companyInfo.phone %>
+                      </span>
+                      <% } %>
+
+                        <% if (companyInfo?.email) { %>
+                          <span>
+                            <i class="ri-mail-line me-1 align-middle"></i>
+                            <%= companyInfo.email %>
+                          </span>
+                          <% } %>
+                  </p>
+                </div>
+
+                <div class="d-flex mb-0 flex-wrap gap-5">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-primary avatar-rounded border border-primary border-opacity-10">
+                      <i class="ri-shield-user-line fs-18"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0 fs-12 text-muted fw-medium">Guards Assigned</p>
+                      <p class="fw-semibold fs-20 mb-0">
+                        <%= assignedGuards?.length || 0 %>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-secondary avatar-rounded border border-secondary border-opacity-10">
+                      <i class="ri-file-list-3-line fs-18"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0 fs-12 text-muted fw-medium">Total Reports</p>
+                      <p class="fw-semibold fs-20 mb-0">
+                        <%= reportSummary?.total || 0 %>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-warning avatar-rounded border border-warning border-opacity-10">
+                      <i class="ri-alarm-warning-line fs-18"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0 fs-12 text-muted fw-medium">Incident Reports</p>
+                      <p class="fw-semibold fs-20 mb-0">
+                        <%= reportSummary?.incident || 0 %>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg bg-success avatar-rounded border border-success border-opacity-10">
+                      <i class="ri-task-line fs-18"></i>
+                    </div>
+                    <div>
+                      <p class="mb-0 fs-12 text-muted fw-medium">Standard Reports</p>
+                      <p class="fw-semibold fs-20 mb-0">
+                        <%= reportSummary?.standard || 0 %>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabs -->
+              <ul class="nav nav-tabs mb-0 tab-style-8 scaleX" id="postSiteTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-pane"
+                    type="button" role="tab" aria-controls="overview-pane" aria-selected="true">
+                    Overview
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane"
+                    type="button" role="tab" aria-controls="profile-pane" aria-selected="false">
+                    Profile
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-pane"
+                    type="button" role="tab" aria-controls="contact-pane" aria-selected="false">
+                    Contact
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="guards-tab" data-bs-toggle="tab" data-bs-target="#guards-pane"
+                    type="button" role="tab" aria-controls="guards-pane" aria-selected="false">
+                    Assign Guards
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane"
+                    type="button" role="tab" aria-controls="reports-pane" aria-selected="false">
+                    Reports
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="email-reports-tab" data-bs-toggle="tab"
+                    data-bs-target="#email-reports-pane" type="button" role="tab" aria-controls="email-reports-pane"
+                    aria-selected="false">
+                    Email Report
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="kpi-tab" data-bs-toggle="tab" data-bs-target="#kpi-pane" type="button"
+                    role="tab" aria-controls="kpi-pane" aria-selected="false">
+                    KPI
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes-pane"
+                    type="button" role="tab" aria-controls="notes-pane" aria-selected="false">
+                    Notes
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="task-tab" data-bs-toggle="tab" data-bs-target="#task-pane" type="button"
+                    role="tab" aria-controls="task-pane" aria-selected="false">
+                    Tasks
+                  </button>
+                </li>
+
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files-pane"
+                    type="button" role="tab" aria-controls="files-pane" aria-selected="false">
+                    Files
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-bs-toggle="tab" href="#visitorsTab">
+                    <i class="ri-user-received-line me-1"></i> Visitors
+                  </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="checklist-tab" data-bs-toggle="tab" data-bs-target="#checklist-pane"
+                    type="button" role="tab" aria-controls="checklist-pane" aria-selected="false">
+                    Checklist
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="row">
+        <div class="col-xl-12">
+          <div class="tab-content mt-3" id="postSiteTabContent">
+
+            <!-- Overview -->
+            <div class="tab-pane fade show active" id="overview-pane" role="tabpanel" aria-labelledby="overview-tab"
+              tabindex="0">
+              <div class="row">
+                <div class="col-xxl-4 col-xl-5">
+                  <div class="card custom-card">
+                    <div class="card-header justify-content-between">
+                      <div class="card-title">Latest Activity</div>
+                    </div>
+                    <div class="card-body">
+                      <ul class="list-unstyled crm-top-leads mb-0">
+                        <% if (latestActivity && latestActivity.length> 0) { %>
+                          <% latestActivity.forEach(function(item){ %>
+                            <li class="mb-3">
+                              <div class="d-flex align-items-top flex-wrap">
+                                <div class="me-2">
+                                  <span class="avatar avatar-sm avatar-rounded bg-primary-transparent fw-semibold">
+                                    <%= (item.title || "X" ).charAt(0).toUpperCase() %>
+                                  </span>
+                                </div>
+                                <div class="flex-fill">
+                                  <p class="fw-semibold mb-0">
+                                    <%= item.title || "Activity" %>
+                                  </p>
+                                  <span class="text-muted fs-12">
+                                    <%= item.subtitle || "" %>
+                                  </span>
+                                </div>
+                                <div class="fw-semibold fs-12">
+                                  <% if (item.status==="Approved" || item.status==="Active" ) { %>
+                                    <span class="badge bg-success-transparent">
+                                      <%= item.status %>
+                                    </span>
+                                    <% } else { %>
+                                      <span class="badge bg-warning-transparent">
+                                        <%= item.status || "Pending" %>
+                                      </span>
+                                      <% } %>
+                                </div>
+                              </div>
+                            </li>
+                            <% }) %>
+                              <% } else { %>
+                                <li class="text-muted">No recent activity found.</li>
+                                <% } %>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-xxl-8 col-xl-7">
+                  <div class="card custom-card">
+                    <div class="card-header">
+                      <div class="card-title">Report Summary</div>
+                    </div>
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">General</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.general || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">Incident</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.incident || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">Standard</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.standard || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">Log</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.log || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">NFC</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.nfc || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="p-3 border rounded">
+                            <div class="fs-12 text-muted">Total</div>
+                            <div class="fs-24 fw-semibold">
+                              <%= reportSummary?.total || 0 %>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card custom-card">
+                    <div class="card-header">
+                      <div class="card-title">Recent Reports</div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table text-nowrap table-sm">
+                          <thead>
+                            <tr>
+                              <th>Title</th>
+                              <th>Category</th>
+                              <th>Submitted By</th>
+                              <th>Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% if (reports && reports.length> 0) { %>
+                              <% reports.slice(0, 8).forEach(function(report){ %>
+                                <tr>
+                                  <td>
+                                    <%= report.title || "Untitled Report" %>
+                                  </td>
+                                  <td>
+                                    <% const cat=(report.category || "general" ).toLowerCase(); %>
+                                      <% if (cat==="incident" ) { %>
+                                        <span class="badge bg-warning-transparent">Incident</span>
+                                        <% } else if (cat==="standard" ) { %>
+                                          <span class="badge bg-success-transparent">Standard</span>
+                                          <% } else if (cat==="nfc" ) { %>
+                                            <span class="badge bg-secondary-transparent">NFC</span>
+                                            <% } else if (cat==="log" ) { %>
+                                              <span class="badge bg-info-transparent">Log</span>
+                                              <% } else { %>
+                                                <span class="badge bg-dark-transparent">General</span>
+                                                <% } %>
+                                  </td>
+                                  <td>
+                                    <%= report.fullname || "Unknown" %>
+                                  </td>
+                                  <td>
+                                    <%= new Date(report.createdAt).toLocaleString() %>
+                                  </td>
+                                </tr>
+                                <% }) %>
+                                  <% } else { %>
+                                    <tr>
+                                      <td colspan="4" class="text-center text-muted">No reports found for this post
+                                        site.</td>
+                                    </tr>
+                                    <% } %>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="tab-pane fade" id="profile-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+              <div class="card custom-card overflow-hidden">
+                <div class="card-body p-4">
+                  <div class="row gy-4 align-items-center">
+                    <div class="col-xl-3"><span class="fw-medium">Client Name :</span></div>
+                    <div class="col-xl-9"><input type="text" class="form-control"
+                        value="<%= companyInfo?.clientName || '' %>" readonly></div>
+
+                    <div class="col-xl-3"><span class="fw-medium">Post Site :</span></div>
+                    <div class="col-xl-9"><input type="text" class="form-control"
+                        value="<%= companyInfo?.siteName || '' %>" readonly></div>
+
+                    <div class="col-xl-3"><span class="fw-medium">Address :</span></div>
+                    <div class="col-xl-9"><input type="text" class="form-control"
+                        value="<%= companyInfo?.address || '' %>" readonly></div>
+
+                    <div class="col-xl-3"><span class="fw-medium">Phone Number :</span></div>
+                    <div class="col-xl-9"><input type="text" class="form-control"
+                        value="<%= companyInfo?.phone || '' %>" readonly></div>
+
+                    <div class="col-xl-3"><span class="fw-medium">Email :</span></div>
+                    <div class="col-xl-9"><input type="text" class="form-control"
+                        value="<%= companyInfo?.email || '' %>" readonly></div>
+
+                    <div class="col-xl-3"><span class="fw-medium">Status :</span></div>
+                    <div class="col-xl-9">
+                      <% if (companyInfo?.statusIsActive===true) { %>
+                        <span class="badge bg-success-transparent">Active</span>
+                        <% } else { %>
+                          <span class="badge bg-danger-transparent">Inactive</span>
+                          <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="tab-pane fade" id="contact-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <h4>Post Site Contacts</h4><br>
+                    <table class="table text-nowrap table-sm">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Phone Number</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (clients && clients.length> 0) { %>
+                          <% clients.forEach(function(client){ %>
+                            <tr>
+                              <td>
+                                <%= client.fullname || "Unknown" %>
+                              </td>
+                              <td>
+                                <%= client.email || "N/A" %>
+                              </td>
+                              <td>
+                                <%= client.phone || "N/A" %>
+                              </td>
+                            </tr>
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="3" class="text-center text-muted">No contacts found.</td>
+                                </tr>
+                                <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Assign Guards -->
+            <div class="tab-pane fade" id="guards-pane" role="tabpanel" aria-labelledby="guards-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <h4>Assigned Guards</h4><br>
+                    <table class="table text-nowrap table-sm">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Mobile Number</th>
+                          <th>Email</th>
+                          <th>View</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (assignedGuards && assignedGuards.length> 0) { %>
+                          <% assignedGuards.forEach(function(guard){ %>
+                            <tr>
+                              <td>
+                                <%= guard.fullname || "Unknown" %>
+                              </td>
+                              <td>
+                                <%= guard.phone || "N/A" %>
+                              </td>
+                              <td>
+                                <%= guard.email || "N/A" %>
+                              </td>
+                              <td>
+                                <form action="/guard-details" method="post" id="guardinfo <%=guard.id%>">
+
+
+                                  <input type="hidden" name="guard_id" value="<%= guard.id%>">
+                                  <!-- <li class=""><a class="dropdown-item" href="#" onclick="document.getElementById('guardinfo <%=guard.id%>').submit(); return false;"><i class="ti ti-eye"></i> &nbsp; Guard Info</a></li> -->
+                                  <!-- <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Assign PostSite</a> -->
+                                  <!-- <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Assign PostSite</a> -->
+                                  <!-- </li> -->
+
+
+                                </form>
+
+                                <a href="#"
+                                  onclick="document.getElementById('guardinfo <%=guard.id%>').submit(); return false;"><i
+                                    class="ri-eye-line"></i></a>
+                              </td>
+                            </tr>
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="4" class="text-center text-muted">No guards assigned to this post site.
+                                  </td>
+                                </tr>
+                                <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reports -->
+            <div class="tab-pane fade" id="reports-pane" role="tabpanel" aria-labelledby="reports-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <h4>Reports</h4><br>
+                    <table class="table text-nowrap table-sm">
+                      <thead>
+                        <tr>
+                          <th>Title</th>
+                          <th>Description / Site Ref</th>
+                          <th>Type</th>
+                          <th>Submitted By</th>
+                          <th>Date</th>
+                          <th>status</th>
+                          <th>view</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (reports && reports.length> 0) { %>
+                          <% reports.forEach(function(report){ %>
+                            <tr>
+                              <td>
+                                <%= report.title || "Untitled Report" %>
+                              </td>
+                              <td>
+                                <%= report.fields?.details || report.fields?.notes || report.fields?.location ||
+                                  companyInfo?.siteName || "N/A" %>
+                              </td>
+                              <td>
+                                <% const cat=(report.category || "general" ).toLowerCase(); %>
+                                  <% if (cat==="incident" ) { %>
+                                    <span class="badge bg-warning-transparent">Incident</span>
+                                    <% } else if (cat==="standard" ) { %>
+                                      <span class="badge bg-success-transparent">Standard</span>
+                                      <% } else if (cat==="nfc" ) { %>
+                                        <span class="badge bg-secondary-transparent">NFC</span>
+                                        <% } else if (cat==="log" ) { %>
+                                          <span class="badge bg-info-transparent">Log</span>
+                                          <% } else { %>
+                                            <span class="badge bg-dark-transparent">General</span>
+                                            <% } %>
+                              </td>
+                              <td>
+                                <%= report.fullname || "Unknown" %>
+                              </td>
+                              <td>
+                                <%= new Date(report.createdAt).toLocaleString() %>
+                              </td>
+                              <td>
+                                <div class="fw-semibold fs-12">
+                                  <% if (report.status===true || report.status==="Active" ) { %>
+                                    <span class="badge bg-success-transparent">Approved</span>
+                                    <% } else { %>
+                                      <span class="badge bg-warning-transparent">
+                                        <%= report.status || "Pending" %>
+                                      </span>
+                                      <% } %>
+                                </div>
+                              </td>
+                              <td>
+                                <form action="/reports-view" method="POST" class="m-0">
+                                  <input type="hidden" name="action" value="view">
+                                  <input type="hidden" name="reportId" value="<%= report._id %>">
+                                  <button type="submit" class="dropdown-item">
+                                    <i class="ri-eye-line me-1 align-middle d-inline-block"></i>
+                                  </button>
+                                </form>
+
+                                <!-- <i class="ri-eye-line"></i></td> -->
+                            </tr>
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="5" class="text-center text-muted">No reports available.</td>
+                                </tr>
+                                <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Report -->
+            <!-- Email Report -->
+            <div class="tab-pane fade" id="email-reports-pane" role="tabpanel" aria-labelledby="email-reports-tab"
+              tabindex="0">
+              <div class="card custom-card">
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <h4 class="card-title mb-1">Email Reports</h4>
+                    <p class="text-muted fs-12 mb-0">Manage report recipients and send scheduled or manual reports.</p>
+                  </div>
+
+                  <div class="dropdown">
+                    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="frequencyDropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ri-timer-line me-1"></i> Frequency
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="frequencyDropdown">
+                      <li><a class="dropdown-item frequency-option active" href="javascript:void(0);"
+                          data-frequency="Daily">Daily</a></li>
+                      <li><a class="dropdown-item frequency-option" href="javascript:void(0);"
+                          data-frequency="Weekly">Weekly</a></li>
+                      <li><a class="dropdown-item frequency-option" href="javascript:void(0);"
+                          data-frequency="Monthly">Monthly</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table text-nowrap table-bordered align-middle">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 60px;">#</th>
+                          <th>Client Name</th>
+                          <th>Email</th>
+                          <th>Report Name</th>
+                          <th>Frequency</th>
+                          <th>Scheduled Countdown</th>
+                          <th class="text-center" style="width: 180px;">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (clients && clients.length> 0) { %>
+                          <% clients.forEach(function(client, index){ %>
+                            <% const clientSchedule=scheduleMap && client.email ?
+                              scheduleMap[String(client.email).toLowerCase()] : null; %>
+                              <tr>
+                                <td>
+                                  <%= index + 1 %>
+                                </td>
+                                <td>
+                                  <div class="fw-semibold">
+                                    <%= client.fullname || "Unknown Client" %>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span class="text-muted">
+                                    <%= client.email || "No Email" %>
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="badge bg-primary-transparent">
+                                    <%= clientSchedule?.reportTitle || companyInfo?.siteName || "Site Report" %>
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="badge bg-info-transparent email-frequency-badge">
+                                    <%= clientSchedule?.frequency || "Not scheduled" %>
+                                  </span>
+                                </td>
+                                <td>
+                                  <% if (clientSchedule?.nextSendAt) { %>
+                                    <span class="badge bg-dark-transparent scheduled-countdown-text"
+                                      data-next-send="<%= new Date(clientSchedule.nextSendAt).toISOString() %>">
+                                      Loading...
+                                    </span>
+                                    <% } else { %>
+                                      <span class="badge bg-dark-transparent scheduled-countdown-text">Not
+                                        scheduled</span>
+                                      <% } %>
+                                </td>
+                                <td class="text-center">
+                                  <div class="d-flex justify-content-center gap-2">
+
+                                    <button type="button" class="btn btn-sm btn-success send-report-btn"
+                                      data-bs-toggle="modal" data-bs-target="#sendReportModal"
+                                      data-client-name="<%= client.fullname || 'Unknown Client' %>"
+                                      data-client-email="<%= client.email || '' %>">
+                                      <i class="ri-send-plane-2-line"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-warning schedule-report-open-btn"
+                                      data-bs-toggle="modal" data-bs-target="#scheduleReportModal"
+                                      data-client-name="<%= client.fullname || 'Unknown Client' %>"
+                                      data-client-email="<%= client.email || '' %>"
+                                      data-saved-frequency="<%= clientSchedule?.frequency || 'Weekly' %>"
+                                      data-saved-title="<%= clientSchedule?.reportTitle || (companyInfo?.siteName || 'Scheduled Site Report') %>"
+                                      data-saved-start-date="<%= clientSchedule?.startDate ? new Date(clientSchedule.startDate).toISOString().slice(0,10) : '' %>">
+                                      <i class="ri-calendar-schedule-line"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-info schedule-history-btn"
+                                      data-bs-toggle="modal" data-bs-target="#scheduleHistoryModal"
+                                      data-client-name="<%= client.fullname || 'Unknown Client' %>"
+                                      data-client-email="<%= client.email || '' %>"
+                                      data-post-site-id="<%= companyInfo?._id || '' %>">
+                                      <i class="ri-eye-line"></i>
+                                    </button>
+
+                                    <% if (clientSchedule) { %>
+                                      <form action="/disable-scheduled-post-site-report" method="POST"
+                                        style="display:inline;">
+                                        <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || '' %>">
+                                        <input type="hidden" name="clientEmail" value="<%= client.email || '' %>">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                          <i class="ri-close-circle-line"></i>
+                                        </button>
+                                      </form>
+                                      <% } %>
+
+                                  </div>
+                                </td>
+                              </tr>
+                              <% }) %>
+                                <% } else { %>
+                                  <tr>
+                                    <td colspan="7" class="text-center text-muted">No client email records found for
+                                      this post site.</td>
+                                  </tr>
+                                  <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KPI -->
+            <div class="tab-pane fade" id="kpi-pane" role="tabpanel" aria-labelledby="kpi-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-body">
+                  <h4>KPI</h4>
+                  <p class="text-muted mb-0">Blank placeholder for now.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="tab-pane fade" id="notes-pane" role="tabpanel" aria-labelledby="notes-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-header">
+                  <div class="card-title">Post Site Notes</div>
+                </div>
+
+                <div class="card-body">
+                  <% if (notes && notes.length> 0) { %>
+                    <div class="table-responsive">
+                      <table class="table table-bordered text-nowrap">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Guard Name</th>
+                            <th>Title</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <% notes.forEach(function(note) { %>
+                            <tr>
+                              <td>
+                                <%= new Date(note.createdAt).toLocaleString() %>
+                              </td>
+                              <td>
+                                <%= note.guardName || "Unknown Guard" %>
+                              </td>
+                              <td>
+                                <%= note.title || "Untitled Note" %>
+                              </td>
+                              <td>
+                                <button type="button" class="btn btn-sm btn-primary view-note-btn"
+                                  data-title="<%= note.title || 'Note' %>"
+                                  data-guard="<%= note.guardName || 'Unknown Guard' %>"
+                                  data-date="<%= new Date(note.createdAt).toLocaleString() %>"
+                                  data-note="<%= note.note || '' %>">
+                                  <i class="ri-eye-line"></i>
+                                </button>
+                              </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                    <% } else { %>
+                      <p class="text-muted mb-0">No notes available for this post site.</p>
+                      <% } %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Files -->
+            <div class="tab-pane fade" id="files-pane" role="tabpanel" aria-labelledby="files-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-body">
+                  <h4>Files</h4>
+                  <p class="text-muted mb-0">Blank placeholder for now.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Visitors -->
+            <div class="tab-pane fade" id="visitorsTab">
+              <style>
+                .visitor-mini-card {
+                  border: 1px solid rgba(148, 163, 184, .25);
+                  border-radius: 16px;
+                  background: linear-gradient(180deg, #ffffff, #f8fafc);
+                  box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+                  transition: all .2s ease;
+                  cursor: pointer;
+                }
+
+                .visitor-mini-card:hover {
+                  transform: translateY(-3px);
+                  box-shadow: 0 14px 30px rgba(15, 23, 42, .12);
+                }
+
+                .visitor-avatar {
+                  width: 42px;
+                  height: 42px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                  background: #e0f2fe;
+                  color: #0284c7;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 20px;
+                  flex-shrink: 0;
+                }
+
+                .visitor-purpose {
+                  max-width: 100%;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+              </style>
+
+              <div class="card custom-card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div>
+                    <h5 class="card-title mb-1">
+                      <i class="ri-user-received-line me-1 text-primary"></i> Visitors
+                    </h5>
+                    <small class="text-muted">Visitors recorded by guards for this post site</small>
+                  </div>
+
+                  <input type="date" id="visitorDateFilter" class="form-control form-control-sm"
+                    style="max-width:190px;">
+                </div>
+
+                <div class="card-body">
+                  <div id="visitorsList" class="row g-3"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CheckList -->
+            <div class="tab-pane fade" id="checklist-pane" role="tabpanel" aria-labelledby="checklist-tab" tabindex="0">
+              <div class="card custom-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="card-title mb-1">Post Site Checklists</h5>
+                    <small class="text-muted">Create and monitor guard checklist progress</small>
+                  </div>
+
+                  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addChecklistModal">
+                    <i class="ri-add-line me-1"></i> Add Checklist
+                  </button>
+                </div>
+
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle text-nowrap">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Date</th>
+                          <th>Added By</th>
+                          <th>Progress</th>
+                          <th>Status</th>
+                          <th class="text-end">Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <% if (checklists && checklists.length> 0) { %>
+                          <% checklists.forEach(function(item){ const totalItems=item.items ? item.items.length : 0; let
+                            totalChecked=0; let completedCount=0; if (item.progress && item.progress.length> 0) {
+                            item.progress.forEach(function(p){
+                            totalChecked += p.checkedItems ? p.checkedItems.length : 0;
+                            if (p.completed) completedCount++;
+                            });
+                            }
+
+                            const assignedCount = item.assignedGuards ? item.assignedGuards.length : 0;
+                            const expectedTotal = totalItems * assignedCount;
+                            const isCompleted = expectedTotal > 0 && totalChecked === expectedTotal;
+                            %>
+
+                            <tr>
+                              <td>
+                                <div class="fw-semibold">
+                                  <%= item.name %>
+                                </div>
+                                <small class="text-muted">
+                                  <%= item.description || "No description" %>
+                                </small>
+                              </td>
+
+                              <td>
+                                <%= new Date(item.createdAt).toLocaleString() %>
+                              </td>
+
+                              <td>
+                                <div class="fw-semibold">
+                                  <%= item.addedByName || "Unknown" %>
+                                </div>
+                                <span class="badge bg-info-transparent">
+                                  <%= item.addedByUserType || "User" %>
+                                </span>
+                              </td>
+
+                              <td>
+                                <div class="fw-semibold">
+                                  <%= totalChecked %>/<%= expectedTotal %>
+                                </div>
+                                <div class="progress progress-xs mt-1">
+                                  <div class="progress-bar bg-success"
+                                    style="width:<%= expectedTotal > 0 ? Math.round((totalChecked / expectedTotal) * 100) : 0 %>%">
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td>
+                                <% if (isCompleted) { %>
+                                  <span class="badge bg-success">Completed</span>
+                                  <% } else { %>
+                                    <span class="badge bg-warning">In Progress</span>
+                                    <% } %>
+                              </td>
+
+                              <td class="text-end">
+                                <button class="btn btn-sm btn-light"
+                                  onclick='openChecklistProgress(<%- JSON.stringify(item) %>)'>
+                                  View Progress
+                                </button>
+
+                                <button class="btn btn-sm btn-primary"
+                                  onclick='openChecklistEdit(<%- JSON.stringify(item) %>)'>
+                                  Edit
+                                </button>
+                              </td>
+                            </tr>
+
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="ri-list-check-3" style="font-size:45px;"></i>
+                                    <h6 class="mt-2">No Checklist Found</h6>
+                                    <p class="mb-0">Create the first checklist for this post site.</p>
+                                  </td>
+                                </tr>
+                                <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            // Tasks
+            <div class="tab-pane fade" id="task-pane" role="tabpanel" aria-labelledby="task-tab" tabindex="0">
+              <div class="card custom-card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div>
+                    <h5 class="card-title mb-1">
+                      <i class="ri-task-line me-1 text-primary"></i> Post Site Tasks
+                    </h5>
+                    <small class="text-muted">Create one-off and recurring guard tasks for this post site</small>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <input type="date" id="taskDateFilter" class="form-control form-control-sm">
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+                      <i class="ri-add-line me-1"></i> New Task
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th>Task Name</th>
+                          <th>Duration</th>
+                          <th>Type</th>
+                          <th>Status</th>
+                          <th>Guards</th>
+                          <th class="text-end">Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <% if (postSiteTasks && postSiteTasks.length> 0) { %>
+                          <% postSiteTasks.forEach(function(task){ %>
+                            <tr class="task-row"
+                              data-date="<%= task.createdAt ? new Date(task.createdAt).toISOString().split('T')[0] : '' %>">
+                              <td>
+                                <div class="fw-semibold">
+                                  <%= task.taskName || "Untitled Task" %>
+                                </div>
+                                <small class="text-muted">
+                                  <%= task.taskDescription || "No description" %>
+                                </small>
+                              </td>
+
+                              <td>
+                                <span class="badge bg-info-transparent">
+                                  <%= task.maxDuration || "N/A" %>
+                                </span>
+                              </td>
+
+                              <td>
+                                <% if (task.taskType==="Recurring" ) { %>
+                                  <span class="badge bg-primary">Recurring</span>
+                                  <% } else { %>
+                                    <span class="badge bg-secondary">One-Off</span>
+                                    <% } %>
+                              </td>
+
+                              <td>
+                                <% if (task.status==="Active" ) { %>
+                                  <span class="badge bg-success">Active</span>
+                                  <% } else if (task.status==="Completed" ) { %>
+                                    <span class="badge bg-info">Completed</span>
+                                    <% } else { %>
+                                      <span class="badge bg-secondary">Inactive</span>
+                                      <% } %>
+                              </td>
+
+                              <td>
+                                <% if (task.assignedGuards && task.assignedGuards.length> 0) { %>
+                                  <% task.assignedGuards.forEach(function(g){ %>
+                                    <span class="badge bg-light text-dark me-1">
+                                      <i class="ri-shield-user-line me-1"></i>
+                                      <%= g.guardName || "Guard" %>
+                                    </span>
+                                    <% }) %>
+                                      <% } else { %>
+                                        <span class="text-muted">No guard</span>
+                                        <% } %>
+                              </td>
+
+                              <td class="text-end">
+                                <button class="btn btn-sm btn-light">
+                                  <i class="ri-edit-line"></i>
+                                </button>
+
+                                <form action="/delete-post-site-task/<%= task._id %>" method="POST" class="d-inline">
+                                  <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?')">
+                                    <i class="ri-delete-bin-line"></i>
+                                  </button>
+                                </form>
+                              </td>
+                            </tr>
+                            <% }) %>
+                              <% } else { %>
+                                <tr>
+                                  <td colspan="6" class="text-center py-5">
+                                    <i class="ri-task-line" style="font-size:48px;color:#94a3b8;"></i>
+                                    <h6 class="mt-2 mb-1">No Task Found</h6>
+                                    <p class="text-muted mb-0">Create your first task for this post site.</p>
+                                  </td>
+                                </tr>
+                                <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Send Report Modal -->
+  <div class="modal fade" id="sendReportModal" tabindex="-1" aria-labelledby="sendReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <form action="/send-post-site-report" method="POST" id="sendReportForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="sendReportModalLabel">
+              <i class="ri-mail-send-line me-2 text-primary"></i>Send Report
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Client Name</label>
+                <input type="text" class="form-control" id="modalClientName" name="clientName" readonly>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Client Email</label>
+                <input type="email" class="form-control" id="modalClientEmail" name="clientEmail" readonly>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Report Title</label>
+              <input type="text" class="form-control" name="reportTitle" id="modalReportTitle"
+                placeholder="Enter report title" required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" name="startDate" id="modalStartDate" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" name="endDate" id="modalEndDate" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <button type="button" class="btn btn-outline-primary btn-sm" id="loadReportsByDateBtn">
+                <i class="ri-filter-3-line me-1"></i> Load Reports Within Date Range
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Selected Reports</label>
+              <div id="selectedReportsWrapper" class="border rounded p-2 bg-light" style="min-height: 70px;">
+                <div class="text-muted small" id="selectedReportsEmptyText">No reports loaded yet.</div>
+                <div id="selectedReportsTags" class="d-flex flex-wrap gap-2"></div>
+              </div>
+            </div>
+
+            <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || '' %>">
+            <input type="hidden" name="frequency" id="selectedFrequencyInput" value="Daily">
+            <input type="hidden" name="reportIds" id="selectedReportIdsInput">
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" id="sendReportBtn" class="btn btn-primary">
+              <i class="ri-send-plane-fill me-1"></i> Send Report
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- shedule Modal -->
+  <div class="modal fade" id="scheduleReportModal" tabindex="-1" aria-labelledby="scheduleReportModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form action="/schedule-post-site-report" method="POST" id="scheduleReportForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="scheduleReportModalLabel">
+              <i class="ri-calendar-schedule-line me-2 text-warning"></i>Schedule Report
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Client Name</label>
+                <input type="text" class="form-control" id="scheduleClientName" name="clientName" readonly>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Client Email</label>
+                <input type="email" class="form-control" id="scheduleClientEmail" name="clientEmail" readonly>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Report Title</label>
+              <input type="text" class="form-control" id="scheduleReportTitle" name="reportTitle"
+                placeholder="Enter report title">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Frequency</label>
+              <select class="form-control" id="scheduleFrequency" name="frequency" required>
+                <!-- for test code -->
+                <option value="5min">⚡ Test - 5 Minutes</option>
+                <option value="10min">⚡ Test - 10 Minutes</option>
+                <!-- test code -->
+                <option value="Daily">Daily</option>
+                <option value="Weekly" selected>Weekly</option>
+                <option value="Monthly">Monthly</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Start Date</label>
+              <!-- this is my real code -->
+              <!-- <input type="date" class="form-control" id="scheduleStartDate" name="startDate" required> -->
+
+              <!-- test code -->
+              <input type="datetime-local" class="form-control" id="scheduleStartDate" name="startDate" required>
+
+            </div>
+
+            <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || '' %>">
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" id="saveScheduleBtn" class="btn btn-warning">
+              <i class="ri-save-line me-1"></i> Save Schedule
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- shedule report History Modal LOGS -->
+  <div class="modal fade" id="scheduleHistoryModal" tabindex="-1" aria-labelledby="scheduleHistoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="scheduleHistoryModalLabel">
+            <i class="ri-eye-line me-2 text-info"></i>Scheduled Report History
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <strong id="historyClientNameText">Client</strong>
+            <div class="text-muted" id="historyClientEmailText"></div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Status</th>
+                  <th>Frequency</th>
+                  <th>Period</th>
+                  <th>Reports</th>
+                  <th>Sent At</th>
+                  <th>Error</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleHistoryTableBody">
+                <tr>
+                  <td colspan="6" class="text-center text-muted">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("sendReportForm");
+      const sendBtn = document.getElementById("sendReportBtn");
+      const scheduleBtn = document.getElementById("scheduleReportBtn");
+
+      function showProcessingAlert(message) {
+        Swal.fire({
+          title: message,
+          html: "Please wait while we process your request...",
+          timer: 2200,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+      }
+
+      if (sendBtn) {
+        sendBtn.addEventListener("click", function () {
+          showProcessingAlert("Sending report...");
+        });
+      }
+
+      if (scheduleBtn) {
+        scheduleBtn.addEventListener("click", function () {
+          showProcessingAlert("Scheduling report...");
+        });
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const success = params.get("success");
+      const error = params.get("error");
+
+      if (success === "report_sent") {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Report sent successfully",
+          showConfirmButton: false,
+          timer: 2500,
+          toast: false
+        });
+      }
+
+      if (success === "report_scheduled") {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Report scheduled successfully",
+          showConfirmButton: false,
+          timer: 2500,
+          toast: false
+        });
+      }
+
+      if (error === "report_failed") {
+        Swal.fire({
+          position: "top-end",
+          icon: "error",
+          title: "Failed to process report",
+          text: "Please try again.",
+          showConfirmButton: true
+        });
+      }
+
+      if (success || error) {
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    });
+  </script>
+
+
+
+  <!-- VISITORS -->
+  <script>
+    const postSiteId = "<%= companyInfo?._id || companyInfo?.id || '' %>";
+    const postSiteName = "<%= companyInfo?.siteName || '' %>";
+    const companyId = "<%= userInfo?.assignedCompanyID || '' %>";
+
+
+
+    async function loadVisitors(dateValue = "") {
+      let url = `/api/visitors?companyId=${companyId}&postSiteId=${postSiteId}`;
+
+      if (dateValue) {
+        const start = new Date(dateValue);
+        const end = new Date(start);
+        end.setDate(end.getDate() + 1);
+
+        url += `&startDate=${start.toISOString()}&endDate=${end.toISOString()}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const container = document.getElementById("visitorsList");
+      container.innerHTML = "";
+
+      if (!data.visitors || data.visitors.length === 0) {
+        container.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <i class="ri-user-search-line" style="font-size:50px;color:#8c9097;"></i>
+          <h6 class="mt-2">No Visitors Found</h6>
+          <p class="text-muted mb-0">No visitor record for the selected date.</p>
+        </div>
+      `;
+        return;
+      }
+
+      data.visitors.forEach(v => {
+        container.innerHTML += `
+        <div class="col-xl-4 col-md-6">
+          <div class="card border shadow-sm h-100" onclick='showVisitorModal(${JSON.stringify(v).replace(/'/g, "&apos;")})' style="cursor:pointer;">
+            <div class="card-body">
+              <h6 class="fw-bold mb-1">${v.visitorName || "Unnamed Visitor"}</h6>
+              <p class="text-muted mb-2">${v.purposeOfVisit || "No purpose entered"}</p>
+              <span class="badge bg-primary-transparent">${v.sex || "N/A"}</span>
+              <span class="badge bg-info-transparent">${v.firstTimeVisiting ? "First Visit" : "Returning"}</span>
+              <div class="mt-3 text-muted small">
+                <i class="ri-time-line me-1"></i>${new Date(v.visitDateTime).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      });
+    }
+
+    document.getElementById("visitorDateFilter").addEventListener("change", function () {
+      loadVisitors(this.value);
+    });
+
+    loadVisitors();
+  </script>
+
+  <!-- POP UP MODAL -->
+  <div class="modal fade" id="visitorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="visitorModalTitle">Visitor Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body" id="visitorModalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showVisitorModal(v) {
+      document.getElementById("visitorModalTitle").innerText = v.visitorName || "Visitor Details";
+
+      document.getElementById("visitorModalBody").innerHTML = `
+      <div class="row gy-3">
+        <div class="col-md-6"><strong>Name:</strong><br>${v.visitorName || "N/A"}</div>
+        <div class="col-md-6"><strong>Sex:</strong><br>${v.sex || "N/A"}</div>
+        <div class="col-md-6"><strong>Phone:</strong><br>${v.phoneNumber || "N/A"}</div>
+        <div class="col-md-6"><strong>Email:</strong><br>${v.email || "N/A"}</div>
+        <div class="col-md-6"><strong>Purpose:</strong><br>${v.purposeOfVisit || "N/A"}</div>
+        <div class="col-md-6"><strong>First Time Visiting:</strong><br>${v.firstTimeVisiting ? "Yes" : "No"}</div>
+        <div class="col-md-12"><strong>Date/Time:</strong><br>${new Date(v.visitDateTime).toLocaleString()}</div>
+
+        <div class="col-md-6">
+          <strong>Visitor Face</strong><br>
+          ${v.visitorFace && v.visitorFace.secureUrl ? `<img src="${v.visitorFace.secureUrl}" class="img-fluid rounded mt-2">` : "No image"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Visitor ID</strong><br>
+          ${v.visitorIdCard && v.visitorIdCard.secureUrl ? `<img src="${v.visitorIdCard.secureUrl}" class="img-fluid rounded mt-2">` : "No image"}
+        </div>
+
+        <div class="col-md-12">
+          <strong>Signature</strong><br>
+          ${v.signature && v.signature.secureUrl ? `<img src="${v.signature.secureUrl}" class="img-fluid rounded mt-2">` : "No signature"}
+        </div>
+      </div>
+    `;
+
+      new bootstrap.Modal(document.getElementById("visitorModal")).show();
+    }
+  </script>
+
+  <!-- VISTORS -->
+  <script>
+    // if (success === "sent") {
+    //   showSuccessPopup("Report sent successfully!");
+    // }
+
+    // if (success === "scheduled") {
+    //   showSuccessPopup("Report scheduled successfully!");
+    // }
+  </script>
+
+  // Modal for Checklist
+  <div class="modal fade" id="addChecklistModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form action="/create-checklist" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Checklist</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || '' %>">
+            <input type="hidden" name="postSiteName" value="<%= companyInfo?.siteName || '' %>">
+
+            <div class="mb-3">
+              <label class="form-label">Checklist Name</label>
+              <input type="text" name="name" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Assigned Guard</label>
+              <select name="assignedGuards" class="form-control" required>
+                <option value="">Select Guard</option>
+
+                <% if (assignedGuards && assignedGuards.length> 0) { %>
+                  <% assignedGuards.forEach(function(guard){ %>
+                    <option
+                      value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>">
+                      <%= guard.fullname || guard.name || guard.email || 'Unnamed Guard' %>
+                    </option>
+                    <% }) %>
+                      <% } %>
+              </select>
+            </div>
+
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+              <label class="form-label mb-0">Checklist Items</label>
+              <button type="button" class="btn btn-sm btn-success" onclick="addChecklistInput()">
+                <i class="ri-add-line"></i> Add
+              </button>
+            </div>
+
+            <div id="checklistItemsWrapper">
+              <div class="input-group mb-2">
+                <input type="text" name="checklistItems" class="form-control" placeholder="Enter checklist item"
+                  required>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save Checklist</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  // checklist progress modal
+  <div class="modal fade" id="checklistProgressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="checklistProgressTitle">Checklist Progress</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body" id="checklistProgressBody"></div>
+      </div>
+    </div>
+  </div>
+
+  // check List add checklist input
+  <script>
+    function addChecklistInput() {
+      const wrapper = document.getElementById("checklistItemsWrapper");
+
+      const div = document.createElement("div");
+      div.className = "input-group mb-2";
+
+      div.innerHTML = `
+      <input type="text" name="checklistItems" class="form-control" placeholder="Enter checklist item" required>
+      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">
+        <i class="ri-delete-bin-line"></i>
+      </button>
+    `;
+
+      wrapper.appendChild(div);
+    }
+
+    function openChecklistProgress(item) {
+      document.getElementById("checklistProgressTitle").innerText = item.name || "Checklist Progress";
+
+      const guards = item.assignedGuards || [];
+      const progress = item.progress || [];
+      const items = item.items || [];
+
+      let html = "";
+
+      guards.forEach((guard) => {
+        const guardProgress = progress.find(p => p.guardId === guard.guardId) || {};
+        const checkedItems = guardProgress.checkedItems || [];
+
+        html += `
+        <div class="border rounded p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h6 class="fw-bold mb-0">${guard.guardName || "Guard"}</h6>
+              <small class="text-muted">${checkedItems.length}/${items.length} completed</small>
+            </div>
+
+            ${guardProgress.completed
+            ? `<span class="badge bg-success">Completed</span>`
+            : `<span class="badge bg-warning">In Progress</span>`
+          }
+          </div>
+
+          <ul class="list-group">
+            ${items.map((i, index) => `
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${i.text}</span>
+                ${checkedItems.includes(index)
+              ? `<span class="badge bg-success"><i class="ri-check-line"></i></span>`
+              : `<span class="badge bg-light text-dark">Pending</span>`
+            }
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      `;
+      });
+
+      document.getElementById("checklistProgressBody").innerHTML = html;
+
+      new bootstrap.Modal(document.getElementById("checklistProgressModal")).show();
+    }
+
+    function openChecklistEdit(item) {
+      alert("Edit modal is next. Checklist selected: " + item.name);
+    }
+  </script>
+
+  // Tasks Modal
+  <div class="modal fade" id="newTaskModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <form action="/create-post-site-task" method="POST">
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="ri-task-line me-1 text-primary"></i> New Task
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || companyInfo?.id || '' %>">
+          <input type="hidden" name="postSiteName" value="<%= companyInfo?.siteName || '' %>">
+
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <label class="form-label">Task Name</label>
+              <input type="text" name="taskName" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Max Duration</label>
+              <select name="maxDuration" class="form-control" required>
+                <option value="">Select Duration</option>
+                <% 
+                  const durations = [
+                    "5 min","10 min","15 min","20 min","30 min","45 min",
+                    "1 hr","1.5 hrs","2 hrs","3 hrs","4 hrs","5 hrs","6 hrs","7 hrs","8 hrs"
+                  ];
+                  durations.forEach(function(d){ 
+                %>
+                  <option value="<%= d %>"><%= d %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Task Description</label>
+              <textarea name="taskDescription" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Assign Guards</label>
+              <select name="assignedGuards" class="form-control" multiple required>
+                <% if (assignedGuards && assignedGuards.length > 0) { %>
+                  <% assignedGuards.forEach(function(guard){ %>
+                    <option value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>">
+                      <%= guard.fullname || guard.name || guard.email || 'Unnamed Guard' %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+              <small class="text-muted">Hold CTRL to select multiple guards.</small>
+            </div>
+
+            <div class="col-md-12">
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#oneOffTaskTab"
+                    type="button" role="tab" onclick="document.getElementById('taskTypeInput').value='One-Off'">
+                    One-off Task
+                  </button>
+                </li>
+
+                <li class="nav-item">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#recurringTaskTab"
+                    type="button" role="tab" onclick="document.getElementById('taskTypeInput').value='Recurring'">
+                    Recurring Task
+                  </button>
+                </li>
+              </ul>
+
+              <input type="hidden" name="taskType" id="taskTypeInput" value="One-Off">
+
+              <div class="tab-content border border-top-0 p-3">
+                <div class="tab-pane fade show active" id="oneOffTaskTab">
+                  <div class="row gy-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Start Date & Time</label>
+                      <input type="datetime-local" name="oneOffStartDateTime" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">Due Date & Time</label>
+                      <input type="datetime-local" name="oneOffDueDateTime" class="form-control">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tab-pane fade" id="recurringTaskTab">
+                  <div class="row gy-3">
+                    <div class="col-md-12">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="recurringContinuous" id="recurringContinuousToggle" onchange="toggleRecurringMode()">
+                        <label class="form-check-label" for="recurringContinuousToggle">Continuous</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12" id="continuousDaysBox" style="display:none;">
+                      <label class="form-label">Scheduled Days</label>
+                      <div class="d-flex flex-wrap gap-3 border rounded p-3">
+                        <% ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].forEach(function(day){ %>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="scheduledDays" value="<%= day %>" id="taskDay_<%= day %>">
+                            <label class="form-check-label" for="taskDay_<%= day %>"><%= day %></label>
+                          </div>
+                        <% }) %>
+                      </div>
+                    </div>
+
+                    <div id="specificRepeatBox">
+                      <div class="row gy-3">
+                        <div class="col-md-4">
+                          <label class="form-label">Mode</label>
+                          <select name="recurringMode" class="form-control">
+                            <option value="Specific Time">Specific Time</option>
+                            <option value="Repeat">Repeat</option>
+                          </select>
+                        </div>
+
+                        <div class="col-md-4">
+                          <label class="form-label">Start Time</label>
+                          <input type="time" name="recurringStartTime" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                          <label class="form-label">Starting From</label>
+                          <input type="date" name="recurringStartingFrom" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                          <label class="form-label">Repeats</label>
+                          <select name="repeatType" class="form-control">
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                          </select>
+                        </div>
+
+                        <div class="col-md-3">
+                          <label class="form-label">Every</label>
+                          <input type="number" name="repeatEvery" class="form-control" value="1" min="1">
+                        </div>
+
+                        <div class="col-md-3">
+                          <label class="form-label">End Repeat</label>
+                          <select name="repeatEndType" class="form-control">
+                            <option value="After">After</option>
+                            <option value="Never">Never</option>
+                          </select>
+                        </div>
+
+                        <div class="col-md-3">
+                          <label class="form-label">After</label>
+                          <input type="number" name="repeatEndAfter" class="form-control" value="5" min="1">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">Sub Tasks</label>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSubTaskInput()">
+                  <i class="ri-add-line"></i> Add
+                </button>
+              </div>
+
+              <div id="subTaskWrapper">
+                <div class="input-group mb-2">
+                  <input type="text" name="subTasks" class="form-control" placeholder="Enter sub task">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Task</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+// Taks Script again
+<script>
+  function addSubTaskInput() {
+    const wrapper = document.getElementById("subTaskWrapper");
+
+    const div = document.createElement("div");
+    div.className = "input-group mb-2";
+
+    div.innerHTML = `
+      <input type="text" name="subTasks" class="form-control" placeholder="Enter sub task">
+      <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">
+        <i class="ri-delete-bin-line"></i>
+      </button>
+    `;
+
+    wrapper.appendChild(div);
+  }
+
+  function toggleRecurringMode() {
+    const toggle = document.getElementById("recurringContinuousToggle");
+    const daysBox = document.getElementById("continuousDaysBox");
+    const repeatBox = document.getElementById("specificRepeatBox");
+
+    if (toggle.checked) {
+      daysBox.style.display = "block";
+      repeatBox.style.display = "none";
+    } else {
+      daysBox.style.display = "none";
+      repeatBox.style.display = "block";
+    }
+  }
+
+  const taskDateFilter = document.getElementById("taskDateFilter");
+
+  if (taskDateFilter) {
+    taskDateFilter.addEventListener("change", function () {
+      const selectedDate = this.value;
+      const rows = document.querySelectorAll(".task-row");
+
+      rows.forEach(row => {
+        const rowDate = row.getAttribute("data-date");
+
+        if (!selectedDate || rowDate === selectedDate) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+  }
+</script>
+
+  <!-- FOOTER -->
+
+  <%- include("../includes/footer"); -%>
+    <!-- Scroll To Top -->
+    <div class="scrollToTop">
+      <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+    </div>
+    <div id="responsive-overlay"></div>
+    <!-- Scroll To Top -->
+
+    <!-- Popper JS -->
+    <script src="../assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Defaultmenu JS -->
+    <script src="../assets/js/defaultmenu.min.js"></script>
+
+    <!-- Node Waves JS-->
+    <script src="../assets/libs/node-waves/waves.min.js"></script>
+
+    <!-- Sticky JS -->
+    <script src="../assets/js/sticky.js"></script>
+
+    <!-- Simplebar JS -->
+    <script src="../assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="../assets/js/simplebar.js"></script>
+
+    <!-- Auto Complete JS -->
+    <script src="../assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+    <!-- Color Picker JS -->
+    <script src="../assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+    <!-- Date & Time Picker JS -->
+    <script src="../assets/libs/flatpickr/flatpickr.min.js"></script>
+
+    <!-- Sweet alert -->
+
+    <script src="assets/libs/sweetalert2/sweetalert2.min.js"></script>
+
+
+
+    <!-- Flat Picker JS -->
+    <!-- <script src="assets/libs/flatpickr/flatpickr.min.js"></script> -->
+
+    <!-- Dragula JS -->
+    <script src="assets/libs/dragula/dragula.min.js"></script>
+
+    <!-- Internal Task  JS -->
+    <script src="assets/js/task-kanban-board-new.js"></script>
+
+    <!-- Gallery JS -->
+    <script src="../assets/libs/glightbox/js/glightbox.min.js"></script>
+
+    <!-- Internal Profile JS -->
+    <script src="assets/js/profile.js"></script>
+
+
+
+
+    <!-- Flat Picker JS -->
+    <!-- <script src="assets/libs/flatpickr/flatpickr.min.js"></script> -->
+
+
+    <!-- Internal Invoice List JS -->
+    <script src="assets/js/task-list.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Custom JS -->
+    <script src="/assets/js/custom.js"></script>
+    <!-- /////////////////////////// -->
+
+    <!-- scrip for notes -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".view-note-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const title = this.getAttribute("data-title") || "Note";
+            const guard = this.getAttribute("data-guard") || "";
+            const date = this.getAttribute("data-date") || "";
+            const note = this.getAttribute("data-note") || "";
+
+            Swal.fire({
+              title: title,
+              width: "80%",
+              html: `
+            <div style="text-align:left;">
+              <p><strong>Guard:</strong> ${guard}</p>
+              <p><strong>Date:</strong> ${date}</p>
+              <hr>
+              <p style="white-space:pre-wrap;">${note}</p>
+            </div>
+          `,
+              confirmButtonText: "Close",
+            });
+          });
+        });
+      });
+    </script>
+    <!-- script for notes end -->
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const sendButtons = document.querySelectorAll(".send-report-btn");
+        const scheduleOpenButtons = document.querySelectorAll(".schedule-report-open-btn");
+        const historyButtons = document.querySelectorAll(".schedule-history-btn");
+
+        const modalClientName = document.getElementById("modalClientName");
+        const modalClientEmail = document.getElementById("modalClientEmail");
+
+        const scheduleClientName = document.getElementById("scheduleClientName");
+        const scheduleClientEmail = document.getElementById("scheduleClientEmail");
+        const scheduleReportTitle = document.getElementById("scheduleReportTitle");
+        const scheduleFrequency = document.getElementById("scheduleFrequency");
+        const scheduleStartDate = document.getElementById("scheduleStartDate");
+
+        const loadReportsByDateBtn = document.getElementById("loadReportsByDateBtn");
+        const modalStartDate = document.getElementById("modalStartDate");
+        const modalEndDate = document.getElementById("modalEndDate");
+        const selectedReportsTags = document.getElementById("selectedReportsTags");
+        const selectedReportsEmptyText = document.getElementById("selectedReportsEmptyText");
+        const selectedReportIdsInput = document.getElementById("selectedReportIdsInput");
+        const selectedFrequencyInput = document.getElementById("selectedFrequencyInput");
+
+        const historyClientNameText = document.getElementById("historyClientNameText");
+        const historyClientEmailText = document.getElementById("historyClientEmailText");
+        const scheduleHistoryTableBody = document.getElementById("scheduleHistoryTableBody");
+
+        let selectedReports = [];
+
+        function renderSelectedReports() {
+          selectedReportsTags.innerHTML = "";
+
+          if (!selectedReports.length) {
+            selectedReportsEmptyText.style.display = "block";
+            selectedReportIdsInput.value = "";
+            return;
+          }
+
+          selectedReportsEmptyText.style.display = "none";
+
+          selectedReports.forEach((report) => {
+            const tag = document.createElement("div");
+            tag.className = "badge bg-primary-transparent d-flex align-items-center gap-2 px-3 py-2";
+            tag.innerHTML = `
+          <span>${report.title} - ${report.category} - ${report.createdAtText}</span>
+          <button type="button" class="btn btn-sm p-0 text-danger remove-report-btn" data-id="${report._id}" style="line-height:1;">
+            <i class="ri-close-circle-fill fs-6"></i>
+          </button>
+        `;
+            selectedReportsTags.appendChild(tag);
+          });
+
+          selectedReportIdsInput.value = selectedReports.map(r => r._id).join(",");
+        }
+
+        selectedReportsTags.addEventListener("click", function (e) {
+          const btn = e.target.closest(".remove-report-btn");
+          if (!btn) return;
+
+          const id = btn.getAttribute("data-id");
+          selectedReports = selectedReports.filter(r => r._id !== id);
+          renderSelectedReports();
+        });
+
+        sendButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            modalClientName.value = this.getAttribute("data-client-name") || "";
+            modalClientEmail.value = this.getAttribute("data-client-email") || "";
+            selectedFrequencyInput.value = "Manual";
+            selectedReports = [];
+            renderSelectedReports();
+          });
+        });
+
+        scheduleOpenButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            scheduleClientName.value = this.getAttribute("data-client-name") || "";
+            scheduleClientEmail.value = this.getAttribute("data-client-email") || "";
+            scheduleReportTitle.value = this.getAttribute("data-saved-title") || "";
+            scheduleFrequency.value = this.getAttribute("data-saved-frequency") || "Weekly";
+            scheduleStartDate.value = this.getAttribute("data-saved-start-date") || "";
+          });
+        });
+
+        loadReportsByDateBtn.addEventListener("click", async function () {
+          const startDate = modalStartDate.value;
+          const endDate = modalEndDate.value;
+          const postSiteId = document.querySelector('#sendReportForm input[name="postSiteId"]').value;
+
+          if (!startDate || !endDate) {
+            alert("Please select both start date and end date.");
+            return;
+          }
+
+          try {
+            const res = await fetch(`/reports-by-date-range?postSiteId=${encodeURIComponent(postSiteId)}&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+            const data = await res.json();
+
+            if (!data.success) {
+              alert(data.message || "Failed to load reports.");
+              return;
+            }
+
+            selectedReports = data.reports || [];
+            renderSelectedReports();
+          } catch (err) {
+            console.error(err);
+            alert("Failed to load reports.");
+          }
+        });
+
+        function formatCountdown(targetIso) {
+          const target = new Date(targetIso).getTime();
+          const now = Date.now();
+          const diff = target - now;
+
+          if (isNaN(target)) return "Invalid";
+          if (diff <= 0) return "Due now";
+
+          const totalSeconds = Math.floor(diff / 1000);
+          const days = Math.floor(totalSeconds / 86400);
+          const hours = Math.floor((totalSeconds % 86400) / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+
+          if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+          return `${minutes}m ${seconds}s`;
+        }
+
+        function startScheduleCountdowns() {
+          const countdownTexts = document.querySelectorAll(".scheduled-countdown-text[data-next-send]");
+
+          function tick() {
+            countdownTexts.forEach((el) => {
+              const iso = el.getAttribute("data-next-send");
+              el.textContent = formatCountdown(iso);
+            });
+          }
+
+          tick();
+          setInterval(tick, 1000);
+        }
+
+        historyButtons.forEach((button) => {
+          button.addEventListener("click", async function () {
+            const clientName = this.getAttribute("data-client-name") || "";
+            const clientEmail = this.getAttribute("data-client-email") || "";
+            const postSiteId = this.getAttribute("data-post-site-id") || "";
+
+            historyClientNameText.textContent = clientName || "Client";
+            historyClientEmailText.textContent = clientEmail || "";
+            scheduleHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>`;
+
+            try {
+              const res = await fetch(`/scheduled-post-site-report-history?postSiteId=${encodeURIComponent(postSiteId)}&clientEmail=${encodeURIComponent(clientEmail)}`);
+              const data = await res.json();
+
+              if (!data.success) {
+                scheduleHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load history.</td></tr>`;
+                return;
+              }
+
+              if (!data.logs || !data.logs.length) {
+                scheduleHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No scheduled history found.</td></tr>`;
+                return;
+              }
+
+              scheduleHistoryTableBody.innerHTML = data.logs.map((log) => {
+                let badgeClass = "bg-secondary-transparent";
+
+                if (log.status === "success") badgeClass = "bg-success-transparent";
+                if (log.status === "failed") badgeClass = "bg-danger-transparent";
+                if (log.status === "skipped_no_reports") badgeClass = "bg-warning-transparent";
+
+                return `
+              <tr>
+                <td><span class="badge ${badgeClass}">${log.status}</span></td>
+                <td>${log.frequency || "-"}</td>
+                <td>${new Date(log.periodStart).toLocaleString()}<br>to<br>${new Date(log.periodEnd).toLocaleString()}</td>
+                <td>${log.reportCount ?? 0}</td>
+                <td>${log.sentAt ? new Date(log.sentAt).toLocaleString() : "-"}</td>
+                <td>${log.errorMessage || "-"}</td>
+              </tr>
+            `;
+              }).join("");
+            } catch (err) {
+              console.error(err);
+              scheduleHistoryTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load history.</td></tr>`;
+            }
+          });
+        });
+
+        startScheduleCountdowns();
+        refreshScheduleTargets();
+        setInterval(refreshScheduleTargets, 10000); // every 10 seconds
+      });
+    </script>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get("success");
+
+      if (success === "report_sent") {
+        showSuccessPopup("Report sent successfully!");
+      }
+    </script>
+    <!-- refresh -->
+    <script>
+      async function refreshScheduleTargets() {
+        try {
+          const postSiteId = "<%= companyInfo?._id || '' %>";
+          if (!postSiteId) return;
+
+          const res = await fetch(`/scheduled-post-site-report-status?postSiteId=${encodeURIComponent(postSiteId)}`);
+          const data = await res.json();
+
+          if (!data.success || !Array.isArray(data.schedules)) return;
+
+          const byEmail = {};
+          data.schedules.forEach((item) => {
+            byEmail[String(item.clientEmail).toLowerCase()] = item;
+          });
+
+          document.querySelectorAll(".scheduled-countdown-text[data-client-email]").forEach((el) => {
+            const email = String(el.getAttribute("data-client-email") || "").toLowerCase();
+            const schedule = byEmail[email];
+
+            if (schedule && schedule.nextSendAt) {
+              el.setAttribute("data-next-send", new Date(schedule.nextSendAt).toISOString());
+            } else {
+              el.removeAttribute("data-next-send");
+              el.textContent = "Not scheduled";
+            }
+          });
+        } catch (err) {
+          console.error("Failed to refresh schedule countdown targets:", err);
+        }
+      }
+    </script>
+
+
+
+    <script>
+      function showSuccessPopup(message) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: message,
+          confirmButtonColor: "#0d6efd",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    </script>
+
+    </body>
+
+    </html>

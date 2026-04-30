@@ -1,0 +1,398 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Edit Report Template</h1>
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+          <li class="breadcrumb-item"><a href="/report-template-manager">Report Template Manager</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Edit Template</li>
+        </ol>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="/report-template-manager" class="btn btn-light btn-wave">
+          <i class="ri-arrow-left-line me-1"></i> Back
+        </a>
+        <button type="submit" form="reportTemplateForm" class="btn btn-primary btn-wave">
+          <i class="ri-save-line me-1"></i> Update Template
+        </button>
+      </div>
+    </div>
+    <!-- End Page Header -->
+
+    <div class="row">
+      <div class="col-xxl-8 col-xl-8">
+        <div class="card custom-card shadow-sm">
+          <div class="card-header justify-content-between">
+            <div class="card-title fs-16">Edit Template Details</div>
+            <span class="badge bg-info-transparent">Template ID: <%= template?._id || "" %></span>
+          </div>
+
+          <div class="card-body">
+            <form id="reportTemplateForm" action="/report-template-update/<%= template._id %>" method="POST">
+              <div class="row gy-3">
+                <div class="col-md-6">
+                  <label class="form-label">Report Name <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    value="<%= template?.title || '' %>"
+                    placeholder="e.g. Detailed Incident Report"
+                    required
+                  >
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Category <span class="text-danger">*</span></label>
+                  <select class="form-select" name="category" required>
+                    <option value="">Select category</option>
+                    <option value="general" <%= template?.category === "general" ? "selected" : "" %>>General</option>
+                    <option value="incident" <%= template?.category === "incident" ? "selected" : "" %>>Incident</option>
+                    <option value="log" <%= template?.category === "log" ? "selected" : "" %>>Log</option>
+                    <option value="standard" <%= template?.category === "standard" ? "selected" : "" %>>Standard</option>
+                    <option value="nfc" <%= template?.category === "nfc" ? "selected" : "" %>>NFC</option>
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Status</label>
+                  <select class="form-select" name="active">
+                    <option value="true" <%= template?.active !== false ? "selected" : "" %>>Active</option>
+                    <option value="false" <%= template?.active === false ? "selected" : "" %>>Inactive</option>
+                  </select>
+                </div>
+
+                <div class="col-md-12">
+                  <label class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    name="description"
+                    rows="3"
+                    placeholder="Briefly describe what this report is used for"
+                  ><%= template?.description || '' %></textarea>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Template Visibility</label>
+                  <select class="form-select" name="showFabMenu">
+                    <option value="true" <%= template?.showFabMenu !== false ? "selected" : "" %>>Show on Mobile Report Menu</option>
+                    <option value="false" <%= template?.showFabMenu === false ? "selected" : "" %>>Hide from Mobile Report Menu</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Company ID</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    value="<%= userInfo?.assignedCompanyID || '' %>"
+                    readonly
+                  >
+                </div>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <h5 class="mb-1">Template Fields</h5>
+                  <p class="text-muted mb-0 fs-12">
+                    Edit the fields guards will complete in the mobile app.
+                    Signature is always included automatically and is not part of the template.
+                  </p>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-wave" id="addFieldBtn">
+                  <i class="ri-add-line me-1"></i> Add Field
+                </button>
+              </div>
+
+              <div id="fieldsContainer"></div>
+
+              <div class="mt-4 d-flex justify-content-end gap-2">
+                <a href="/report-template-manager" class="btn btn-light btn-wave">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-wave">
+                  <i class="ri-save-line me-1"></i> Update Template
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xxl-4 col-xl-4">
+        <div class="card custom-card shadow-sm">
+          <div class="card-header justify-content-between">
+            <div class="card-title fs-16">Template Info</div>
+            <span class="badge bg-success-transparent">Loaded from DB</span>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="text-muted fs-12 mb-1">Created</div>
+              <div class="fw-semibold">
+                <%= template?.createdAt ? new Date(template.createdAt).toLocaleString() : "N/A" %>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-muted fs-12 mb-1">Last Updated</div>
+              <div class="fw-semibold">
+                <%= template?.updatedAt ? new Date(template.updatedAt).toLocaleString() : "N/A" %>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-muted fs-12 mb-1">Total Fields</div>
+              <div class="fw-semibold">
+                <%= Array.isArray(template?.fields) ? template.fields.length : 0 %>
+              </div>
+            </div>
+
+            <div class="alert alert-primary mb-0">
+              <strong>Note:</strong> Any change made here will affect how this report template appears for guards on mobile.
+            </div>
+          </div>
+        </div>
+
+        <div class="card custom-card shadow-sm">
+          <div class="card-header">
+            <div class="card-title fs-16">Field Type Guide</div>
+          </div>
+          <div class="card-body">
+            <ul class="mb-0 ps-3 text-muted">
+              <li><strong>Text</strong> for short values like names or IDs</li>
+              <li><strong>Textarea</strong> for longer descriptions</li>
+              <li><strong>Date</strong> for incident or patrol date</li>
+              <li><strong>Time</strong> for exact time</li>
+              <li><strong>Number</strong> for quantities</li>
+              <li><strong>Dropdown</strong> for fixed options</li>
+              <li><strong>Radio</strong> for one-choice selection</li>
+              <li><strong>Checkbox</strong> for yes/no or selected item</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>
+
+<div class="scrollToTop">
+  <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+
+<script src="/assets/libs/@popperjs/core/umd/popper.min.js"></script>
+<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/defaultmenu.min.js"></script>
+<script src="/assets/libs/node-waves/waves.min.js"></script>
+<script src="/assets/js/sticky.js"></script>
+<script src="/assets/libs/simplebar/simplebar.min.js"></script>
+<script src="/assets/js/simplebar.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/custom-switcher.min.js"></script>
+
+<script>
+  let fieldIndex = 0;
+  const existingFields = <%- JSON.stringify(template?.fields || []) %>;
+
+  function slugify(text) {
+    return (text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function fieldCard(index, field = {}) {
+    const type = field.type || "";
+    const optionsText = Array.isArray(field.options) ? field.options.join(", ") : "";
+    const showOptions = ["dropdown", "radio", "checkbox"].includes(type);
+    const requiredChecked = field.required ? "checked" : "";
+
+    return `
+      <div class="card custom-card border mb-3 field-card" data-index="${index}">
+        <div class="card-header justify-content-between">
+          <div class="card-title fs-14">Field #${index + 1}</div>
+          <button type="button" class="btn btn-sm btn-danger-light remove-field">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="row gy-3">
+            <div class="col-md-4">
+              <label class="form-label">Field Label <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control field-label"
+                name="fields[${index}][label]"
+                value="${escapeHtml(field.label || "")}"
+                placeholder="e.g. Date of Incident"
+                required
+              >
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Key Name</label>
+              <input
+                type="text"
+                class="form-control field-key"
+                name="fields[${index}][keyName]"
+                value="${escapeHtml(field.keyName || "")}"
+                placeholder="auto_generated"
+              >
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Input Type <span class="text-danger">*</span></label>
+              <select class="form-select field-type" name="fields[${index}][type]" required>
+                <option value="">Select type</option>
+                <option value="text" ${type === "text" ? "selected" : ""}>Text</option>
+                <option value="textarea" ${type === "textarea" ? "selected" : ""}>Textarea</option>
+                <option value="date" ${type === "date" ? "selected" : ""}>Date</option>
+                <option value="time" ${type === "time" ? "selected" : ""}>Time</option>
+                <option value="number" ${type === "number" ? "selected" : ""}>Number</option>
+                <option value="dropdown" ${type === "dropdown" ? "selected" : ""}>Dropdown</option>
+                <option value="radio" ${type === "radio" ? "selected" : ""}>Radio</option>
+                <option value="checkbox" ${type === "checkbox" ? "selected" : ""}>Checkbox</option>
+              </select>
+            </div>
+
+            <div class="col-md-2">
+              <label class="form-label">Order</label>
+              <input
+                type="number"
+                class="form-control"
+                name="fields[${index}][order]"
+                value="${field.order ?? index}"
+                min="0"
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Placeholder / Hint</label>
+              <input
+                type="text"
+                class="form-control"
+                name="fields[${index}][placeholder]"
+                value="${escapeHtml(field.placeholder || field.hint || "")}"
+                placeholder="Optional helper text"
+              >
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Max Length</label>
+              <input
+                type="number"
+                class="form-control"
+                name="fields[${index}][maxLength]"
+                value="${field.maxLength ?? ""}"
+                placeholder="Optional"
+                min="1"
+              >
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+              <div class="form-check form-check-lg">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="fields[${index}][required]"
+                  value="true"
+                  id="required_${index}"
+                  ${requiredChecked}
+                >
+                <label class="form-check-label" for="required_${index}">
+                  Required Field
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-12 options-wrap ${showOptions ? "" : "d-none"}">
+              <label class="form-label">Options</label>
+              <textarea
+                class="form-control"
+                name="fields[${index}][options]"
+                rows="2"
+                placeholder="Enter options separated by commas e.g. Low, Medium, High"
+              >${escapeHtml(optionsText)}</textarea>
+              <small class="text-muted">Only used for dropdown, radio, or checkbox fields.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function addField(field = {}) {
+    const container = document.getElementById("fieldsContainer");
+    container.insertAdjacentHTML("beforeend", fieldCard(fieldIndex, field));
+    bindFieldEvents();
+    fieldIndex++;
+  }
+
+  function bindFieldEvents() {
+    document.querySelectorAll(".remove-field").forEach(btn => {
+      btn.onclick = function () {
+        this.closest(".field-card").remove();
+      };
+    });
+
+    document.querySelectorAll(".field-label").forEach(input => {
+      input.oninput = function () {
+        const card = this.closest(".field-card");
+        const keyInput = card.querySelector(".field-key");
+        if (!keyInput.dataset.touched) {
+          keyInput.value = slugify(this.value);
+        }
+      };
+    });
+
+    document.querySelectorAll(".field-key").forEach(input => {
+      input.oninput = function () {
+        this.dataset.touched = "true";
+      };
+    });
+
+    document.querySelectorAll(".field-type").forEach(select => {
+      select.onchange = function () {
+        const card = this.closest(".field-card");
+        const optionsWrap = card.querySelector(".options-wrap");
+        const v = this.value;
+
+        if (["dropdown", "radio", "checkbox"].includes(v)) {
+          optionsWrap.classList.remove("d-none");
+        } else {
+          optionsWrap.classList.add("d-none");
+        }
+      };
+    });
+  }
+
+  document.getElementById("addFieldBtn").addEventListener("click", function () {
+    addField();
+  });
+
+  if (existingFields.length > 0) {
+    existingFields.forEach(field => addField(field));
+  } else {
+    addField();
+  }
+</script>

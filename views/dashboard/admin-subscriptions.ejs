@@ -1,0 +1,75 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Admin Subscriptions</h1>
+        <div>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Subscriptions</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="card custom-card">
+      <div class="card-header">
+        <div class="card-title">All User Subscriptions</div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered text-nowrap">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Gateway</th>
+                <th>Status</th>
+                <th>Active</th>
+                <th>Expires At</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (subscriptions && subscriptions.length) { %>
+                <% subscriptions.forEach(function(sub) { %>
+                  <tr>
+                    <td><%= sub.username || "-" %></td>
+                    <td><%= sub.email || "-" %></td>
+                    <td><%= sub.planName || "-" %> (<%= sub.planCode || "-" %>)</td>
+                    <td><%= sub.gateway || "-" %></td>
+                    <td>
+                      <span class="badge <%= sub.subscriptionStatus === 'active' ? 'bg-success' : 'bg-warning' %>">
+                        <%= sub.subscriptionStatus || "-" %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge <%= sub.isActive ? 'bg-success' : 'bg-danger' %>">
+                        <%= sub.isActive ? "Yes" : "No" %>
+                      </span>
+                    </td>
+                    <td><%= sub.expiresAt ? new Date(sub.expiresAt).toLocaleString() : "-" %></td>
+                    <td><%= sub.createdAt ? new Date(sub.createdAt).toLocaleString() : "-" %></td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" class="text-center text-muted">No subscriptions found.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>

@@ -1,0 +1,928 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+    
+
+<% if (upgradeMessage) { %>
+  <div class="alert alert-warning">
+    <%= upgradeMessage %>
+  </div>
+<% } %>
+
+    <!-- Start::app-content -->
+    <div class="main-content app-content">
+        <div class="container-fluid">
+
+            <!-- Page Header -->
+            <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h1 class="page-title fw-medium fs-18 mb-2">Pricing</h1>
+                    <div class="">
+                        <nav>
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="javascript:void(0);">Pages</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Pricing</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="btn-list">
+                    <button type="button" class="btn btn-primary-light btn-wave me-2">
+                        <i class="bx bx-crown align-middle"></i> Plan Upgrade
+                    </button>
+
+                </div>
+            </div>
+            <!-- Page Header Close -->
+
+            <!-- Start:: row-1 -->
+
+            <!-- End:: row-1 -->
+
+            <!-- Start:: row-2 -->
+            <div class="row">
+                <div class="fw-semibold my-3 fs-20">Select a Plan</div>
+                <div class="col-xl-12" id="convertable-pricing">
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="switcher-box">
+                            <span>Monthly</span>
+                            <div class="switcher-pricing text-center">
+                                <input type="checkbox" class="pricing-toggle">
+                            </div>
+                            <span>Yearly</span>
+                        </div>
+                    </div>
+                    <div class="tab-content show" id="monthly1">
+                        <div class="row d-flex align-items-center justify-content-center">
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div class="card custom-card pricing-card">
+                                    <div class="card-body p-4">
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1">Essential</h4>
+                                            <span class="mb-1 text-muted d-block">Essential features for a magical
+                                                start</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$5/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+                                                    <span class="badge bg-secondary rounded-pill">Email</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>2 Users
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Security Team
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>3 Users
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Post Site
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>3 Sites
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">7 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        GPS Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">30 Days</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=essential_monthly"
+                                            class="btn btn-lg btn-primary d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div
+                                    class="card custom-card pricing-card hover border border-primary border-opacity-50">
+                                    <div class="card-body p-4">
+                                        <div class="ribbon-2 ribbon-secondary ribbon-left">Best Plan</div>
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1">Advanced</h4>
+                                            <span class="mb-1 text-muted d-block">Perfect for small to medium size
+                                                security companies.</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$8/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>Turbo
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Security Team
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">14 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Gps Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">60 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Geofence
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">60 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Messenger
+                                                    </span>
+                                                    <span class="badge bg-success rounded-pill">Live Chat</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=advanced_monthly"
+                                            class="btn btn-lg btn-primary d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div class="card custom-card pricing-card">
+                                    <div class="card-body p-4">
+                                        <div class="ribbon-2 ribbon- ribbon-left ">Most Popular</div>
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1 mt-4">Professional</h4>
+                                            <span class="mb-1 text-muted d-block">A great choice for security companies
+                                                that have multiple clients.</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$10.99/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+                                                    <span class="badge bg-orange rounded-pill">24/7 Support</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>Quantum
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Security Team
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">30 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        GPS Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Geofence
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Site Tour
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Task
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Checklist
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=professional_monthly"
+                                            class="btn btn-lg btn-primary d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="yearly1">
+                        <div class="row d-flex align-items-center justify-content-center">
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div class="card custom-card pricing-card">
+                                    <div class="card-body p-4">
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1">Essential</h4>
+                                            <span class="mb-1 text-muted d-block">Essential features for a magical
+                                                start</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$4.50/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+                                                    <span class="badge bg-secondary rounded-pill">Email</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>Standard
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Security Team
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">7 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        GPS Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">30 Days</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=essential_yearly"
+                                            class="btn btn-lg btn-primary-light d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div
+                                    class="card custom-card pricing-card hover border border-primary border-opacity-50">
+                                    <div class="card-body p-4">
+                                        <div class="ribbon-2 ribbon-secondary ribbon-left">Best Plan</div>
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1">Advanced</h4>
+                                            <span class="mb-1 text-muted d-block">Perfect for small to medium size
+                                                security companies.</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$6.80/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>Turbo
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Security Team
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">14 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Gps Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">60 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Geofence
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">60 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Messenger
+                                                    </span>
+                                                    <span class="badge bg-success rounded-pill">Live Chat</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=advanced_yearly"
+                                            class="btn btn-lg btn-primary-light d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8 col-xl-4 col-xxl-4 col-md-8 col-sm-12">
+                                <div class="card custom-card pricing-card">
+                                    <div class="card-body p-4">
+                                        <div class="ribbon-2 ribbon- ribbon-left ">Most Popular</div>
+                                        <div class="text-center">
+                                            <h4 class="fw-medium mb-1 mt-4">Professional</h4>
+                                            <span class="mb-1 text-muted d-block">A great choice for security companies
+                                                that have multiple clients.</span>
+                                            <h2 class="mb-0 fw-bold d-block text-primary">$8.50/<span
+                                                    class="fs-12 text-default fw-medium ms-1">User / Month</span></h2>
+                                            <h6 class="fw-medium mb-1 mt-4">Start at 3 Users</h6>
+                                        </div>
+                                        <hr class="border-top my-4">
+                                        <ul class="list-unstyled pricing-body">
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Dashboard
+                                                    </span>
+                                                    <span class="badge bg-orange rounded-pill">24/7 Support</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Activity
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Clients
+                                                    </span>
+                                                    <span class="badge bg-pink-transparent rounded-pill">
+                                                        <i class="ri-flashlight-fill text-warning me-1"></i>Quantum
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Security Team
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto">
+                                                        Time Clock
+                                                    </span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Reporting
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">30 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        GPS Live Tracking
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Geofence
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Site Tour
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Task
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-xs svg-success">
+                                                        <i class="ti ti-checks text-success fs-18"></i>
+                                                    </span>
+                                                    <span class="ms-2 my-auto flex-fill">
+                                                        Checklist
+                                                    </span>
+                                                    <span class="text-muted fs-12 fw-medium">90 Days</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <hr class="border-top my-4">
+                                        <a href="/select-payment?plan=professional_yearly"
+                                            class="btn btn-lg btn-primary-light d-grid w-100 btn-wave">
+                                            <span class="ms-4 me-4">Get Started Now</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End:: row-2 -->
+
+            <!-- Start::row-3 -->
+
+            <!--End::row-3 -->
+
+        </div>
+    </div>
+    <!-- End::app-content -->
+
+
+    <!-- Footer Start -->
+    <%- include("../includes/footer"); -%>
+        <!-- Footer End -->
+<% if (typeof subscriptionNotice !== "undefined" && subscriptionNotice) { %>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const notice = <%- JSON.stringify(subscriptionNotice) %>;
+
+    if (window.Swal) {
+      Swal.fire({
+        icon: "warning",
+        title: "Subscription Required",
+        text: notice,
+        confirmButtonText: "OK"
+      });
+    } else {
+      alert(notice);
+    }
+  });
+</script>
+<% } %>
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                                aria-label="Search Anything ..." aria-describedby="button-addon2">
+                            <button class="btn btn-primary" type="button" id="button-addon2"><i
+                                    class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+
+        <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+        <!-- Apex Charts JS -->
+        <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Sales Dashboard -->
+        <script src="assets/js/sales-dashboard.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+        <!-- Google Maps JS -->
+        <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/js/google-maps.js"></script>
+
+        <!-- Dragula JS -->
+        <script src="assets/libs/dragula/dragula.min.js"></script>
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Pricing JS -->
+        <script src="assets/js/pricing.js"></script>
+
+        <!-- Internal To-Do-List JS -->
+        <script src="assets/js/todolist.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+        </body>
+
+        </html>

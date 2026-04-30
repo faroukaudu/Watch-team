@@ -1,0 +1,452 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+
+<style>
+  .attendance-hero {
+    background: linear-gradient(135deg, #111827, #123458);
+    border-radius: 18px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 14px 35px rgba(0,0,0,.15);
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .attendance-hero::after {
+    content: "";
+    position: absolute;
+    right: -45px;
+    top: -45px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+
+  .attendance-stat {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+  }
+
+  .attendance-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.16);
+    color: #fff;
+    font-size: 22px;
+  }
+
+  .attendance-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148,163,184,.25);
+    box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    overflow: hidden;
+  }
+
+  .attendance-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    background: #f8fafc;
+  }
+
+  .time-main {
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .late-badge {
+    background: rgba(220, 38, 38, .12);
+    color: #dc2626;
+    font-weight: 700;
+  }
+
+  .ontime-badge {
+    background: rgba(22, 163, 74, .12);
+    color: #16a34a;
+    font-weight: 700;
+  }
+
+  .overtime-badge {
+    background: rgba(234, 88, 12, .12);
+    color: #ea580c;
+    font-weight: 700;
+  }
+
+  .site-pill {
+    background: rgba(37, 99, 235, .10);
+    color: #2563eb;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+</style>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <% 
+      function formatTimeOnly(value) {
+        if (!value) return "N/A";
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "N/A";
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+
+      function formatDateOnly(value) {
+        if (!value) return "N/A";
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "N/A";
+        return d.toLocaleDateString([], { month: "short", day: "2-digit", year: "numeric" });
+      }
+
+      function getClock(item) {
+        return item.clock && item.clock.length > 0 ? item.clock[item.clock.length - 1] : null;
+      }
+
+      function getPostSiteName(item) {
+        return item.postSiteName || item.siteName || "Unknown Post Site";
+      }
+
+      function getLateStatus(item) {
+        const clock = getClock(item);
+        const actualIn = item.checkInTime || (clock && clock.clockInTime);
+        const scheduledStart = item.shiftStartTime || item.startTime || item.scheduledStartTime;
+
+        if (!actualIn || !scheduledStart) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const actualDate = new Date(actualIn);
+        if (isNaN(actualDate.getTime())) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const [hh, mm] = String(scheduledStart).split(":");
+        if (!hh || !mm) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const scheduledDate = new Date(actualDate);
+        scheduledDate.setHours(Number(hh), Number(mm), 0, 0);
+
+        const graceMinutes = 10;
+        const lateLimit = new Date(scheduledDate.getTime() + graceMinutes * 60000);
+
+        if (actualDate > lateLimit) {
+          return { label: "Late", className: "late-badge" };
+        }
+
+        return { label: "On Time", className: "ontime-badge" };
+      }
+
+      function getCheckoutStatus(item) {
+        const clock = getClock(item);
+        const actualOut = item.checkOutTime || (clock && clock.clockOutTime);
+        const scheduledEnd = item.shiftEndTime || item.endTime || item.scheduledEndTime;
+
+        if (!actualOut || !scheduledEnd) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const actualDate = new Date(actualOut);
+        if (isNaN(actualDate.getTime())) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const [hh, mm] = String(scheduledEnd).split(":");
+        if (!hh || !mm) {
+          return { label: "On Time", className: "ontime-badge" };
+        }
+
+        const scheduledDate = new Date(actualDate);
+        scheduledDate.setHours(Number(hh), Number(mm), 0, 0);
+
+        if (actualDate > scheduledDate) {
+          return { label: "Overtime", className: "overtime-badge" };
+        }
+
+        return { label: "On Time", className: "ontime-badge" };
+      }
+
+      const totalRecords = attendance ? attendance.length : 0;
+      const completedTasks = attendance ? attendance.filter(item => item.checkOutTime || (getClock(item) && getClock(item).clockOutTime)).length : 0;
+      const pendingTasks = totalRecords - completedTasks;
+      const onTimeCount = attendance ? attendance.filter(item => getLateStatus(item).label === "On Time").length : 0;
+      const lateCount = attendance ? attendance.filter(item => getLateStatus(item).label === "Late").length : 0;
+    %>
+
+    <div class="attendance-hero">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold  mb-1">Attendance</h2>
+          <p class="text-white-50 mb-0">
+            View guard check-in, check-out, time clock records, and punctuality status.
+          </p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="attendance-stat d-flex align-items-center gap-3">
+            <div class="attendance-stat-icon">
+              <i class="ri-checkbox-circle-line"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-white-50 fs-12">Completed Task</p>
+              <h3 class="fw-bold text-white mb-0"><%= completedTasks %></h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="attendance-stat d-flex align-items-center gap-3">
+            <div class="attendance-stat-icon">
+              <i class="ri-time-line"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-white-50 fs-12">Pending Task</p>
+              <h3 class="fw-bold text-white mb-0"><%= pendingTasks %></h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="attendance-stat d-flex align-items-center gap-3">
+            <div class="attendance-stat-icon">
+              <i class="ri-user-smile-line"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-white-50 fs-12">On Time</p>
+              <h3 class="fw-bold text-white mb-0"><%= onTimeCount %></h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="attendance-stat d-flex align-items-center gap-3">
+            <div class="attendance-stat-icon">
+              <i class="ri-alarm-warning-line"></i>
+            </div>
+            <div>
+              <p class="mb-1 text-white-50 fs-12">Late</p>
+              <h3 class="fw-bold text-white mb-0"><%= lateCount %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card custom-card attendance-card">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h5 class="card-title mb-1">Attendance Records</h5>
+          <small class="text-muted">Pulled from mobile post-site check-in and time clock</small>
+        </div>
+
+        <form action="/attendance" method="GET" class="d-flex gap-2 flex-wrap">
+          <input type="date" name="startDate" value="<%= startDate || '' %>" class="form-control form-control-sm">
+          <input type="date" name="endDate" value="<%= endDate || '' %>" class="form-control form-control-sm">
+
+          <button class="btn btn-sm btn-primary" type="submit">
+            <i class="ri-filter-3-line me-1"></i> Filter
+          </button>
+
+          <a href="/attendance" class="btn btn-sm btn-light">
+            Reset
+          </a>
+        </form>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 attendance-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Guard</th>
+                <th>Post Site</th>
+                <th>Clocked-In</th>
+                <th>Clocked-Out</th>
+                <th>Work Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (attendance && attendance.length > 0) { %>
+                <% attendance.forEach(function(item){ 
+                  const clock = getClock(item);
+                  const isCheckedOut = item.checkOutTime || (clock && clock.clockOutTime);
+                  const lateStatus = getLateStatus(item);
+                  const checkoutStatus = getCheckoutStatus(item);
+                %>
+
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">
+                        <%= item.checkInTime ? formatDateOnly(item.checkInTime) : "N/A" %>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div class="fw-semibold">
+                        <i class="ri-shield-user-line me-1 text-primary"></i>
+                        <%= item.guardName || "Unknown Guard" %>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="site-pill">
+                        <i class="ri-map-pin-line"></i>
+                        <%= getPostSiteName(item) %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="time-main">
+                        <%= formatTimeOnly(item.checkInTime || (clock && clock.clockInTime)) %>
+                      </div>
+                      <span class="badge <%= lateStatus.className %> mt-1">
+                        <%= lateStatus.label %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <% if (isCheckedOut) { %>
+                        <div class="time-main">
+                          <%= formatTimeOnly(item.checkOutTime || (clock && clock.clockOutTime)) %>
+                        </div>
+                        <span class="badge <%= checkoutStatus.className %> mt-1">
+                          <%= checkoutStatus.label %>
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-warning-transparent">Still Checked In</span>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <%= clock && clock.workTime ? clock.workTime : "N/A" %>
+                    </td>
+
+                    <td>
+                      <% if (isCheckedOut) { %>
+                        <span class="badge bg-success">Completed</span>
+                      <% } else { %>
+                        <span class="badge bg-warning">In Progress</span>
+                      <% } %>
+                    </td>
+                  </tr>
+
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="text-center py-5">
+                    <i class="ri-time-line" style="font-size:46px;color:#94a3b8;"></i>
+                    <h6 class="mt-2 mb-1">No Attendance Found</h6>
+                    <p class="text-muted mb-0">No guard check-in or time clock record found for this filter.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="../assets/js/apexcharts-column.js"></script>
+    
+</body>
+
+</html> 

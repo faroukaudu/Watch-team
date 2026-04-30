@@ -1,0 +1,181 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Manage Payment Method</h1>
+        <div>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="/my-subscription">My Subscription</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Manage Payment Method</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      <div class="btn-list">
+        <a href="/my-subscription" class="btn btn-primary-light btn-wave">
+          <i class="ri-arrow-left-line align-middle me-1"></i> Back to Subscription
+        </a>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="row justify-content-center">
+      <div class="col-xl-8 col-lg-10">
+
+        <div class="card custom-card">
+          <div class="card-header justify-content-between">
+            <div class="card-title">
+              Saved Card Details
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <% if (card) { %>
+              <div class="row g-4">
+                <div class="col-md-7">
+                  <div class="p-4 rounded" style="background: linear-gradient(135deg, #1d4ed8, #1e3a8a); min-height: 210px; color: #fff; position: relative; overflow: hidden;">
+                    <div style="position:absolute; top:-40px; right:-40px; width:140px; height:140px; border-radius:50%; background: rgba(255,255,255,0.08);"></div>
+                    <div style="position:absolute; bottom:-30px; left:-30px; width:120px; height:120px; border-radius:50%; background: rgba(255,255,255,0.06);"></div>
+
+                    <div class="d-flex justify-content-between align-items-start position-relative">
+                      <div>
+                        <div class="fs-12 text-white-50 mb-2">Default Payment Method</div>
+                        <h5 class="text-white mb-0"><%= card.brand ? card.brand.toUpperCase() : "CARD" %></h5>
+                      </div>
+                      <div class="text-end">
+                        <span class="badge bg-light text-dark">Active</span>
+                      </div>
+                    </div>
+
+                    <div class="position-relative mt-5">
+                      <div class="fs-20 fw-semibold" style="letter-spacing: 3px;">
+                        **** **** **** <%= card.last4 %>
+                      </div>
+                    </div>
+
+                    <div class="position-relative mt-4 d-flex justify-content-between">
+                      <div>
+                        <div class="fs-12 text-white-50">Expires</div>
+                        <div class="fw-semibold"><%= card.exp_month %>/<%= card.exp_year %></div>
+                      </div>
+                      <div class="text-end">
+                        <div class="fs-12 text-white-50">Gateway</div>
+                        <div class="fw-semibold">Stripe</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-5">
+                  <div class="border rounded p-3 h-100">
+                    <h6 class="fw-semibold mb-3">Card Information</h6>
+
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                      <span class="text-muted">Card Brand</span>
+                      <span class="fw-medium"><%= card.brand ? card.brand.toUpperCase() : "-" %></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                      <span class="text-muted">Last 4 Digits</span>
+                      <span class="fw-medium"><%= card.last4 || "-" %></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                      <span class="text-muted">Expiry Date</span>
+                      <span class="fw-medium"><%= card.exp_month %>/<%= card.exp_year %></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between py-2">
+                      <span class="text-muted">Subscription Status</span>
+                      <span class="badge bg-success-transparent"><%= subscription?.subscriptionStatus || "active" %></span>
+                    </div>
+
+                    <div class="mt-4 d-grid gap-2">
+                      <form action="/billing/stripe/portal" method="POST">
+                        <button type="submit" class="btn btn-primary btn-wave w-100">
+                          <i class="ri-bank-card-line me-1"></i> Update Card
+                        </button>
+                      </form>
+
+                      <button
+                        type="button"
+                        class="btn btn-danger-light btn-wave w-100"
+                        data-bs-toggle="modal"
+                        data-bs-target="#cancelSubscriptionModal"
+                      >
+                        <i class="ri-close-circle-line me-1"></i> End Subscription
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="text-center py-5">
+                <div class="mb-3">
+                  <i class="ri-bank-card-line fs-1 text-muted"></i>
+                </div>
+                <h5 class="fw-semibold">No saved card found</h5>
+                <p class="text-muted mb-4">
+                  We could not find a saved Stripe card for this account yet.
+                </p>
+
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                  <form action="/billing/stripe/portal" method="POST">
+                    <button type="submit" class="btn btn-primary btn-wave">
+                      <i class="ri-bank-card-line me-1"></i> Add / Update Card
+                    </button>
+                  </form>
+
+                  <a href="/my-subscription" class="btn btn-light btn-wave">
+                    Back
+                  </a>
+                </div>
+              </div>
+            <% } %>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Cancel Subscription Modal -->
+<div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="cancelSubscriptionModalLabel">Confirm Subscription Cancellation</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">
+          Are you sure you want to end your subscription?
+        </p>
+        <p class="text-muted mb-0">
+          This action will disable your active plan access and may affect the services available in your dashboard.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">No, Keep Subscription</button>
+
+        <form action="/billing/cancel-subscription" method="POST">
+          <button type="submit" class="btn btn-danger">
+            Yes, End Subscription
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>

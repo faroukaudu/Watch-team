@@ -1,0 +1,486 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+
+<style>
+    /* WhatsApp-like layout */
+#chat-messages {
+  list-style: none;
+  padding: 12px;
+  margin: 0;
+}
+
+#chat-messages .msg-row {
+  display: flex;
+  flex-direction: column;
+  margin: 6px 0;
+  position: relative;
+}
+
+#chat-messages .msg-row.sent {
+  align-items: flex-end;
+}
+
+#chat-messages .msg-row.received {
+  align-items: flex-start;
+}
+
+/* Bubble */
+#chat-messages .bubble {
+  max-width: min(70%, 520px);
+  padding: 10px 12px;
+  border-radius: 14px;
+  position: relative;
+  line-height: 1.35;
+  word-break: break-word;
+  white-space: pre-wrap;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+}
+
+#chat-messages .sent .bubble {
+  background: #95cf83;  /* darker than #dcf8c6 */
+  border-top-right-radius: 6px;
+}
+#chat-messages .sent .bubble::after {
+  border-left-color: #b7f0a5; /* tail matches bubble */
+}
+
+#chat-messages .received .bubble {
+  background: #ffffff;
+  border-top-left-radius: 6px;
+}
+
+#chat-messages .bubble .text {
+  margin: 0;
+  font-size: 14px;
+  color: #111;
+}
+
+/* ✅ Time OUTSIDE the bubble */
+#chat-messages .meta-out {
+  margin-top: 3px;
+  font-size: 11px;
+  opacity: 0.65;
+  user-select: none;
+}
+
+#chat-messages .sent .meta-out {
+  text-align: right;
+  padding-right: 6px; /* aligns under bubble tail */
+}
+
+#chat-messages .received .meta-out {
+  text-align: left;
+  padding-left: 6px; /* aligns under bubble tail */
+}
+
+/* ✅ Bubble tail (arrow) using pseudo elements */
+#chat-messages .sent .bubble::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid #95cf83;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+#chat-messages .received .bubble::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 10px;
+  width: 0;
+  height: 0;
+  border-right: 6px solid #ffffff;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+</style>
+<!-- Start::app-content -->
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Chat</h1>
+        <div>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="javascript:void(0);">Pages</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Chat</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-flex gap-2">
+          <div class="position-relative">
+            <button class="btn btn-primary btn-wave" type="button"
+              id="dropdownMenuClickableInside" data-bs-toggle="dropdown"
+              data-bs-auto-close="outside" aria-expanded="false">
+              Filter By <i class="ri-arrow-down-s-fill ms-1"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuClickableInside">
+              <li><a class="dropdown-item" href="javascript:void(0);">Today</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);">Yesterday</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);">Last 7 Days</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);">Last 30 Days</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);">Last 6 Months</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);">Last Year</a></li>
+            </ul>
+          </div>
+
+          <button class="btn btn-secondary btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Download">
+            <i class="ti ti-download"></i>
+          </button>
+          <button class="btn btn-success btn-icon btn-wave" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Share">
+            <i class="ti ti-share-3"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Page Header Close -->
+
+    <div class="main-chart-wrapper gap-lg-2 gap-0 mb-2 d-lg-flex" style="height: calc(100vh - 350px); min-height: 500px;">
+
+      <!-- LEFT: USERS LIST -->
+      <div class="chat-info border d-flex flex-column" >
+        <div class="chat-search p-3 border-bottom">
+          <div class="input-group">
+            <input id="chat-search" type="text" class="form-control" placeholder="Search Chat" aria-describedby="button-addon01">
+            <button aria-label="button" class="btn btn-primary" type="button" id="button-addon01">
+              <i class="ri-search-line"></i>
+            </button>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs tab-style-8 scaleX nav-justified mb-0 border-bottom d-flex" id="myTab1" role="tablist">
+          <li class="nav-item me-0" role="presentation">
+            <button class="nav-link active p-3" id="users-tab" data-bs-toggle="tab"
+              data-bs-target="#users-tab-pane" type="button" role="tab"
+              aria-controls="users-tab-pane" aria-selected="true">Chats</button>
+          </li>
+          <!-- <li class="nav-item me-0" role="presentation">
+            <button class="nav-link p-3" id="groups-tab" data-bs-toggle="tab"
+              data-bs-target="#groups-tab-pane" type="button" role="tab"
+              aria-controls="groups-tab-pane" aria-selected="false">Groups</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link p-3" id="contacts-tab" data-bs-toggle="tab"
+              data-bs-target="#contacts-tab-pane" type="button" role="tab"
+              aria-controls="contacts-tab-pane" aria-selected="false">Contacts</button>
+          </li> -->
+        </ul>
+
+        <div class="tab-content flex-fill" id="myTabContent" style="overflow-y: auto;">
+          <!-- CHAT TAB -->
+          <div class="tab-pane show active border-0 chat-users-tab" id="users-tab-pane"
+            role="tabpanel" aria-labelledby="users-tab" tabindex="0">
+
+            <ul class="list-unstyled mb-0 mt-2 chat-users-tab" id="chat-msg-scroll">
+              <li class="pb-0">
+                <p class="text-muted fs-11 fw-medium mb-2 op-7">Company Users</p>
+              </li>
+
+              <% if (companyUsers && companyUsers.length) { %>
+                <% companyUsers.forEach((u) => { 
+                  const displayName = (u.fullname && u.fullname.trim()) ? u.fullname : (u.username || "User");
+                  const firstLetter = displayName.trim().charAt(0).toUpperCase();
+                  const email = u.userType;
+
+                %>
+                
+                  <li class="checkforactive company-user-item"
+                      data-user-id="<%= u._id %>"
+                      data-user-name="<%- displayName %>">
+                    <a href="javascript:void(0);"
+                       onclick="selectUser('<%= u._id %>','<%- displayName %>')">
+                      <div class="d-flex align-items-top">
+                        <div class="me-1 lh-1">
+                          <!-- Alphabet Avatar (keeps your styling vibe) -->
+                          <span class="avatar avatar-md me-2 avatar-rounded bg-primary text-white d-flex align-items-center justify-content-center">
+                            <span class="fw-semibold"><%= firstLetter %></span>
+                          </span>
+                        </div>
+                        <div class="flex-fill">
+                          <p class="mb-0 fw-medium">
+                            <%- displayName %>
+                            <span class="float-end text-muted fw-normal fs-11"></span>
+                          </p>
+                          <p class="fs-12 mb-0">
+                            <span class="chat-msg text-truncate text-muted"><%= email %></span>
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                <% }) %>
+              <% } else { %>
+                <li class="px-3 py-4 text-center text-muted">
+                  No other users found in your company.
+                </li>
+              <% } %>
+            </ul>
+          </div>
+
+          <!-- GROUPS TAB (placeholder) -->
+          <div class="tab-pane border-0" id="groups-tab-pane"
+            role="tabpanel" aria-labelledby="groups-tab" tabindex="0">
+            <div class="p-3 text-muted">Groups coming soon.</div>
+          </div>
+
+          <!-- CONTACTS TAB (placeholder) -->
+          <div class="tab-pane border-0" id="contacts-tab-pane"
+            role="tabpanel" aria-labelledby="contacts-tab" tabindex="0">
+            <div class="p-3 text-muted">Contacts coming soon.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CHAT CONTENT -->
+      <div class="chat-content border flex-fill">
+
+        <!-- Chat Header -->
+        <div class="chat-header border-bottom">
+          <div class="d-flex align-items-center " style="margin: 13px;">
+            <div class="me-2 lh-1">
+              <!-- Header avatar (alphabet) -->
+              <span class="avatar avatar-rounded online avatar-md me-2 d-flex align-items-center justify-content-center bg-primary text-white"
+                    id="chat-header-avatar">
+                <span class="fw-semibold" id="chat-header-letter">?</span>
+              </span>
+            </div>
+
+            <div class="flex-fill">
+              <p class="mb-0 fw-medium fs-14 lh-1  ">
+                <a href="javascript:void(0);" class="chatnameperson responsive-userinfo-open" id="chat-header-name">
+                  Select a User
+                </a>
+              </p>
+              <p class="text-muted mb-3 chatpersonstatus" id="chat-header-status"> </p>
+            </div>
+
+            <div class="d-flex flex-wrap rightIcons">
+              <button aria-label="button" type="button" class="btn btn-icon btn-primary my-1 ms-2 btn-sm">
+                <i class="ti ti-phone"></i>
+              </button>
+              <button aria-label="button" type="button" class="btn btn-icon btn-secondary my-1 ms-2 btn-sm">
+                <i class="ti ti-video"></i>
+              </button>
+              <button aria-label="button" type="button" class="btn btn-icon btn-outline my-1 ms-2 responsive-userinfo-open btn-sm"
+                      data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                <i class="ti ti-user-circle" id="responsive-chat-close"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="chat-body" style="height: 100%; overflow: auto;">
+          <!-- IMPORTANT: your client_chat.js appends into this -->
+          <div class="p-3">
+            <ul class="list-unstyled mb-0" id="chat-messages">
+              <!-- messages will load here -->
+            </ul>
+
+            <div class="text-center text-muted mt-4" id="chat-empty-hint">
+              Select a user on the left to load messages.
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Chat Footer -->
+        <div class="chat-footer ">
+          <div class="d-flex align-items-center p-2">
+            <a aria-label="anchor" class="btn btn-icon me-2 btn-success emoji-picker" href="javascript:void(0)">
+              <i class="ri-emotion-line"></i>
+            </a>
+
+            <input
+              class="form-control chat-message-space"
+              id="message-input"
+              placeholder="Type your message here."
+              type="text"
+              onkeydown="if(event.key === 'Enter'){ sendMessage(); }"
+            />
+
+            <a aria-label="anchor" class="btn btn-primary ms-2 btn-icon btn-send" href="javascript:void(0)" onclick="sendMessage()">
+              <i class="ri-send-plane-2-line"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- End::app-content -->
+// js files
+ <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="../assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="../assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="../assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="../assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="../assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="../assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="../assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="../assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="../assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+
+    <!-- Flat Picker JS -->
+    <!-- <script src="assets/libs/flatpickr/flatpickr.min.js"></script> -->
+
+    <!-- Dragula JS -->
+    <script src="assets/libs/dragula/dragula.min.js"></script>
+
+    <!-- Internal Task  JS -->
+    <script src="assets/js/task-kanban-board-new.js"></script>
+
+        <!-- Gallery JS -->
+        <script src="../assets/libs/glightbox/js/glightbox.min.js"></script>
+
+        <!-- Internal Profile JS -->
+        <script src="assets/js/profile.js"></script>
+
+
+
+
+            <!-- Flat Picker JS -->
+        <!-- <script src="assets/libs/flatpickr/flatpickr.min.js"></script> -->
+
+
+          <!-- Internal Invoice List JS -->
+    <script src="assets/js/task-list.js"></script>
+
+        <!-- Custom JS -->
+        <script src="/assets/js/custom.js"></script>
+        <!-- /////////////////////////// -->
+// js file end
+
+<!-- Start::chat user details offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight">
+  <div class="offcanvas-body">
+    <button type="button" class="btn-close btn btn-sm btn-icon btn-outline-light border" data-bs-dismiss="offcanvas"
+      aria-label="Close"></button>
+
+    <div class="chat-user-details" id="chat-user-details">
+      <div class="text-center mb-5">
+        <span class="avatar avatar-rounded online avatar-xxl me-2 mb-3 d-flex align-items-center justify-content-center bg-primary text-white"
+              id="details-avatar">
+          <span class="fw-semibold fs-2" id="details-letter">?</span>
+        </span>
+        <p class="mb-0 fw-medium fs-16" id="details-name">Select a user</p>
+        <p class="text-muted mb-0 fs-12" id="details-sub"> </p>
+      </div>
+
+      <div class="p-3 border rounded">
+        <p class="mb-1 fw-medium">Tips</p>
+        <p class="mb-0 text-muted fs-12">
+          Click a user to load chat history. Type a message and press Enter or the send icon.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End::chat user details offcanvas -->
+
+<!-- Globals for client_chat.js (USE var to avoid "Cannot redeclare block-scoped variable") -->
+<script>
+  // Only set if not already set by another partial
+  if (typeof currentUserId === "undefined") var currentUserId = "<%= userInfo._id %>";
+  if (typeof companyId === "undefined") var companyId = "<%= userInfo.assignedCompanyID %>";
+</script>
+
+<audio id="snd-sent" preload="auto">
+  <source src="/sounds/send.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="snd-incoming" preload="auto">
+  <source src="/sounds/incoming.wav" type="audio/mpeg">
+</audio>
+
+<!-- Socket.IO client -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- Your client script (make sure the file path matches your /public structure) -->
+<script src="/guard-ass/js/client_chat.js"></script>
+
+<!-- Small helpers to keep avatar letters in sync with selected user -->
+<script>
+  // Wrap selectUser to also update header/offcanvas letters without changing your client_chat.js logic
+  (function () {
+    const originalSelectUser = window.selectUser;
+
+    window.selectUser = async function (userId, userName) {
+      // Update header + offcanvas letters instantly
+      const letter = (userName || "?").trim().charAt(0).toUpperCase() || "?";
+      const headerName = document.getElementById("chat-header-name");
+      const headerLetter = document.getElementById("chat-header-letter");
+      const emptyHint = document.getElementById("chat-empty-hint");
+
+      const detailsName = document.getElementById("details-name");
+      const detailsLetter = document.getElementById("details-letter");
+
+      if (headerName) headerName.textContent = userName || "Select a User";
+      if (headerLetter) headerLetter.textContent = letter;
+
+      if (detailsName) detailsName.textContent = userName || "Select a user";
+      if (detailsLetter) detailsLetter.textContent = letter;
+
+      if (emptyHint) emptyHint.style.display = "none";
+
+      // Call your real selectUser from client_chat.js
+      if (typeof originalSelectUser === "function") {
+        return await originalSelectUser(userId, userName);
+      }
+    };
+
+    // Simple local search filter (keeps your UI nice)
+    const input = document.getElementById("chat-search");
+    if (input) {
+      input.addEventListener("input", function () {
+        const q = (this.value || "").toLowerCase();
+        document.querySelectorAll(".company-user-item").forEach((li) => {
+          const name = (li.getAttribute("data-user-name") || "").toLowerCase();
+          li.style.display = name.includes(q) ? "" : "none";
+        });
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

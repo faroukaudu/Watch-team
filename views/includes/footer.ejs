@@ -1,0 +1,33 @@
+<footer class="footer mt-auto py-3 bg-white text-center">
+    <div class="container">
+        <span class="text-muted"> Copyright &copy; <span id="year"></span> <a
+                href="javascript:void(0);" class="text-dark fw-medium"> WatchTeam</a>.
+            Designed with <span class="bi bi-heart-fill text-danger"></span> by <a  href="https://spruko.com/" target="_blank">
+                <span class="fw-medium text-primary">WatchTeam</span>
+            </a> All
+            rights
+            reserved
+        </span>
+    </div>
+</footer>
+<% if (typeof userInfo !== "undefined" && userInfo && userInfo.userType === "Client") { %>
+<script id="client-menu-guard">
+document.addEventListener("DOMContentLoaded", function () {
+  const allowed = new Set(["/chat","/time-log","/report","/report-template-manager","/live-tracking","/analytics/shedule","/activities","/my-report"]);
+  document.querySelectorAll(".side-menu__item[href]").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (!href || href === "javascript:void(0);") return;
+    if (href.startsWith("#")) return;
+    if (!allowed.has(href)) {
+      const li = link.closest("li");
+      if (li) li.style.display = "none";
+    }
+  });
+  document.querySelectorAll(".slide-menu").forEach((menu) => {
+    if (!menu.querySelector("a.side-menu__item[href]:not([style*='display: none'])")) {
+      menu.style.display = "none";
+    }
+  });
+});
+</script>
+<% } %>

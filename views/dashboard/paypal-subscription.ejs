@@ -1,0 +1,50 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+    <div class="my-4">
+      <h1 class="page-title fw-medium fs-18 mb-2">PayPal Subscription</h1>
+      <p class="text-muted mb-4">
+        Plan: <strong><%= selectedPlan.planName %></strong> -
+        <strong><%= selectedPlan.billingCycle %></strong> -
+        <strong>$<%= selectedPlan.amount %></strong>
+      </p>
+
+      <div class="card custom-card">
+        <div class="card-body p-4">
+          <div id="paypal-button-container"></div>
+          <div id="paypal-error" class="text-danger mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=<%= paypalClientId %>&vault=true&intent=subscription"></script>
+<script>
+  paypal.Buttons({
+    style: {
+      shape: 'rect',
+      color: 'gold',
+      layout: 'vertical',
+      label: 'subscribe'
+    },
+
+    createSubscription: function(data, actions) {
+      return actions.subscription.create({
+        plan_id: "<%= paypalPlanId %>"
+      });
+    },
+
+    onApprove: function(data) {
+      window.location.href = "/billing/paypal/success?subscription_id=" + encodeURIComponent(data.subscriptionID) + "&planCode=" + encodeURIComponent("<%= planCode %>");
+    },
+
+    onError: function(err) {
+      console.error("PayPal subscription error:", err);
+      document.getElementById("paypal-error").textContent = "Unable to start PayPal subscription.";
+    }
+  }).render('#paypal-button-container');
+</script>
+
+<%- include("../includes/footer"); -%>

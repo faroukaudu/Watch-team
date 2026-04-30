@@ -1,0 +1,136 @@
+<%- include("../includes/header", { user: userInfo, userInfo: userInfo }); -%>
+<p class="text-danger">Platform Admin page loaded</p>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-medium fs-18 mb-2">Platform Admin Dashboard</h1>
+        <div>
+          <nav>
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Platform Admin</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <% const safeTotals = totals || {}; %>
+    <% const safeCompanies = companies || []; %>
+
+    <div class="row">
+      <div class="col-xl-2 col-md-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <p class="text-muted mb-1">Companies</p>
+            <h3 class="fw-semibold mb-0"><%= safeTotals.companies || 0 %></h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-2 col-md-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <p class="text-muted mb-1">Clients</p>
+            <h3 class="fw-semibold mb-0"><%= safeTotals.clients || 0 %></h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-2 col-md-4">
+        <div class="card custom-card">
+          <div class="card-body">
+            <p class="text-muted mb-1">Guards</p>
+            <h3 class="fw-semibold mb-0"><%= safeTotals.guards || 0 %></h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card">
+          <div class="card-body">
+            <p class="text-muted mb-1">Active Subscriptions</p>
+            <h3 class="fw-semibold mb-0"><%= safeTotals.activeSubscriptions || 0 %></h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card">
+          <div class="card-body">
+            <p class="text-muted mb-1">Inactive Subscriptions</p>
+            <h3 class="fw-semibold mb-0"><%= safeTotals.inactiveSubscriptions || 0 %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card custom-card">
+      <div class="card-header">
+        <div class="card-title">Registered Companies</div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered text-nowrap">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Clients</th>
+                <th>Guards</th>
+                <th>Admins</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Active</th>
+                <th>Expiry</th>
+                <th>Gateway</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (safeCompanies.length) { %>
+                <% safeCompanies.forEach(function(company) { %>
+                  <tr>
+                    <td><%= company.companyName || "-" %></td>
+                    <td><%= company.companyEmail || "-" %></td>
+                    <td><%= company.clientsCount || 0 %></td>
+                    <td><%= company.guardsCount || 0 %></td>
+                    <td><%= company.adminsCount || 0 %></td>
+                    <td><%= company.planName || "-" %></td>
+                    <td>
+                      <span class="badge <%= company.subscriptionStatus === 'active' ? 'bg-success' : 'bg-warning' %>">
+                        <%= company.subscriptionStatus || "-" %>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge <%= company.isActive ? 'bg-success' : 'bg-danger' %>">
+                        <%= company.isActive ? "Yes" : "No" %>
+                      </span>
+                    </td>
+                    <td><%= company.expiresAt ? new Date(company.expiresAt).toLocaleDateString() : "-" %></td>
+                    <td><%= company.gateway || "-" %></td>
+                    <td>
+                      <a href="/platform-admin/company/<%= company._id %>" class="btn btn-sm btn-primary">
+                        View
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="11" class="text-center text-muted">No companies found.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>

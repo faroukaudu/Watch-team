@@ -1,0 +1,343 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+
+<style>
+  .exchange-hero {
+    background: linear-gradient(135deg, #111827, #123458);
+    border-radius: 18px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 14px 35px rgba(0,0,0,.15);
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .exchange-hero::after {
+    content: "";
+    position: absolute;
+    right: -45px;
+    top: -45px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+  }
+
+  .exchange-card {
+    border-radius: 18px;
+    border: 1px solid rgba(148,163,184,.25);
+    box-shadow: 0 10px 25px rgba(15,23,42,.06);
+    overflow: hidden;
+  }
+
+  .exchange-table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    background: #f8fafc;
+  }
+
+  .exchange-pill {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .shift-pill {
+    background: rgba(37, 99, 235, .10);
+    color: #2563eb;
+  }
+
+  .guard-pill {
+    background: rgba(15, 23, 42, .08);
+    color: #111827;
+  }
+</style>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <% 
+      const totalRequests = exchanges ? exchanges.length : 0;
+      const pendingRequests = exchanges ? exchanges.filter(e => e.status === "Pending").length : 0;
+      const acceptedRequests = exchanges ? exchanges.filter(e => e.status === "Accepted").length : 0;
+      const rejectedRequests = exchanges ? exchanges.filter(e => e.status === "Rejected").length : 0;
+
+      function formatDate(value) {
+        if (!value) return "N/A";
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "N/A";
+        return d.toLocaleDateString([], { month: "short", day: "2-digit", year: "numeric" });
+      }
+
+      function formatTime(value) {
+        if (!value) return "";
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+    %>
+
+    <div class="exchange-hero">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold text-white mb-1">Shift Exchange</h2>
+          <p class="text-white-50 mb-0">
+            Monitor guard shift exchange requests, approvals, and rejections.
+          </p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);">
+            <p class="mb-1 text-white-50 fs-12">Total Requests</p>
+            <h3 class="fw-bold text-white mb-0"><%= totalRequests %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);">
+            <p class="mb-1 text-white-50 fs-12">Pending</p>
+            <h3 class="fw-bold text-white mb-0"><%= pendingRequests %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);">
+            <p class="mb-1 text-white-50 fs-12">Accepted</p>
+            <h3 class="fw-bold text-white mb-0"><%= acceptedRequests %></h3>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <div class="p-3 rounded-3" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);">
+            <p class="mb-1 text-white-50 fs-12">Rejected</p>
+            <h3 class="fw-bold text-white mb-0"><%= rejectedRequests %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card custom-card exchange-card">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h5 class="card-title mb-1">Exchange Requests</h5>
+          <small class="text-muted">All shift exchange activity submitted from the mobile app</small>
+        </div>
+
+        <div style="min-width:280px;">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <i class="ri-search-line"></i>
+            </span>
+            <input 
+              type="text" 
+              id="exchangeSearch" 
+              class="form-control border-start-0" 
+              placeholder="Search guard, shift, post site..."
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 exchange-table">
+            <thead>
+              <tr>
+                <th>Request Date</th>
+                <th>Shift</th>
+                <th>Post Site</th>
+                <th>Sent By</th>
+                <th>Received By</th>
+                <th>Status</th>
+                <th>Response Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (exchanges && exchanges.length > 0) { %>
+                <% exchanges.forEach(function(item){ %>
+                  <tr class="exchange-row">
+                    <td>
+                      <div class="fw-semibold"><%= formatDate(item.requestDate || item.createdAt) %></div>
+                      <small class="text-muted"><%= formatTime(item.requestDate || item.createdAt) %></small>
+                    </td>
+
+                    <td>
+                      <span class="exchange-pill shift-pill">
+                        <i class="ri-calendar-schedule-line"></i>
+                        <%= item.shiftTitle || "Shift" %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="fw-semibold">
+                        <i class="ri-map-pin-line me-1 text-primary"></i>
+                        <%= item.postSiteName || "Post Site" %>
+                      </div>
+                    </td>
+
+                    <td >
+                      <span class=" exchange-pill guard-pillfw-semibold">
+                        <i class="ri-shield-user-line"></i>
+                        <%= item.sentByGuardName || "Unknown Guard" %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="exchange-pill ">
+                        <i class="ri-user-received-line"></i>
+                        <%= item.receivedByGuardName || "Unknown Guard" %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <% if (item.status === "Accepted") { %>
+                        <span class="badge bg-success">
+                          <i class="ri-checkbox-circle-line me-1"></i>Accepted
+                        </span>
+                      <% } else if (item.status === "Rejected") { %>
+                        <span class="badge bg-danger">
+                          <i class="ri-close-circle-line me-1"></i>Rejected
+                        </span>
+                      <% } else { %>
+                        <span class="badge bg-warning">
+                          <i class="ri-time-line me-1"></i>Pending
+                        </span>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <% if (item.responseDate) { %>
+                        <div class="fw-semibold"><%= formatDate(item.responseDate) %></div>
+                        <small class="text-muted"><%= formatTime(item.responseDate) %></small>
+                      <% } else { %>
+                        <span class="text-muted">No response yet</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="text-center py-5">
+                    <i class="ri-swap-line" style="font-size:48px;color:#94a3b8;"></i>
+                    <h6 class="mt-2 mb-1">No Shift Exchange Found</h6>
+                    <p class="text-muted mb-0">Exchange requests from guards will appear here.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("exchangeSearch");
+    const rows = document.querySelectorAll(".exchange-row");
+
+    if (searchInput) {
+      searchInput.addEventListener("keyup", function () {
+        const value = this.value.toLowerCase();
+
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = text.includes(value) ? "" : "none";
+        });
+      });
+    }
+  });
+</script>
+
+
+        <!-- Footer Start -->
+        <%- include("../includes/footer"); -%>
+<!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                        aria-label="Search Anything ..." aria-describedby="button-addon2">
+                    <button class="btn btn-primary" type="button"
+                        id="button-addon2"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    <script src="../assets/js/apexcharts-column.js"></script>
+    
+</body>
+
+</html> 

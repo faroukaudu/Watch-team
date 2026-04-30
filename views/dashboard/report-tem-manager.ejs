@@ -1,0 +1,346 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<div class="main-content app-content">
+  <div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+      <div>
+        <div>
+          <h1 class="page-title fw-medium fs-18 mb-2">Report Template Manager</h1>
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+              <a href="/dashboard">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Report Template Manager</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <% if (userInfo.userType !== "Client") { %>
+        <a href="/report-template-web" class="btn btn-primary btn-wave">
+          <i class="ri-add-line me-1 fw-medium align-middle"></i> New Report Template
+        </a>
+        <% } %>
+      </div>
+    </div>
+    <!-- End Page Header -->
+
+    <!-- Summary Cards -->
+    <div class="row">
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card overflow-hidden">
+          <div class="card-body">
+            <div class="d-flex align-items-top justify-content-between">
+              <div>
+                <span class="text-muted d-block mb-1">Total Templates</span>
+                <h4 class="fw-semibold mb-0"><%= Array.isArray(templates) ? templates.length : 0 %></h4>
+              </div>
+              <div class="avatar avatar-md bg-primary-transparent">
+                <i class="ri-file-list-3-line fs-18"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card overflow-hidden">
+          <div class="card-body">
+            <div class="d-flex align-items-top justify-content-between">
+              <div>
+                <span class="text-muted d-block mb-1">Active Templates</span>
+                <h4 class="fw-semibold mb-0">
+                  <%= (templates || []).filter(t => t.active !== false).length %>
+                </h4>
+              </div>
+              <div class="avatar avatar-md bg-success-transparent">
+                <i class="ri-checkbox-circle-line fs-18"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card overflow-hidden">
+          <div class="card-body">
+            <div class="d-flex align-items-top justify-content-between">
+              <div>
+                <span class="text-muted d-block mb-1">Hidden From Mobile</span>
+                <h4 class="fw-semibold mb-0">
+                  <%= (templates || []).filter(t => t.showFabMenu === false).length %>
+                </h4>
+              </div>
+              <div class="avatar avatar-md bg-warning-transparent">
+                <i class="ri-eye-off-line fs-18"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6">
+        <div class="card custom-card overflow-hidden">
+          <div class="card-body">
+            <div class="d-flex align-items-top justify-content-between">
+              <div>
+                <span class="text-muted d-block mb-1">Company</span>
+                <h6 class="fw-semibold mb-0"><%= userInfo?.assignedCompanyID || "N/A" %></h6>
+              </div>
+              <div class="avatar avatar-md bg-info-transparent">
+                <i class="ri-building-line fs-18"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Summary Cards -->
+
+    <!-- Report Templates -->
+    <div class="card custom-card">
+      <div class="card-header justify-content-between">
+        <div class="card-title">All Report Templates</div>
+        <div class="d-flex gap-2">
+          <input
+            type="text"
+            id="templateSearch"
+            class="form-control form-control-sm"
+            placeholder="Search template..."
+            style="min-width: 220px;"
+          >
+        </div>
+      </div>
+
+      <div class="card-body">
+        <% if (templates && templates.length > 0) { %>
+          <div class="row" id="templateGrid">
+            <% templates.forEach(function(template) { %>
+              <div
+                class="col-xxl-4 col-xl-6 col-lg-6 template-card"
+                data-title="<%= (template.title || '').toLowerCase() %>"
+                data-category="<%= (template.category || '').toLowerCase() %>"
+              >
+                <div class="card custom-card border shadow-sm">
+                  <div class="card-body p-0">
+                    <div class="p-3 kanban-board-head">
+                      <div class="d-flex text-muted justify-content-between mb-2 fs-12 fw-medium">
+                        <div>
+                          <i class="ri-time-line me-1 align-middle d-inline-block"></i>
+                          Created -
+                          <%= template.createdAt ? new Date(template.createdAt).toLocaleDateString() : "N/A" %>
+                        </div>
+                        <div>
+                          <% if (template.active !== false) { %>
+                            <span class="badge bg-success-transparent">Active</span>
+                          <% } else { %>
+                            <span class="badge bg-danger-transparent">Inactive</span>
+                          <% } %>
+                        </div>
+                      </div>
+
+                      <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="task-badges">
+                          <span class="ms-1 badge bg-outline-primary">
+                            <%= template.category || "general" %>
+                          </span>
+                          <% if (template.showFabMenu === false) { %>
+                            <span class="ms-1 badge bg-outline-warning">Hidden on Mobile</span>
+                          <% } else { %>
+                            <span class="ms-1 badge bg-outline-success">Visible on Mobile</span>
+                          <% } %>
+                        </div>
+
+                        <% if (userInfo.userType !== "Client") { %>
+                        <div class="dropdown">
+                          <a
+                            aria-label="anchor"
+                            href="javascript:void(0);"
+                            class="btn btn-icon btn-sm btn-primary-light"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            <i class="fe fe-more-vertical"></i>
+                          </a>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                              <a class="dropdown-item edit-template-btn"
+                                 href="/report-template-edit/<%= template._id %>">
+                                <i class="ri-edit-line me-1 align-middle d-inline-block"></i>Edit
+                              </a>
+                            </li>
+                            <li>
+                              <button
+                                type="button"
+                                class="dropdown-item text-danger delete-template-btn"
+                                data-id="<%= template._id %>"
+                                data-title="<%= template.title %>"
+                              >
+                                <i class="ri-delete-bin-line me-1 align-middle d-inline-block"></i>Delete
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                        <% } %>
+                      </div>
+
+                      <div class="kanban-content mt-2">
+                        <h6 class="fw-medium mb-1 fs-15"><%= template.title %></h6>
+                        <div class="kanban-task-description text-muted">
+                          <%= template.description && template.description.trim()
+                                ? template.description
+                                : "No description added for this template." %>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="p-3 border-top border-block-start-dashed">
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <div class="p-2 rounded bg-light text-center">
+                            <div class="fs-12 text-muted">Fields</div>
+                            <div class="fw-semibold">
+                              <%= Array.isArray(template.fields) ? template.fields.length : 0 %>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="p-2 rounded bg-light text-center">
+                            <div class="fs-12 text-muted">Signature</div>
+                            <div class="fw-semibold text-success">Always Included</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <% if (userInfo.userType !== "Client") { %>
+                      <div class="mt-3 d-flex gap-2">
+                        <a href="/report-template-edit/<%= template._id %>" class="btn btn-sm btn-primary w-100">
+                          <i class="ri-edit-line me-1"></i> Edit
+                        </a>
+
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-danger-light w-100 delete-template-btn"
+                          data-id="<%= template._id %>"
+                          data-title="<%= template.title %>"
+                        >
+                          <i class="ri-delete-bin-line me-1"></i> Delete
+                        </button>
+                      </div>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="ri-file-list-3-line fs-40 text-muted"></i>
+            </div>
+            <h5 class="mb-1">No Report Templates Found</h5>
+            <p class="text-muted mb-3">No templates available for your company.</p>
+            <% if (userInfo.userType !== "Client") { %>
+            <a href="/report-template-create" class="btn btn-primary btn-wave">
+              <i class="ri-add-line me-1"></i> Create Template
+            </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    <!-- End Report Templates -->
+
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteTemplateModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="deleteTemplateForm" method="POST">
+        <div class="modal-header">
+          <h6 class="modal-title">Delete Report Template</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="alert alert-danger">
+            Are you sure you want to delete
+            <strong id="deleteTemplateTitle">this template</strong>?
+          </div>
+          <p class="mb-0 text-muted">
+            This action will permanently remove the report template from the database.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="ri-delete-bin-line me-1"></i> Delete Template
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include("../includes/footer"); -%>
+
+<div class="scrollToTop">
+  <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+
+<script src="/assets/libs/@popperjs/core/umd/popper.min.js"></script>
+<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/defaultmenu.min.js"></script>
+<script src="/assets/libs/node-waves/waves.min.js"></script>
+<script src="/assets/js/sticky.js"></script>
+<script src="/assets/libs/simplebar/simplebar.min.js"></script>
+<script src="/assets/js/simplebar.js"></script>
+<script src="/assets/js/custom.js"></script>
+<script src="/assets/js/custom-switcher.min.js"></script>
+
+<script>
+  // Search filter
+  const templateSearch = document.getElementById("templateSearch");
+  const templateCards = document.querySelectorAll(".template-card");
+
+  if (templateSearch) {
+    templateSearch.addEventListener("input", function () {
+      const q = this.value.trim().toLowerCase();
+
+      templateCards.forEach(card => {
+        const title = card.dataset.title || "";
+        const category = card.dataset.category || "";
+        const matches = title.includes(q) || category.includes(q);
+        card.style.display = matches ? "" : "none";
+      });
+    });
+  }
+
+  // Delete modal handling
+  const deleteButtons = document.querySelectorAll(".delete-template-btn");
+  const deleteForm = document.getElementById("deleteTemplateForm");
+  const deleteTitle = document.getElementById("deleteTemplateTitle");
+  const deleteModalEl = document.getElementById("deleteTemplateModal");
+  const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+
+  deleteButtons.forEach(btn => {
+    btn.addEventListener("click", function () {
+      const id = this.getAttribute("data-id");
+      const title = this.getAttribute("data-title");
+
+      deleteTitle.textContent = title || "this template";
+      deleteForm.setAttribute("action", "/report-template-delete/" + id);
+
+      if (deleteModal) {
+        deleteModal.show();
+      }
+    });
+  });
+</script>

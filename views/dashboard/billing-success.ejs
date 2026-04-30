@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful</title>
+  <link rel="stylesheet" href="/assets/libs/bootstrap/css/bootstrap.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(70, 120, 255, 0.35), transparent 35%),
+        linear-gradient(180deg, #071a52 0%, #0b245f 45%, #081a43 100%);
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .success-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      position: relative;
+    }
+
+    .success-card {
+      width: 100%;
+      max-width: 760px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      padding: 40px 28px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .check-burst {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2ee59d 0%, #11c779 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 12px rgba(46, 229, 157, 0.10),
+        0 0 0 24px rgba(46, 229, 157, 0.06),
+        0 10px 30px rgba(17, 199, 121, 0.45);
+      position: relative;
+      animation: popIn 0.6s ease;
+    }
+
+    .check-burst::before,
+    .check-burst::after {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255,255,255,0.18);
+    }
+
+    .check-icon {
+      font-size: 54px;
+      font-weight: bold;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.82);
+      font-size: 1.02rem;
+      margin-bottom: 28px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(46, 229, 157, 0.16);
+      color: #aef7d7;
+      margin-bottom: 22px;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 22px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: rgba(255,255,255,0.72);
+      font-weight: 500;
+    }
+
+    .value {
+      color: #fff;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-glow {
+      min-width: 180px;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 12px 18px;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: -120px;
+      width: 44px;
+      height: 58px;
+      border-radius: 50% 50% 48% 48%;
+      opacity: 0.85;
+      animation: floatUp linear infinite;
+      z-index: 1;
+    }
+
+    .balloon::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 55px;
+      width: 2px;
+      height: 70px;
+      background: rgba(255,255,255,0.35);
+      transform: translateX(-50%);
+    }
+
+    .b1 { left: 8%; background: #ff5d8f; animation-duration: 10s; animation-delay: 0s; }
+    .b2 { left: 22%; background: #ffd166; animation-duration: 12s; animation-delay: 1.2s; }
+    .b3 { left: 40%; background: #06d6a0; animation-duration: 11s; animation-delay: 2.5s; }
+    .b4 { left: 63%; background: #4cc9f0; animation-duration: 13s; animation-delay: 0.8s; }
+    .b5 { left: 80%; background: #a78bfa; animation-duration: 9s; animation-delay: 1.8s; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      10% { opacity: 0.9; }
+      100% { transform: translateY(-115vh) scale(1.06); opacity: 0; }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="success-wrap">
+    <div class="balloon b1"></div>
+    <div class="balloon b2"></div>
+    <div class="balloon b3"></div>
+    <div class="balloon b4"></div>
+    <div class="balloon b5"></div>
+
+    <div class="success-card">
+      <div class="check-burst">
+        <div class="check-icon">✓</div>
+      </div>
+
+      <div class="pill">Successfully Paid</div>
+
+      <h1 class="title">Payment Received</h1>
+      <p class="subtitle">
+        <%= message || "Your subscription payment was completed successfully." %>
+      </p>
+
+      <% if (subscription) { %>
+        <div class="info-box">
+          <div class="info-row">
+            <div class="label">Plan</div>
+            <div class="value"><%= subscription.planName || "-" %></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Billing Cycle</div>
+            <div class="value"><%= subscription.billingCycle || "-" %></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Gateway</div>
+            <div class="value"><%= gateway || subscription.gateway || "-" %></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Subscription Status</div>
+            <div class="value"><%= subscription.subscriptionStatus || "-" %></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Active</div>
+            <div class="value"><%= subscription.isActive ? "Yes" : "No" %></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Expires At</div>
+            <div class="value">
+              <%= subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleString() : "-" %>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="actions">
+        <a href="/dashboard" class="btn btn-primary btn-glow">Go to Dashboard</a>
+        <a href="/my-subscription" class="btn btn-outline-light btn-glow">View Subscription</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

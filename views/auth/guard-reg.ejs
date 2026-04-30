@@ -1,0 +1,132 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>WatchTeam | Guards Registeration</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- Favicon -->
+	<link rel="shortcut icon" type="image/x-icon" href="/guard-ass/img/favicon.png">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="/guard-ass/css/bootstrap.min.css">
+	<!-- Fontawesome CSS -->
+	<link rel="stylesheet" href="/guard-ass/css/fontawesome-all.min.css">
+	<!-- Flaticon CSS -->
+	<link rel="stylesheet" href="/guard-ass/font/flaticon.css">
+	<!-- Google Web Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="/guard-ass/style.css">
+</head>
+
+<body>
+	<!--[if lt IE 8]>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+	<div id="wrapper" class="wrapper">
+		<div class="fxt-template-animation fxt-template-layout13">
+			<div class="container-fluid">
+				<div class="row" >
+					<div class="col-md-6 col-12 order-md-2 fxt-bg-wrap" >
+						<div class="fxt-bg-img" data-bg-image="/guard-ass/img/figure/div.jpg">
+							<div class="fxt-header">
+								<div class="fxt-transformY-50 fxt-transition-delay-1">
+									<a href="login-13.html" class="fxt-logo"><img src="/guard-ass/img/logonew.png" width="150px" alt="Logo"></a>
+								</div>
+								<% const parts = name.split(" ");%>
+								<div class="fxt-transformY-50 fxt-transition-delay-2">
+									<p>Dear <%=parts[0]%></p>
+									<h1>Welcome to Watch<span style="font-size: 45px; color: rgb(18, 111, 173); font-weight: 900;">Team</span></h1>
+								</div>
+								<div class="fxt-transformY-50 fxt-transition-delay-3">
+									<p>You've been Invited to work with <br> <span style="color:rgb(48, 150, 218); font-weight: 700; font-size: 23px;"><%= results.postSite[0].clientName%> </span> <br> At the<br> 
+										<span style="font-style: italic; font-weight: 700;" > <%= results.postSite[0].siteName%></span></p> <hr><br><br>
+									<p style="font-size: 14px; margin-top: 30px;">Kindly Register your Profile to have access to the <br>Mobile App.</p>
+									
+								</div>
+							</div>
+							<!-- <ul class="fxt-socials">
+								<li class="fxt-facebook fxt-transformY-50 fxt-transition-delay-4"><a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a></li>
+								<li class="fxt-twitter fxt-transformY-50 fxt-transition-delay-5"><a href="#" title="twitter"><i class="fab fa-twitter"></i></a></li>
+								<li class="fxt-google fxt-transformY-50 fxt-transition-delay-6"><a href="#" title="google"><i class="fab fa-google-plus-g"></i></a></li>
+								<li class="fxt-linkedin fxt-transformY-50 fxt-transition-delay-7"><a href="#" title="linkedin"><i class="fab fa-linkedin-in"></i></a></li>
+								<li class="fxt-youtube fxt-transformY-50 fxt-transition-delay-8"><a href="#" title="youtube"><i class="fab fa-youtube"></i></a></li>
+							</ul> -->
+						</div>
+					</div>
+					<div class="col-md-6 col-12 order-md-1 fxt-bg-color" >
+						<div class="fxt-content">
+							<h2>Register as a Guard</h2>
+							<div class="fxt-form">
+								<form method="POST" action="/guard-new">
+									<div class="form-group">
+										
+										<label for="f_name" class="input-label">First Name</label>
+										<input type="text" id="f_name" class="form-control" name="fname" placeholder="example name" value="<%= parts[0]%>" required="required">
+									</div>
+									<div class="form-group">
+										<label for="l_name" class="input-label">Last Name</label>
+										<input type="text" id="l_name" class="form-control" name="lname" placeholder="example name" value="<%= parts[1]%>" required="required">
+									</div>
+									<div class="form-group">
+										<label for="email" class="input-label">Email Address</label>
+										<input type="email" id="email" class="form-control" name="username" placeholder="demo@gmail.com" value="<%=email%>" required="required">
+									</div>
+									<div class="form-group">
+										<label for="email" class="input-label">Phone</label>
+										<input type="text" id="phone" class="form-control" name="phone" placeholder="+01 85668" required="required">
+									</div>
+									<div class="form-group">
+										<label for="password" class="input-label">Password</label>
+										<input id="password" type="password" class="form-control" name="password" placeholder="********" required="required">
+										<i toggle="#password" class="fa fa-fw fa-eye toggle-password field-icon"></i>
+									</div>
+
+									<input type="hidden" name="siteId", value="<%= results.postSite[0]._id%>" >
+									<input type="hidden" name="comp_id" value="<%=comID%>">
+									<input type="hidden" name="comp_name" value="<%= results.companyName%>">
+									<div class="form-group">
+										<label for="c_password" class="input-label">Confirm Password</label>
+										<input id="c_password" type="password" class="form-control" name="c_password" placeholder="********" required="required">
+										<i toggle="#c_password" class="fa fa-fw fa-eye toggle-password field-icon"></i>
+									</div>
+									<div class="form-group">
+										<div class="fxt-checkbox-area">
+											<div class="checkbox">
+												<input id="checkbox1" type="checkbox">
+												<label for="checkbox1">I agree with the terms and condition</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="submit" class="fxt-btn-fill">Accept Invite</button>
+									</div>
+								</form>
+							</div>
+							<div class="text-center">
+								<p>Have an account?<a href="login-13.html" class="switcher-text2 inline-text">Log in</a></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- jquery-->
+	<script src="/guard-ass/js/jquery-3.5.0.min.js"></script>
+	<!-- Popper js -->
+	<script src="/guard-ass/js/popper.min.js"></script>
+	<!-- Bootstrap js -->
+	<script src="/guard-ass/js/bootstrap.min.js"></script>
+	<!-- Imagesloaded js -->
+	<script src="/guard-ass/js/imagesloaded.pkgd.min.js"></script>
+	<!-- Validator js -->
+	<script src="/guard-ass/js/validator.min.js"></script>
+	<!-- Custom Js -->
+	<script src="/guard-ass/js/main.js"></script>
+
+</body>
+
+</html>
