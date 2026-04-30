@@ -71,9 +71,9 @@ app.set('view engine', 'ejs');
 
 
 // const passwrdResetToken = require('node-random-chars');
-const uri = "mongodb://127.0.0.1:27017/watchTeam";
+// const uri = "mongodb://127.0.0.1:27017/watchTeam";
 // const uri = "mongodb+srv://fadeelahfancy98com:"+process.env.DBPASSWORD+"@emc.5phugjz.mongodb.net/emcDB";
-// const uri = "mongodb+srv://fadeelahfancy98com_db_user:5UHmLPQOe3PPgI9D@cluster0.wlgwqir.mongodb.net/watchTeam";
+const uri = "mongodb+srv://fadeelahfancy98com_db_user:5UHmLPQOe3PPgI9D@cluster0.wlgwqir.mongodb.net/watchTeam";
 
 
 // Sessions start
