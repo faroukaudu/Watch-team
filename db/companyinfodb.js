@@ -49,6 +49,7 @@ const siteSchema = new mongoose.Schema({
     lat:String,
     long:String,
     statusIsActive:Boolean,
+    reportRecipients:[String],
     
 });
 const reportSchema = new mongoose.Schema({
@@ -78,6 +79,12 @@ const clockReportSchema = new mongoose.Schema({
     duration:String,
     workTime:String,
     breakTime:String,
+    shiftTemplateId:String,
+    shiftTitle:String,
+    shiftStartTime:String,
+    shiftEndTime:String,
+    overtime:String,
+    overtimeSeconds:Number,
     
 
     
@@ -106,6 +113,9 @@ const notificationSchema = new mongoose.Schema({
     email:String,
     type:String,
     activityId:String,
+    readBy:[String],
+    message:String,
+    createdAt:{ type: Date, default: Date.now },
     // breakTime:String,
     
 

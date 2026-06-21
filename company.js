@@ -119,7 +119,7 @@ app.post("/create-post-site", async (req, res) => {
 
     console.log("SITE IS", site);
 
-    if (req.user.userType === "Super Admin") {
+    if (req.user.userType === "Super Admin" || req.user.userType === "Platform Admin") {
       console.log("i am Admin");
       console.log(req.user.assignedCompanyID);
 
@@ -361,20 +361,25 @@ const postSiteTasks = await PostSiteTask.find({
 console.log("POST SITE ID:", postSiteIdStr);
 console.log("CHECKLIST FOUND:", checklists.length);
     return res.render("dashboard/post-site-info", {
-      userInfo: req.user,
-      clientInfo: userFound,
-      companyInfo: siteInfo,
-      fullCompInfo: comF,
-      assignedGuards,
-      clients,
-      reports,
-      reportSummary,
-      latestActivity,
-      scheduleMap,
-      notes,
-      checklists,
-      postSiteTasks,
-    });
+  userInfo: req.user,
+  clientInfo: userFound,
+  companyInfo: siteInfo,
+  fullCompInfo: comF,
+
+  companyId: String(companyId),
+  postSiteId: postSiteIdStr,
+  postSiteName: siteInfo.postSiteName || siteInfo.name || "",
+
+  assignedGuards,
+  clients,
+  reports,
+  reportSummary,
+  latestActivity,
+  scheduleMap,
+  notes,
+  checklists,
+  postSiteTasks,
+});
   } catch (err) {
     console.error("GET /view-post-site error:", err);
     return res.status(500).send("Server error");

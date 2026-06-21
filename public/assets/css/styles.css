@@ -12084,7 +12084,7 @@ button.btn.todo-handle {
   background-color: rgba(var(--secondary-rgb), 0.4);
 }
 .profile-image::after {
-  content: "";
+  /* content: ""; */
   position: absolute;
   inset-inline-start: 0;
   inset-block-start: 0;

@@ -115,13 +115,90 @@
         return item.clock && item.clock.length > 0 ? item.clock[item.clock.length - 1] : null;
       }
 
+      function getCheckOutTime(item) {
+        const clock = getClock(item);
+
+        return item.checkOutTime ||
+          item.checkoutTime ||
+          item.checkOut ||
+          item.checkout ||
+          item.clockOutTime ||
+          item.clockOut ||
+          item.endTimeActual ||
+          item.actualCheckOutTime ||
+          item.checkOutDateTime ||
+          item.checkoutDateTime ||
+          (clock && (
+            clock.clockOutTime ||
+            clock.checkoutTime ||
+            clock.checkOutTime ||
+            clock.clockOut ||
+            clock.checkOut ||
+            clock.endTime ||
+            clock.endDateTime ||
+            clock.actualCheckOutTime
+          ));
+      }
+
+      function getCheckInTime(item) {
+        const clock = getClock(item);
+
+        return item.checkInTime ||
+          item.checkinTime ||
+          item.checkIn ||
+          item.checkin ||
+          item.clockInTime ||
+          item.clockIn ||
+          item.startTimeActual ||
+          item.actualCheckInTime ||
+          item.checkInDateTime ||
+          item.checkinDateTime ||
+          (clock && (
+            clock.clockInTime ||
+            clock.checkinTime ||
+            clock.checkInTime ||
+            clock.clockIn ||
+            clock.checkIn ||
+            clock.startTime ||
+            clock.startDateTime ||
+            clock.actualCheckInTime
+          ));
+      }
+
+      function getWorkTime(item) {
+        const clock = getClock(item);
+
+        if (clock && clock.workTime) return clock.workTime;
+        if (item.workTime) return item.workTime;
+        if (item.totalWorkTime) return item.totalWorkTime;
+        if (item.workHours) return item.workHours;
+
+        const checkIn = getCheckInTime(item);
+        const checkOut = getCheckOutTime(item);
+
+        if (!checkIn || !checkOut) return "N/A";
+
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) return "N/A";
+
+        const diffMs = end - start;
+        if (diffMs <= 0) return "N/A";
+
+        const totalMinutes = Math.floor(diffMs / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return `${hours}h ${minutes}m`;
+      }
+
       function getPostSiteName(item) {
         return item.postSiteName || item.siteName || "Unknown Post Site";
       }
 
       function getLateStatus(item) {
-        const clock = getClock(item);
-        const actualIn = item.checkInTime || (clock && clock.clockInTime);
+        const actualIn = getCheckInTime(item);
         const scheduledStart = item.shiftStartTime || item.startTime || item.scheduledStartTime;
 
         if (!actualIn || !scheduledStart) {
@@ -152,8 +229,7 @@
       }
 
       function getCheckoutStatus(item) {
-        const clock = getClock(item);
-        const actualOut = item.checkOutTime || (clock && clock.clockOutTime);
+        const actualOut = getCheckOutTime(item);
         const scheduledEnd = item.shiftEndTime || item.endTime || item.scheduledEndTime;
 
         if (!actualOut || !scheduledEnd) {
@@ -181,7 +257,7 @@
       }
 
       const totalRecords = attendance ? attendance.length : 0;
-      const completedTasks = attendance ? attendance.filter(item => item.checkOutTime || (getClock(item) && getClock(item).clockOutTime)).length : 0;
+      const completedTasks = attendance ? attendance.filter(item => getCheckOutTime(item)).length : 0;
       const pendingTasks = totalRecords - completedTasks;
       const onTimeCount = attendance ? attendance.filter(item => getLateStatus(item).label === "On Time").length : 0;
       const lateCount = attendance ? attendance.filter(item => getLateStatus(item).label === "Late").length : 0;
@@ -190,7 +266,7 @@
     <div class="attendance-hero">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
-          <h2 class="fw-bold  mb-1">Attendance</h2>
+          <h2 class="fw-bold mb-1">Attendance</h2>
           <p class="text-white-50 mb-0">
             View guard check-in, check-out, time clock records, and punctuality status.
           </p>
@@ -287,8 +363,7 @@
             <tbody>
               <% if (attendance && attendance.length > 0) { %>
                 <% attendance.forEach(function(item){ 
-                  const clock = getClock(item);
-                  const isCheckedOut = item.checkOutTime || (clock && clock.clockOutTime);
+                  const isCheckedOut = getCheckOutTime(item);
                   const lateStatus = getLateStatus(item);
                   const checkoutStatus = getCheckoutStatus(item);
                 %>
@@ -296,7 +371,7 @@
                   <tr>
                     <td>
                       <div class="fw-semibold">
-                        <%= item.checkInTime ? formatDateOnly(item.checkInTime) : "N/A" %>
+                        <%= getCheckInTime(item) ? formatDateOnly(getCheckInTime(item)) : "N/A" %>
                       </div>
                     </td>
 
@@ -316,7 +391,7 @@
 
                     <td>
                       <div class="time-main">
-                        <%= formatTimeOnly(item.checkInTime || (clock && clock.clockInTime)) %>
+                        <%= formatTimeOnly(getCheckInTime(item)) %>
                       </div>
                       <span class="badge <%= lateStatus.className %> mt-1">
                         <%= lateStatus.label %>
@@ -326,7 +401,7 @@
                     <td>
                       <% if (isCheckedOut) { %>
                         <div class="time-main">
-                          <%= formatTimeOnly(item.checkOutTime || (clock && clock.clockOutTime)) %>
+                          <%= formatTimeOnly(getCheckOutTime(item)) %>
                         </div>
                         <span class="badge <%= checkoutStatus.className %> mt-1">
                           <%= checkoutStatus.label %>
@@ -337,7 +412,7 @@
                     </td>
 
                     <td>
-                      <%= clock && clock.workTime ? clock.workTime : "N/A" %>
+                      <%= getWorkTime(item) %>
                     </td>
 
                     <td>
@@ -367,29 +442,29 @@
 
   </div>
 </div>
-        <!-- Footer Start -->
-        <%- include("../includes/footer"); -%>
+
+<!-- Footer Start -->
+<%- include("../includes/footer"); -%>
 <!-- Footer End -->
-        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="input-group">
-                    <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
-                        aria-label="Search Anything ..." aria-describedby="button-addon2">
-                    <button class="btn btn-primary" type="button"
-                        id="button-addon2"><i class="bi bi-search"></i></button>
-                </div>
-            </div>
+
+<div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="input-group">
+          <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+            aria-label="Search Anything ..." aria-describedby="button-addon2">
+          <button class="btn btn-primary" type="button"
+            id="button-addon2"><i class="bi bi-search"></i></button>
         </div>
+      </div>
     </div>
-
-
-
+  </div>
+</div>
 
 <!-- Scroll To Top -->
 <div class="scrollToTop">
-    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+  <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
 </div>
 <div id="responsive-overlay"></div>
 <!-- Scroll To Top -->
@@ -422,31 +497,28 @@
 <!-- Date & Time Picker JS -->
 <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
 
+<!-- Apex Charts JS -->
+<script src="assets/libs/apexcharts/apexcharts.min.js"></script>
 
-    <!-- Apex Charts JS -->
-    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+<!-- Sales Dashboard --> 
+<script src="assets/js/sales-dashboard.js"></script>
 
-    <!-- Sales Dashboard --> 
-    <script src="assets/js/sales-dashboard.js"></script>
+<!-- Custom JS -->
+<script src="assets/js/custom.js"></script>
 
-    <!-- Custom JS -->
-    <script src="assets/js/custom.js"></script>
-
-    
 <!-- Custom-Switcher JS -->
 <script src="assets/js/custom-switcher.min.js"></script>
 
-    <!-- Google Maps API -->
-    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+<!-- Google Maps API -->
+<script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
 
-    <!-- Google Maps JS -->
-    <script src="assets/libs/gmaps/gmaps.min.js"></script>
-    <script src="assets/js/google-maps.js"></script>
+<!-- Google Maps JS -->
+<script src="assets/libs/gmaps/gmaps.min.js"></script>
+<script src="assets/js/google-maps.js"></script>
 
-    <!-- Custom JS -->
-    <script src="assets/js/custom.js"></script>
-    <script src="../assets/js/apexcharts-column.js"></script>
-    
+<!-- Custom JS -->
+<script src="assets/js/custom.js"></script>
+<script src="../assets/js/apexcharts-column.js"></script>
+
 </body>
-
-</html> 
+</html>

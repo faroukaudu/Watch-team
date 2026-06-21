@@ -60,7 +60,15 @@ module.exports = function registerUploadRoutes(app) {
 
       folder = `watch-team/visitors/${visitorTempId}/${kind}`;
 
-    } else {
+    } else if (moduleType === "watchmode") {
+  const { watchModeTempId } = req.body;
+
+  if (!watchModeTempId) {
+    return res.status(400).json({ error: "watchModeTempId is required" });
+  }
+folder = `watch-team/watchmode/${watchModeTempId}/${kind}`;
+    
+}else {
       if (!reportId) {
         return res.status(400).json({ error: "reportId is required" });
       }

@@ -20,9 +20,11 @@
       <!-- Hero -->
       <div class="row">
         <div class="col-xl-12">
-          <div class="card custom-card profile-card overflow-hidden">
-            <div class="profile-image">
-              <img src="./assets/images/media/media-3.jpg" class="card-img-top" alt="Post Site Banner">
+          <div class="card custom-card profile-card ">
+            <div class="profile-image position-relative" style="height:260px; overflow:hidden;">
+              <div id="postSiteBannerMap" data-lat="<%= companyInfo.lat %>" data-long="<%= companyInfo.long %>"
+                style="height:260px; width:100%;">
+              </div>
             </div>
 
             <div class="card-body p-4 pb-0 position-relative">
@@ -187,6 +189,13 @@
                     <i class="ri-user-received-line me-1"></i> Visitors
                   </a>
                 </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="site-tours-tab" data-bs-toggle="tab" data-bs-target="#site-tours-pane"
+                    type="button" role="tab">
+                    Site Tours
+                  </button>
+                </li>
+
                 <li class="nav-item" role="presentation">
                   <button class="nav-link" id="checklist-tab" data-bs-toggle="tab" data-bs-target="#checklist-pane"
                     type="button" role="tab" aria-controls="checklist-pane" aria-selected="false">
@@ -862,6 +871,61 @@
               </div>
             </div>
 
+            <!-- Site tour -->
+            <div class="tab-pane fade" id="site-tours-pane" role="tabpanel">
+
+              <div class="card custom-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="card-title mb-1">
+                      <i class="ri-route-line me-1 text-primary"></i> Site Tours
+                    </h5>
+                    <small class="text-muted">
+                      Create patrol routes, monitor scan progress, and view QR checkpoints
+                    </small>
+                  </div>
+
+                  <div class="d-flex gap-2 flex-wrap">
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createTourModal">
+    <i class="ri-qr-code-line me-1"></i> Create QR Code Tour
+  </button>
+
+  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createNfcTourModal">
+    <i class="ri-rfid-line me-1"></i> Create NFC Tour
+  </button>
+</div>
+                </div>
+
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th>Tour Name</th>
+                          <th>Checkpoints</th>
+                          <th>Progress</th>
+                          <th>Active Guards</th>
+                          <th>Status</th>
+                          <th>Created</th>
+                          <th class="text-end">Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody id="siteToursTableBody">
+                        <tr>
+                          <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="ri-loader-4-line" style="font-size:35px;"></i>
+                            <p class="mb-0 mt-2">Click the Site Tours tab to load tours.</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
             <!-- CheckList -->
             <div class="tab-pane fade" id="checklist-pane" role="tabpanel" aria-labelledby="checklist-tab" tabindex="0">
               <div class="card custom-card">
@@ -977,7 +1041,7 @@
               </div>
             </div>
 
-            // Tasks
+            <!-- Tasks -->
             <div class="tab-pane fade" id="task-pane" role="tabpanel" aria-labelledby="task-tab" tabindex="0">
               <div class="card custom-card mt-3">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -1098,8 +1162,458 @@
     </div>
   </div>
 
+  <!-- Site tour modal -->
+  <div class="modal fade" id="createTourModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <form action="/site-tours/create" method="POST" class="modal-content">
 
-  <!-- Send Report Modal -->
+        <div class="modal-header">
+          <h5 class="modal-title">Create Site Tour</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="companyId" value="<%= userInfo?.assignedCompanyID || '' %>">
+          <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || companyInfo?.id || '' %>">
+          <input type="hidden" name="postSiteName" value="<%= companyInfo?.siteName || '' %>">
+
+          <div class="mb-3">
+            <label class="form-label">Tour Name</label>
+            <input type="text" name="tourName" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Checkpoints</label>
+            <textarea name="checkpoints" class="form-control" rows="6"
+              placeholder="Main Gate&#10;Parking Lot&#10;Back Exit" required></textarea>
+            <small class="text-muted">Enter one checkpoint per line. Each checkpoint will automatically receive a QR
+              code.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Tour</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="createNfcTourModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title">
+            <i class="ri-nfc-line me-1 text-success"></i> Create NFC Tour
+          </h5>
+          <small class="text-muted">Create checkpoints, then write each checkpoint to an NTAG215 NFC tag.</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="createNfcTourForm">
+          <input type="hidden" name="companyId" value="<%= companyId %>">
+          <input type="hidden" name="postSiteId" value="<%= postSiteId %>">
+          <input type="hidden" name="postSiteName" value="<%= postSiteName || '' %>">
+
+          <div class="mb-3">
+            <label class="form-label">Tour Name</label>
+            <input type="text" name="tourName" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">NFC Checkpoints</label>
+            <textarea name="checkpoints" class="form-control" rows="5" required
+              placeholder="Front Gate&#10;Main Lobby&#10;Back Door&#10;Parking Lot"></textarea>
+            <small class="text-muted">Enter one checkpoint per line.</small>
+          </div>
+
+          <button type="submit" class="btn btn-success">
+            <i class="ri-nfc-line me-1"></i> Create NFC Tour
+          </button>
+        </form>
+
+        <div id="nfcWriteSection" class="mt-4 d-none">
+          <hr>
+          <h6 class="fw-bold mb-2">Write NFC Tags</h6>
+          <p class="text-muted small mb-3">
+            Open this page on an Android phone with NFC enabled. Tap “Write Tag”, then touch the NTAG215 tag to the phone.
+          </p>
+
+          <div id="nfcCheckpointList" class="list-group"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="modal fade" id="viewTourQrModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="tourQrModalTitle">Tour QR Codes</h5>
+            <small class="text-muted">Print and place these QR codes at their checkpoint locations.</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div id="tourQrWrapper" class="row g-3"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="ri-printer-line me-1"></i> Print
+          </button>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="viewTourProgressModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tourProgressModalTitle">Tour Progress</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body" id="tourProgressWrapper"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.loadedSiteTours = [];
+
+    function safeText(value, fallback) {
+      if (value === null || value === undefined || value === "") return fallback || "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function loadSiteTours() {
+      const tbody = document.getElementById("siteToursTableBody");
+      if (!tbody) return;
+
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="ri-loader-4-line" style="font-size:35px;"></i><p class="mb-0 mt-2">Loading site tours...</p></td></tr>';
+
+      try {
+        const url = "/api/site-tours?companyId=" + encodeURIComponent(companyId) + "&postSiteId=" + encodeURIComponent(postSiteId);
+        const res = await fetch(url);
+        const data = await res.json();
+
+        window.loadedSiteTours = data.tours || [];
+
+        if (!data.tours || data.tours.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="ri-route-line" style="font-size:45px;"></i><h6 class="mt-2">No Site Tour Found</h6><p class="mb-0">Create the first patrol route for this post site.</p></td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+
+        data.tours.forEach(function (tour, index) {
+          const checkpoints = tour.checkpoints || [];
+          const progress = tour.progress || [];
+          let totalScans = 0;
+          let activeGuards = [];
+
+          progress.forEach(function (p) {
+            const scanned = p.scannedCheckpoints || [];
+            totalScans += scanned.length;
+
+            if (p.status === "In Progress") {
+              activeGuards.push(p.guardName || "Guard");
+            }
+          });
+
+          const checkpointCount = checkpoints.length;
+          const guardCount = progress.length;
+          const expectedTotal = checkpointCount * (guardCount || 1);
+          const progressPercent = checkpointCount > 0 && guardCount > 0
+            ? Math.min(100, Math.round((totalScans / expectedTotal) * 100))
+            : 0;
+
+          const statusBadge = progressPercent >= 100
+            ? '<span class="badge bg-success">Completed</span>'
+            : progressPercent > 0
+              ? '<span class="badge bg-warning">In Progress</span>'
+              : '<span class="badge bg-secondary">Not Started</span>';
+
+          const activeGuardText = activeGuards.length > 0
+            ? activeGuards.map(function (g) {
+              return '<span class="badge bg-info-transparent me-1">' + safeText(g, "Guard") + '</span>';
+            }).join("")
+            : '<span class="text-muted">No active guard</span>';
+
+          const createdDate = tour.createdAt ? new Date(tour.createdAt).toLocaleString() : "N/A";
+          const row = document.createElement("tr");
+
+          row.innerHTML =
+            '<td>' +
+            '<div class="fw-semibold">' + safeText(tour.tourName, "Site Tour") + '</div>' +
+            '<small class="text-muted">' + safeText(tour.description, "No description") + '</small>' +
+            '</td>' +
+            '<td><span class="badge bg-dark-transparent">' + checkpointCount + '</span></td>' +
+            '<td style="min-width:180px;">' +
+            '<div class="d-flex justify-content-between"><small>' + progressPercent + '%</small><small>' + totalScans + '/' + expectedTotal + '</small></div>' +
+            '<div class="progress progress-xs mt-1"><div class="progress-bar bg-success" style="width:' + progressPercent + '%"></div></div>' +
+            '</td>' +
+            '<td>' + activeGuardText + '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td>' + safeText(createdDate, "N/A") + '</td>' +
+            '<td class="text-end">' +
+            '<button type="button" class="btn btn-sm btn-light me-1" title="View QR Codes" onclick="viewTourQr(' + index + ')"><i class="ri-eye-line"></i></button>' +
+            '<button type="button" class="btn btn-sm btn-outline-primary" title="View Progress" onclick="viewTourProgress(' + index + ')"><i class="ri-list-check-2"></i></button>' +
+            '</td>';
+
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-danger">Unable to load site tours.</td></tr>';
+      }
+    }
+
+    function viewTourQr(index) {
+      const tour = window.loadedSiteTours[index];
+      if (!tour) return;
+
+      document.getElementById("tourQrModalTitle").innerText = (tour.tourName || "Site Tour") + " - QR Codes";
+
+      const wrapper = document.getElementById("tourQrWrapper");
+      wrapper.innerHTML = "";
+
+      const checkpoints = tour.checkpoints || [];
+
+      if (checkpoints.length === 0) {
+        wrapper.innerHTML = '<div class="col-12 text-center py-4 text-muted">No QR checkpoints found.</div>';
+      }
+
+      checkpoints.forEach(function (point, idx) {
+        const qrValue = encodeURIComponent(point.qrCodeValue || "");
+        const col = document.createElement("div");
+        col.className = "col-md-3 col-sm-6";
+
+        col.innerHTML =
+          '<div class="border rounded p-3 text-center h-100">' +
+          '<div class="fw-semibold mb-2">' + (idx + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+          '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + qrValue + '" class="img-fluid mb-2" style="max-width:160px;" alt="QR Code">' +
+          '<div class="small text-muted" style="word-break:break-all;">' + safeText(point.qrCodeValue, "") + '</div>' +
+          '</div>';
+
+        wrapper.appendChild(col);
+      });
+
+      new bootstrap.Modal(document.getElementById("viewTourQrModal")).show();
+    }
+
+    function viewTourProgress(index) {
+      const tour = window.loadedSiteTours[index];
+      if (!tour) return;
+
+      document.getElementById("tourProgressModalTitle").innerText = (tour.tourName || "Site Tour") + " - Progress";
+
+      const wrapper = document.getElementById("tourProgressWrapper");
+      const progress = tour.progress || [];
+      const checkpoints = tour.checkpoints || [];
+
+      if (progress.length === 0) {
+        wrapper.innerHTML = '<div class="text-center py-5 text-muted"><i class="ri-map-pin-time-line" style="font-size:45px;"></i><h6 class="mt-2">No Scan Activity Yet</h6><p class="mb-0">No guard has started this tour.</p></div>';
+        new bootstrap.Modal(document.getElementById("viewTourProgressModal")).show();
+        return;
+      }
+
+      let html = "";
+
+      progress.forEach(function (p) {
+        const scanned = p.scannedCheckpoints || [];
+        const percent = checkpoints.length > 0 ? Math.round((scanned.length / checkpoints.length) * 100) : 0;
+
+        html +=
+          '<div class="border rounded p-3 mb-3">' +
+          '<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">' +
+          '<div>' +
+          '<h6 class="fw-bold mb-1">' + safeText(p.guardName, "Guard") + '</h6>' +
+          '<small class="text-muted">Started: ' + (p.startedAt ? new Date(p.startedAt).toLocaleString() : "N/A") +
+          (p.completedAt ? ' | Completed: ' + new Date(p.completedAt).toLocaleString() : '') + '</small>' +
+          '</div>' +
+          '<span class="badge ' + (p.status === "Completed" ? "bg-success" : "bg-warning") + '">' + safeText(p.status, "In Progress") + '</span>' +
+          '</div>' +
+          '<div class="mt-3">' +
+          '<div class="d-flex justify-content-between"><small>' + scanned.length + '/' + checkpoints.length + ' checkpoints</small><small>' + percent + '%</small></div>' +
+          '<div class="progress progress-xs mt-1"><div class="progress-bar bg-success" style="width:' + percent + '%"></div></div>' +
+          '</div>' +
+          '<div class="table-responsive mt-3">' +
+          '<table class="table table-sm table-bordered mb-0">' +
+          '<thead><tr><th>Checkpoint</th><th>Status</th><th>Scanned At</th></tr></thead><tbody>';
+
+        checkpoints.forEach(function (cp) {
+          const scannedItem = scanned.find(function (s) {
+            return String(s.checkpointId) === String(cp._id);
+          });
+
+          html +=
+            '<tr>' +
+            '<td>' + safeText(cp.name, "Checkpoint") + '</td>' +
+            '<td>' + (scannedItem ? '<span class="badge bg-success">Scanned</span>' : '<span class="badge bg-secondary">Pending</span>') + '</td>' +
+            '<td>' + (scannedItem && scannedItem.scannedAt ? new Date(scannedItem.scannedAt).toLocaleString() : "N/A") + '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table></div></div>';
+      });
+
+      wrapper.innerHTML = html;
+      new bootstrap.Modal(document.getElementById("viewTourProgressModal")).show();
+    }
+
+        let currentNfcTour = null;
+
+    const createNfcTourForm = document.getElementById("createNfcTourForm");
+
+    if (createNfcTourForm) {
+      createNfcTourForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(createNfcTourForm);
+        const body = Object.fromEntries(formData.entries());
+
+        try {
+          const res = await fetch("/site-tours/create-nfc", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+
+          const data = await res.json();
+
+          if (!data.success) {
+            alert(data.message || "Unable to create NFC tour.");
+            return;
+          }
+
+          currentNfcTour = data.tour;
+          console.log(currentNfcTour);
+          renderNfcWriteList(currentNfcTour);
+          loadSiteTours();
+        } catch (error) {
+          alert("Server error creating NFC tour.");
+        }
+      });
+    }
+
+    function renderNfcWriteList(tour) {
+      const section = document.getElementById("nfcWriteSection");
+      const list = document.getElementById("nfcCheckpointList");
+
+      if (!section || !list || !tour) return;
+
+      section.classList.remove("d-none");
+      list.innerHTML = "";
+
+      const checkpoints = tour.checkpoints || [];
+
+      checkpoints.forEach(function (point, index) {
+        const item = document.createElement("div");
+        item.className = "list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2";
+
+        item.innerHTML =
+          '<div>' +
+          '<div class="fw-semibold">' + (index + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+          '<small class="text-muted" style="word-break:break-all;">' + safeText(point.nfcTagValue, "") + '</small>' +
+          '</div>' +
+          '<div class="d-flex align-items-center gap-2">' +
+          '<span id="nfc-status-' + point._id + '" class="badge ' + (point.nfcWritten ? 'bg-success' : 'bg-secondary') + '">' + (point.nfcWritten ? 'Written' : 'Pending') + '</span>' +
+          '<button type="button" class="btn btn-sm btn-success" onclick="writeNfcTag(\'' + tour._id + '\', \'' + point._id + '\', \'' + String(point.nfcTagValue || "").replace(/'/g, "\\'") + '\')">' +
+          '<i class="ri-nfc-line me-1"></i> Write Tag' +
+          '</button>' +
+          '</div>';
+
+        list.appendChild(item);
+      });
+    }
+
+    async function writeNfcTag(tourId, checkpointId, nfcTagValue) {
+      if (!("NDEFReader" in window)) {
+        alert("This browser does not support Web NFC. Use Chrome on an NFC-enabled Android phone over HTTPS.");
+        return;
+      }
+
+      try {
+        const writer = new NDEFReader();
+
+        await writer.write({
+          records: [
+            {
+              recordType: "text",
+              data: nfcTagValue,
+            },
+          ],
+        });
+
+        const confirmRes = await fetch("/api/site-tours/nfc-write-confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            companyId,
+            postSiteId,
+            tourId,
+            checkpointId,
+          }),
+        });
+
+        const confirmData = await confirmRes.json();
+
+        if (!confirmData.success) {
+          alert(confirmData.message || "NFC was written, but server confirmation failed.");
+          return;
+        }
+
+        const status = document.getElementById("nfc-status-" + checkpointId);
+        if (status) {
+          status.className = "badge bg-success";
+          status.innerText = "Written";
+        }
+
+        loadSiteTours();
+        alert("NFC tag written successfully.");
+      } catch (error) {
+        alert("NFC write failed or was cancelled. Try again and hold the tag close to the phone.");
+      }
+    }
+
+    const siteToursTab = document.getElementById("site-tours-tab");
+    if (siteToursTab) {
+      siteToursTab.addEventListener("click", loadSiteTours);
+    }
+  </script>
+
   <div class="modal fade" id="sendReportModal" tabindex="-1" aria-labelledby="sendReportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
@@ -1121,6 +1635,17 @@
               <div class="col-md-6 mb-3">
                 <label class="form-label">Client Email</label>
                 <input type="email" class="form-control" id="modalClientEmail" name="clientEmail" readonly>
+                <div class="col-md-12 mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-primary open-extra-recipients-btn" data-target-form="send">
+                      <i class="ri-user-add-line me-1"></i> Add More Recipient
+                    </button>
+
+                    <div class="text-muted fst-italic mt-1 fs-11" id="sendRecipientCountText">
+                      1 person would receive this report
+                    </div>
+
+                    <input type="hidden" name="extraRecipients" id="sendExtraRecipientsInput" value="[]">
+                  </div>
               </div>
             </div>
 
@@ -1170,7 +1695,7 @@
     </div>
   </div>
 
-  <!-- shedule Modal -->
+
   <div class="modal fade" id="scheduleReportModal" tabindex="-1" aria-labelledby="scheduleReportModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1193,7 +1718,19 @@
               <div class="col-md-6 mb-3">
                 <label class="form-label">Client Email</label>
                 <input type="email" class="form-control" id="scheduleClientEmail" name="clientEmail" readonly>
+                <div class="col-md-12 ">
+                    <button type="button" class="btn btn-sm btn-outline-primary open-extra-recipients-btn" data-target-form="schedule">
+                      <i class="ri-user-add-line me-1"></i> Add More Recipient
+                    </button>
+
+                    <div class="text-muted fst-italic mt-1 fs-11" id="scheduleRecipientCountText">
+                      1 person would receive this scheduled report
+                    </div>
+
+  <input type="hidden" name="extraRecipients" id="scheduleExtraRecipientsInput" value="[]">
+</div>
               </div>
+              
             </div>
 
             <div class="mb-3">
@@ -1238,7 +1775,7 @@
     </div>
   </div>
 
-  <!-- shedule report History Modal LOGS -->
+
   <div class="modal fade" id="scheduleHistoryModal" tabindex="-1" aria-labelledby="scheduleHistoryModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1278,6 +1815,166 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="extraRecipientsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="ri-user-add-line me-2 text-primary"></i>Add More Recipients
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="recipientModalTargetForm" value="send">
+
+        <div id="extraRecipientsFields"></div>
+
+        <button type="button" class="btn btn-sm btn-outline-primary mt-3" id="addRecipientFieldBtn">
+          <i class="ri-add-line me-1"></i> Add Recipient
+        </button>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveExtraRecipientsBtn">
+          Save Recipients
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let activeRecipientTarget = "send";
+
+const sendRecipients =
+  <%- JSON.stringify(companyInfo.reportRecipients || []) %>;
+
+const scheduleRecipients =
+  <%- JSON.stringify(companyInfo.reportRecipients || []) %>;
+
+    const modalEl = document.getElementById("extraRecipientsModal");
+    const fieldsWrapper = document.getElementById("extraRecipientsFields");
+    const addFieldBtn = document.getElementById("addRecipientFieldBtn");
+    const saveBtn = document.getElementById("saveExtraRecipientsBtn");
+
+    const sendInput = document.getElementById("sendExtraRecipientsInput");
+    const scheduleInput = document.getElementById("scheduleExtraRecipientsInput");
+
+    const sendCountText = document.getElementById("sendRecipientCountText");
+    const scheduleCountText = document.getElementById("scheduleRecipientCountText");
+
+    function getActiveList() {
+      return activeRecipientTarget === "schedule" ? scheduleRecipients : sendRecipients;
+    }
+
+    function updateCountText() {
+      const sendTotal = 1 + sendRecipients.length;
+      const scheduleTotal = 1 + scheduleRecipients.length;
+
+      if (sendCountText) {
+        sendCountText.textContent = sendTotal + (sendTotal === 1
+          ? " person would receive this report"
+          : " people would receive this report");
+      }
+
+      if (scheduleCountText) {
+        scheduleCountText.textContent = scheduleTotal + (scheduleTotal === 1
+          ? " person would receive this scheduled report"
+          : " people would receive this scheduled report");
+      }
+
+      if (sendInput) sendInput.value = JSON.stringify(sendRecipients);
+      if (scheduleInput) scheduleInput.value = JSON.stringify(scheduleRecipients);
+    }
+
+    function renderRecipientFields() {
+      const list = getActiveList();
+      fieldsWrapper.innerHTML = "";
+
+      if (list.length === 0) {
+        list.push("");
+      }
+
+      list.forEach(function (email, index) {
+        const row = document.createElement("div");
+        row.className = "input-group mb-2 recipient-row";
+
+        row.innerHTML =
+          '<span class="input-group-text">Recipient ' + (index + 1) + '</span>' +
+          '<input type="email" class="form-control extra-recipient-email" value="' + email + '" placeholder="Enter recipient email">' +
+          '<button type="button" class="btn btn-outline-danger remove-recipient-btn" data-index="' + index + '">' +
+            '<i class="ri-delete-bin-line"></i>' +
+          '</button>';
+
+        fieldsWrapper.appendChild(row);
+      });
+
+      document.querySelectorAll(".remove-recipient-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const index = Number(this.getAttribute("data-index"));
+          const activeList = getActiveList();
+
+          activeList.splice(index, 1);
+          renderRecipientFields();
+          updateCountText();
+        });
+      });
+    }
+
+    document.querySelectorAll(".open-extra-recipients-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeRecipientTarget = this.getAttribute("data-target-form") || "send";
+
+        renderRecipientFields();
+
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      });
+    });
+
+    addFieldBtn.addEventListener("click", function () {
+      getActiveList().push("");
+      renderRecipientFields();
+    });
+
+    saveBtn.addEventListener("click", function () {
+      const activeList = getActiveList();
+      const emails = [];
+
+      document.querySelectorAll(".extra-recipient-email").forEach(function (input) {
+        const email = input.value.trim();
+
+        if (email && !emails.includes(email)) {
+          emails.push(email);
+        }
+      });
+
+      if (activeRecipientTarget === "schedule") {
+        scheduleRecipients.length = 0;
+        emails.forEach(email => scheduleRecipients.push(email));
+      } else {
+        sendRecipients.length = 0;
+        emails.forEach(email => sendRecipients.push(email));
+      }
+
+      updateCountText();
+
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      modalInstance.hide();
+    });
+
+    updateCountText();
+  });
+</script>
+
+
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -1357,7 +2054,7 @@
 
 
 
-  <!-- VISITORS -->
+
   <script>
     const postSiteId = "<%= companyInfo?._id || companyInfo?.id || '' %>";
     const postSiteName = "<%= companyInfo?.siteName || '' %>";
@@ -1419,7 +2116,7 @@
     loadVisitors();
   </script>
 
-  <!-- POP UP MODAL -->
+
   <div class="modal fade" id="visitorModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -1468,18 +2165,10 @@
     }
   </script>
 
-  <!-- VISTORS -->
-  <script>
-    // if (success === "sent") {
-    //   showSuccessPopup("Report sent successfully!");
-    // }
 
-    // if (success === "scheduled") {
-    //   showSuccessPopup("Report scheduled successfully!");
-    // }
-  </script>
 
-  // Modal for Checklist
+
+  <!-- Modal for Checklist -->
   <div class="modal fade" id="addChecklistModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -1542,7 +2231,7 @@
     </div>
   </div>
 
-  // checklist progress modal
+
   <div class="modal fade" id="checklistProgressModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -1556,7 +2245,7 @@
     </div>
   </div>
 
-  // check List add checklist input
+
   <script>
     function addChecklistInput() {
       const wrapper = document.getElementById("checklistItemsWrapper");
@@ -1626,251 +2315,253 @@
     }
   </script>
 
-  // Tasks Modal
+
   <div class="modal fade" id="newTaskModal" tabindex="-1">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <form action="/create-post-site-task" method="POST">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <form action="/create-post-site-task" method="POST">
 
-        <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="ri-task-line me-1 text-primary"></i> New Task
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="ri-task-line me-1 text-primary"></i> New Task
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
 
-        <div class="modal-body">
-          <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || companyInfo?.id || '' %>">
-          <input type="hidden" name="postSiteName" value="<%= companyInfo?.siteName || '' %>">
+          <div class="modal-body">
+            <input type="hidden" name="postSiteId" value="<%= companyInfo?._id || companyInfo?.id || '' %>">
+            <input type="hidden" name="postSiteName" value="<%= companyInfo?.siteName || '' %>">
 
-          <div class="row gy-3">
-            <div class="col-md-6">
-              <label class="form-label">Task Name</label>
-              <input type="text" name="taskName" class="form-control" required>
-            </div>
+            <div class="row gy-3">
+              <div class="col-md-6">
+                <label class="form-label">Task Name</label>
+                <input type="text" name="taskName" class="form-control" required>
+              </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Max Duration</label>
-              <select name="maxDuration" class="form-control" required>
-                <option value="">Select Duration</option>
-                <% 
-                  const durations = [
-                    "5 min","10 min","15 min","20 min","30 min","45 min",
-                    "1 hr","1.5 hrs","2 hrs","3 hrs","4 hrs","5 hrs","6 hrs","7 hrs","8 hrs"
-                  ];
-                  durations.forEach(function(d){ 
-                %>
-                  <option value="<%= d %>"><%= d %></option>
-                <% }) %>
-              </select>
-            </div>
-
-            <div class="col-md-12">
-              <label class="form-label">Task Description</label>
-              <textarea name="taskDescription" class="form-control" rows="3"></textarea>
-            </div>
-
-            <div class="col-md-12">
-              <label class="form-label">Assign Guards</label>
-              <select name="assignedGuards" class="form-control" multiple required>
-                <% if (assignedGuards && assignedGuards.length > 0) { %>
-                  <% assignedGuards.forEach(function(guard){ %>
-                    <option value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>">
-                      <%= guard.fullname || guard.name || guard.email || 'Unnamed Guard' %>
+              <div class="col-md-6">
+                <label class="form-label">Max Duration</label>
+                <select name="maxDuration" class="form-control" required>
+                  <option value="">Select Duration</option>
+                  <% const durations=[ "5 min" ,"10 min","15 min","20 min","30 min","45 min", "1 hr" ,"1.5hrs","2hrs","3 hrs","4 hrs","5 hrs","6 hrs","7 hrs","8 hrs" ]; durations.forEach(function(d){ %>
+                    <option value="<%= d %>">
+                      <%= d %>
                     </option>
-                  <% }) %>
-                <% } %>
-              </select>
-              <small class="text-muted">Hold CTRL to select multiple guards.</small>
-            </div>
+                    <% }) %>
+                </select>
+              </div>
 
-            <div class="col-md-12">
-              <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#oneOffTaskTab"
-                    type="button" role="tab" onclick="document.getElementById('taskTypeInput').value='One-Off'">
-                    One-off Task
-                  </button>
-                </li>
+              <div class="col-md-12">
+                <label class="form-label">Task Description</label>
+                <textarea name="taskDescription" class="form-control" rows="3"></textarea>
+              </div>
 
-                <li class="nav-item">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#recurringTaskTab"
-                    type="button" role="tab" onclick="document.getElementById('taskTypeInput').value='Recurring'">
-                    Recurring Task
-                  </button>
-                </li>
-              </ul>
+              <div class="col-md-12">
+                <label class="form-label">Assign Guards</label>
+                <select name="assignedGuards" class="form-control" multiple required>
+                  <% if (assignedGuards && assignedGuards.length> 0) { %>
+                    <% assignedGuards.forEach(function(guard){ %>
+                      <option
+                        value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>">
+                        <%= guard.fullname || guard.name || guard.email || 'Unnamed Guard' %>
+                      </option>
+                      <% }) %>
+                        <% } %>
+                </select>
+                <small class="text-muted">Hold CTRL to select multiple guards.</small>
+              </div>
 
-              <input type="hidden" name="taskType" id="taskTypeInput" value="One-Off">
+              <div class="col-md-12">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#oneOffTaskTab" type="button"
+                      role="tab" onclick="document.getElementById('taskTypeInput').value='One-Off'">
+                      One-off Task
+                    </button>
+                  </li>
 
-              <div class="tab-content border border-top-0 p-3">
-                <div class="tab-pane fade show active" id="oneOffTaskTab">
-                  <div class="row gy-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Start Date & Time</label>
-                      <input type="datetime-local" name="oneOffStartDateTime" class="form-control">
-                    </div>
+                  <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#recurringTaskTab" type="button"
+                      role="tab" onclick="document.getElementById('taskTypeInput').value='Recurring'">
+                      Recurring Task
+                    </button>
+                  </li>
+                </ul>
 
-                    <div class="col-md-6">
-                      <label class="form-label">Due Date & Time</label>
-                      <input type="datetime-local" name="oneOffDueDateTime" class="form-control">
-                    </div>
-                  </div>
-                </div>
+                <input type="hidden" name="taskType" id="taskTypeInput" value="One-Off">
 
-                <div class="tab-pane fade" id="recurringTaskTab">
-                  <div class="row gy-3">
-                    <div class="col-md-12">
-                      <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="recurringContinuous" id="recurringContinuousToggle" onchange="toggleRecurringMode()">
-                        <label class="form-check-label" for="recurringContinuousToggle">Continuous</label>
+                <div class="tab-content border border-top-0 p-3">
+                  <div class="tab-pane fade show active" id="oneOffTaskTab">
+                    <div class="row gy-3">
+                      <div class="col-md-6">
+                        <label class="form-label">Start Date & Time</label>
+                        <input type="datetime-local" name="oneOffStartDateTime" class="form-control">
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label">Due Date & Time</label>
+                        <input type="datetime-local" name="oneOffDueDateTime" class="form-control">
                       </div>
                     </div>
+                  </div>
 
-                    <div class="col-md-12" id="continuousDaysBox" style="display:none;">
-                      <label class="form-label">Scheduled Days</label>
-                      <div class="d-flex flex-wrap gap-3 border rounded p-3">
-                        <% ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].forEach(function(day){ %>
-                          <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="scheduledDays" value="<%= day %>" id="taskDay_<%= day %>">
-                            <label class="form-check-label" for="taskDay_<%= day %>"><%= day %></label>
+                  <div class="tab-pane fade" id="recurringTaskTab">
+                    <div class="row gy-3">
+                      <div class="col-md-12">
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" name="recurringContinuous"
+                            id="recurringContinuousToggle" onchange="toggleRecurringMode()">
+                          <label class="form-check-label" for="recurringContinuousToggle">Continuous</label>
+                        </div>
+                      </div>
+
+                      <div class="col-md-12" id="continuousDaysBox" style="display:none;">
+                        <label class="form-label">Scheduled Days</label>
+                        <div class="d-flex flex-wrap gap-3 border rounded p-3">
+                          <% ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].forEach(function(day){
+                            %>
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" name="scheduledDays" value="<%= day %>"
+                                id="taskDay_<%= day %>">
+                              <label class="form-check-label" for="taskDay_<%= day %>">
+                                <%= day %>
+                              </label>
+                            </div>
+                            <% }) %>
+                        </div>
+                      </div>
+
+                      <div id="specificRepeatBox">
+                        <div class="row gy-3">
+                          <div class="col-md-4">
+                            <label class="form-label">Mode</label>
+                            <select name="recurringMode" class="form-control">
+                              <option value="Specific Time">Specific Time</option>
+                              <option value="Repeat">Repeat</option>
+                            </select>
                           </div>
-                        <% }) %>
-                      </div>
-                    </div>
 
-                    <div id="specificRepeatBox">
-                      <div class="row gy-3">
-                        <div class="col-md-4">
-                          <label class="form-label">Mode</label>
-                          <select name="recurringMode" class="form-control">
-                            <option value="Specific Time">Specific Time</option>
-                            <option value="Repeat">Repeat</option>
-                          </select>
-                        </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" name="recurringStartTime" class="form-control">
+                          </div>
 
-                        <div class="col-md-4">
-                          <label class="form-label">Start Time</label>
-                          <input type="time" name="recurringStartTime" class="form-control">
-                        </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Starting From</label>
+                            <input type="date" name="recurringStartingFrom" class="form-control">
+                          </div>
 
-                        <div class="col-md-4">
-                          <label class="form-label">Starting From</label>
-                          <input type="date" name="recurringStartingFrom" class="form-control">
-                        </div>
+                          <div class="col-md-3">
+                            <label class="form-label">Repeats</label>
+                            <select name="repeatType" class="form-control">
+                              <option value="Daily">Daily</option>
+                              <option value="Weekly">Weekly</option>
+                            </select>
+                          </div>
 
-                        <div class="col-md-3">
-                          <label class="form-label">Repeats</label>
-                          <select name="repeatType" class="form-control">
-                            <option value="Daily">Daily</option>
-                            <option value="Weekly">Weekly</option>
-                          </select>
-                        </div>
+                          <div class="col-md-3">
+                            <label class="form-label">Every</label>
+                            <input type="number" name="repeatEvery" class="form-control" value="1" min="1">
+                          </div>
 
-                        <div class="col-md-3">
-                          <label class="form-label">Every</label>
-                          <input type="number" name="repeatEvery" class="form-control" value="1" min="1">
-                        </div>
+                          <div class="col-md-3">
+                            <label class="form-label">End Repeat</label>
+                            <select name="repeatEndType" class="form-control">
+                              <option value="After">After</option>
+                              <option value="Never">Never</option>
+                            </select>
+                          </div>
 
-                        <div class="col-md-3">
-                          <label class="form-label">End Repeat</label>
-                          <select name="repeatEndType" class="form-control">
-                            <option value="After">After</option>
-                            <option value="Never">Never</option>
-                          </select>
-                        </div>
-
-                        <div class="col-md-3">
-                          <label class="form-label">After</label>
-                          <input type="number" name="repeatEndAfter" class="form-control" value="5" min="1">
+                          <div class="col-md-3">
+                            <label class="form-label">After</label>
+                            <input type="number" name="repeatEndAfter" class="form-control" value="5" min="1">
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="col-md-12">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">Sub Tasks</label>
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSubTaskInput()">
-                  <i class="ri-add-line"></i> Add
-                </button>
-              </div>
+              <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="form-label mb-0">Sub Tasks</label>
+                  <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSubTaskInput()">
+                    <i class="ri-add-line"></i> Add
+                  </button>
+                </div>
 
-              <div id="subTaskWrapper">
-                <div class="input-group mb-2">
-                  <input type="text" name="subTasks" class="form-control" placeholder="Enter sub task">
+                <div id="subTaskWrapper">
+                  <div class="input-group mb-2">
+                    <input type="text" name="subTasks" class="form-control" placeholder="Enter sub task">
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Task</button>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Task</button>
+          </div>
 
-      </form>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-// Taks Script again
-<script>
-  function addSubTaskInput() {
-    const wrapper = document.getElementById("subTaskWrapper");
+  <!-- Tasks Script -->
+  <script>
+    function addSubTaskInput() {
+      const wrapper = document.getElementById("subTaskWrapper");
 
-    const div = document.createElement("div");
-    div.className = "input-group mb-2";
+      const div = document.createElement("div");
+      div.className = "input-group mb-2";
 
-    div.innerHTML = `
+      div.innerHTML = `
       <input type="text" name="subTasks" class="form-control" placeholder="Enter sub task">
       <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">
         <i class="ri-delete-bin-line"></i>
       </button>
     `;
 
-    wrapper.appendChild(div);
-  }
-
-  function toggleRecurringMode() {
-    const toggle = document.getElementById("recurringContinuousToggle");
-    const daysBox = document.getElementById("continuousDaysBox");
-    const repeatBox = document.getElementById("specificRepeatBox");
-
-    if (toggle.checked) {
-      daysBox.style.display = "block";
-      repeatBox.style.display = "none";
-    } else {
-      daysBox.style.display = "none";
-      repeatBox.style.display = "block";
+      wrapper.appendChild(div);
     }
-  }
 
-  const taskDateFilter = document.getElementById("taskDateFilter");
+    function toggleRecurringMode() {
+      const toggle = document.getElementById("recurringContinuousToggle");
+      const daysBox = document.getElementById("continuousDaysBox");
+      const repeatBox = document.getElementById("specificRepeatBox");
 
-  if (taskDateFilter) {
-    taskDateFilter.addEventListener("change", function () {
-      const selectedDate = this.value;
-      const rows = document.querySelectorAll(".task-row");
+      if (toggle.checked) {
+        daysBox.style.display = "block";
+        repeatBox.style.display = "none";
+      } else {
+        daysBox.style.display = "none";
+        repeatBox.style.display = "block";
+      }
+    }
 
-      rows.forEach(row => {
-        const rowDate = row.getAttribute("data-date");
+    const taskDateFilter = document.getElementById("taskDateFilter");
 
-        if (!selectedDate || rowDate === selectedDate) {
-          row.style.display = "";
-        } else {
-          row.style.display = "none";
-        }
+    if (taskDateFilter) {
+      taskDateFilter.addEventListener("change", function () {
+        const selectedDate = this.value;
+        const rows = document.querySelectorAll(".task-row");
+
+        rows.forEach(row => {
+          const rowDate = row.getAttribute("data-date");
+
+          if (!selectedDate || rowDate === selectedDate) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
       });
-    });
-  }
-</script>
+    }
+  </script>
 
-  <!-- FOOTER -->
+
 
   <%- include("../includes/footer"); -%>
     <!-- Scroll To Top -->
@@ -1885,7 +2576,7 @@
 
     <!-- Bootstrap JS -->
     <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-
+    visitors
     <!-- Defaultmenu JS -->
     <script src="../assets/js/defaultmenu.min.js"></script>
 
@@ -2229,6 +2920,33 @@
         });
       }
     </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASbZIITafeYZViSsD0PqqPcUVaX_dabm8"></script>
+
+<script>
+  window.addEventListener("load", function () {
+    var mapContainer = document.getElementById("postSiteBannerMap");
+    if (!mapContainer || typeof google === "undefined") return;
+
+    var siteLat = parseFloat(mapContainer.dataset.lat);
+    var siteLong = parseFloat(mapContainer.dataset.long);
+
+    if (isNaN(siteLat) || isNaN(siteLong)) return;
+
+    var siteLocation = { lat: siteLat, lng: siteLong };
+
+    var map = new google.maps.Map(mapContainer, {
+      center: siteLocation,
+      zoom: 17,
+      mapTypeId: "roadmap"
+    });
+
+    new google.maps.Marker({
+      position: siteLocation,
+      map: map
+    });
+  });
+</script>
 
     </body>
 

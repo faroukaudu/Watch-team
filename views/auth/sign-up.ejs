@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="vertical" data-vertical-style="overlay" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" data-toggled="close">
+<html lang="en" dir="ltr" data-nav-layout="vertical" data-vertical-style="overlay" data-theme-mode="light"
+    data-header-styles="light" data-menu-styles="light" data-toggled="close">
 
 <head>
 
@@ -7,10 +8,11 @@
     <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title> Watch Team - Sign-up</title>
+    <title> WatchTeam - Sign-up</title>
     <meta name="Description" content="Bootstrap Responsive Admin Web Dashboard HTML5 Template">
     <meta name="Author" content="Spruko Technologies Private Limited">
-<meta name="keywords" content="dashboard template,dashboard html,bootstrap admin,dashboard admin,admin template,sales dashboard,crypto dashboard,projects dashboard,html template,html,html css,admin dashboard template,html css bootstrap,dashboard html css,pos system,bootstrap dashboard">
+    <meta name="keywords"
+        content="dashboard template,dashboard html,bootstrap admin,dashboard admin,admin template,sales dashboard,crypto dashboard,projects dashboard,html template,html,html css,admin dashboard template,html css bootstrap,dashboard html css,pos system,bootstrap dashboard">
     <!-- Favicon -->
     <link rel="icon" href="../assets/images/brand-logos/favicon.ico" type="image/x-icon">
 
@@ -18,13 +20,28 @@
     <script src="../assets/js/authentication-main.js"></script>
 
     <!-- Bootstrap Css -->
-    <link id="style" href="../assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+    <link id="style" href="../assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Style Css -->
-    <link href="../assets/css/styles.css" rel="stylesheet" >
+    <link href="../assets/css/styles.css" rel="stylesheet">
 
     <!-- Icons Css -->
-    <link href="../assets/css/icons.css" rel="stylesheet" >
+    <link href="../assets/css/icons.css" rel="stylesheet">
+
+    <style>
+        .authentication-background {
+            background: url('../assets/images/lock.jpg') center center/cover no-repeat fixed !important;
+            min-height: 100vh;
+
+        }
+
+        .authentication-background::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(1, 9, 34, 0.421) !important;
+        }
+    </style>
 
 
 </head>
@@ -40,15 +57,17 @@
         <div class="offcanvas-body">
             <nav class="border-bottom border-block-end-dashed">
                 <div class="nav nav-tabs nav-justified" id="switcher-main-tab" role="tablist">
-                    <button class="nav-link active" id="switcher-home-tab" data-bs-toggle="tab" data-bs-target="#switcher-home"
-                        type="button" role="tab" aria-controls="switcher-home" aria-selected="true">Theme Styles</button>
-                    <button class="nav-link" id="switcher-profile-tab" data-bs-toggle="tab" data-bs-target="#switcher-profile"
-                        type="button" role="tab" aria-controls="switcher-profile" aria-selected="false">Theme Colors</button>
+                    <button class="nav-link active" id="switcher-home-tab" data-bs-toggle="tab"
+                        data-bs-target="#switcher-home" type="button" role="tab" aria-controls="switcher-home"
+                        aria-selected="true">Theme Styles</button>
+                    <button class="nav-link" id="switcher-profile-tab" data-bs-toggle="tab"
+                        data-bs-target="#switcher-profile" type="button" role="tab" aria-controls="switcher-profile"
+                        aria-selected="false">Theme Colors</button>
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade show active border-0" id="switcher-home" role="tabpanel" aria-labelledby="switcher-home-tab"
-                    tabindex="0">
+                <div class="tab-pane fade show active border-0" id="switcher-home" role="tabpanel"
+                    aria-labelledby="switcher-home-tab" tabindex="0">
                     <div class="">
                         <p class="switcher-style-head">Theme Color Mode:</p>
                         <div class="row switcher-style g-0">
@@ -57,8 +76,8 @@
                                     <label class="form-check-label" for="switcher-light-theme">
                                         Light
                                     </label>
-                                    <input class="form-check-input" type="radio" name="theme-style" id="switcher-light-theme"
-                                        checked>
+                                    <input class="form-check-input" type="radio" name="theme-style"
+                                        id="switcher-light-theme" checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -66,7 +85,8 @@
                                     <label class="form-check-label" for="switcher-dark-theme">
                                         Dark
                                     </label>
-                                    <input class="form-check-input" type="radio" name="theme-style" id="switcher-dark-theme">
+                                    <input class="form-check-input" type="radio" name="theme-style"
+                                        id="switcher-dark-theme">
                                 </div>
                             </div>
                         </div>
@@ -79,7 +99,8 @@
                                     <label class="form-check-label" for="switcher-ltr">
                                         LTR
                                     </label>
-                                    <input class="form-check-input" type="radio" name="direction" id="switcher-ltr" checked>
+                                    <input class="form-check-input" type="radio" name="direction" id="switcher-ltr"
+                                        checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -100,8 +121,8 @@
                                     <label class="form-check-label" for="switcher-vertical">
                                         Vertical
                                     </label>
-                                    <input class="form-check-input" type="radio" name="navigation-style" id="switcher-vertical"
-                                        checked>
+                                    <input class="form-check-input" type="radio" name="navigation-style"
+                                        id="switcher-vertical" checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -155,7 +176,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="px-4 pb-3 text-secondary fs-11"><span class="fw-medium fs-12 text-dark me-2 d-inline-block">Note:</span>Works same for both Vertical and Horizontal</div>
+                        <div class="px-4 pb-3 text-secondary fs-11"><span
+                                class="fw-medium fs-12 text-dark me-2 d-inline-block">Note:</span>Works same for both
+                            Vertical and Horizontal</div>
                     </div>
                     <div class="">
                         <p class="switcher-style-head">Page Styles:</p>
@@ -165,8 +188,8 @@
                                     <label class="form-check-label" for="switcher-regular">
                                         Regular
                                     </label>
-                                    <input class="form-check-input" type="radio" name="page-styles" id="switcher-regular"
-                                        checked>
+                                    <input class="form-check-input" type="radio" name="page-styles"
+                                        id="switcher-regular" checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -174,7 +197,8 @@
                                     <label class="form-check-label" for="switcher-classic">
                                         Classic
                                     </label>
-                                    <input class="form-check-input" type="radio" name="page-styles" id="switcher-classic">
+                                    <input class="form-check-input" type="radio" name="page-styles"
+                                        id="switcher-classic">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -182,7 +206,8 @@
                                     <label class="form-check-label" for="switcher-modern">
                                         Modern
                                     </label>
-                                    <input class="form-check-input" type="radio" name="page-styles" id="switcher-modern">
+                                    <input class="form-check-input" type="radio" name="page-styles"
+                                        id="switcher-modern">
                                 </div>
                             </div>
                         </div>
@@ -195,8 +220,8 @@
                                     <label class="form-check-label" for="switcher-full-width">
                                         Full Width
                                     </label>
-                                    <input class="form-check-input" type="radio" name="layout-width" id="switcher-full-width"
-                                        checked>
+                                    <input class="form-check-input" type="radio" name="layout-width"
+                                        id="switcher-full-width" checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -204,7 +229,8 @@
                                     <label class="form-check-label" for="switcher-boxed">
                                         Boxed
                                     </label>
-                                    <input class="form-check-input" type="radio" name="layout-width" id="switcher-boxed">
+                                    <input class="form-check-input" type="radio" name="layout-width"
+                                        id="switcher-boxed">
                                 </div>
                             </div>
                         </div>
@@ -217,8 +243,8 @@
                                     <label class="form-check-label" for="switcher-menu-fixed">
                                         Fixed
                                     </label>
-                                    <input class="form-check-input" type="radio" name="menu-positions" id="switcher-menu-fixed"
-                                        checked>
+                                    <input class="form-check-input" type="radio" name="menu-positions"
+                                        id="switcher-menu-fixed" checked>
                                 </div>
                             </div>
                             <div class="col-sm-4">
@@ -226,7 +252,8 @@
                                     <label class="form-check-label" for="switcher-menu-scroll">
                                         Scrollable
                                     </label>
-                                    <input class="form-check-input" type="radio" name="menu-positions" id="switcher-menu-scroll">
+                                    <input class="form-check-input" type="radio" name="menu-positions"
+                                        id="switcher-menu-scroll">
                                 </div>
                             </div>
                         </div>
@@ -312,10 +339,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="px-4 pb-3 text-secondary fs-11"><span class="fw-medium fs-12 text-dark me-2 d-inline-block">Note:</span>Navigation menu styles won't work here.</div>
+                        <div class="px-4 pb-3 text-secondary fs-11"><span
+                                class="fw-medium fs-12 text-dark me-2 d-inline-block">Note:</span>Navigation menu styles
+                            won't work here.</div>
                     </div>
                 </div>
-                <div class="tab-pane fade border-0" id="switcher-profile" role="tabpanel" aria-labelledby="switcher-profile-tab" tabindex="0">
+                <div class="tab-pane fade border-0" id="switcher-profile" role="tabpanel"
+                    aria-labelledby="switcher-profile-tab" tabindex="0">
                     <div>
                         <div class="theme-colors">
                             <p class="switcher-style-head">Menu Colors:</p>
@@ -346,7 +376,8 @@
                                         type="radio" name="menu-colors" id="switcher-menu-transparent">
                                 </div>
                             </div>
-                            <div class="px-4 pb-3 text-muted fs-11">Note:If you want to change color Menu dynamically change from below Theme Primary color picker</div>
+                            <div class="px-4 pb-3 text-muted fs-11">Note:If you want to change color Menu dynamically
+                                change from below Theme Primary color picker</div>
                         </div>
                         <div class="theme-colors">
                             <p class="switcher-style-head">Header Colors:</p>
@@ -368,16 +399,17 @@
                                 </div>
                                 <div class="form-check switch-select me-3">
                                     <input class="form-check-input color-input color-gradient" data-bs-toggle="tooltip"
-                                        data-bs-placement="top" title="Gradient Header" type="radio" name="header-colors"
-                                        id="switcher-header-gradient">
+                                        data-bs-placement="top" title="Gradient Header" type="radio"
+                                        name="header-colors" id="switcher-header-gradient">
                                 </div>
                                 <div class="form-check switch-select me-3">
-                                    <input class="form-check-input color-input color-transparent" data-bs-toggle="tooltip"
-                                        data-bs-placement="top" title="Transparent Header" type="radio" name="header-colors"
-                                        id="switcher-header-transparent">
+                                    <input class="form-check-input color-input color-transparent"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Transparent Header"
+                                        type="radio" name="header-colors" id="switcher-header-transparent">
                                 </div>
                             </div>
-                            <div class="px-4 pb-3 text-muted fs-11">Note:If you want to change color Header dynamically change from below Theme Primary color picker</div>
+                            <div class="px-4 pb-3 text-muted fs-11">Note:If you want to change color Header dynamically
+                                change from below Theme Primary color picker</div>
                         </div>
                         <div class="theme-colors">
                             <p class="switcher-style-head">Theme Primary:</p>
@@ -391,16 +423,16 @@
                                         name="theme-primary" id="switcher-primary1">
                                 </div>
                                 <div class="form-check switch-select me-3">
-                                    <input class="form-check-input color-input color-primary-3" type="radio" name="theme-primary"
-                                        id="switcher-primary2">
+                                    <input class="form-check-input color-input color-primary-3" type="radio"
+                                        name="theme-primary" id="switcher-primary2">
                                 </div>
                                 <div class="form-check switch-select me-3">
-                                    <input class="form-check-input color-input color-primary-4" type="radio" name="theme-primary"
-                                        id="switcher-primary3">
+                                    <input class="form-check-input color-input color-primary-4" type="radio"
+                                        name="theme-primary" id="switcher-primary3">
                                 </div>
                                 <div class="form-check switch-select me-3">
-                                    <input class="form-check-input color-input color-primary-5" type="radio" name="theme-primary"
-                                        id="switcher-primary4">
+                                    <input class="form-check-input color-input color-primary-5" type="radio"
+                                        name="theme-primary" id="switcher-primary4">
                                 </div>
                                 <div class="form-check switch-select ps-0 mt-1 color-primary-light">
                                     <div class="theme-container-primary"></div>
@@ -420,8 +452,8 @@
                                         name="theme-background" id="switcher-background1">
                                 </div>
                                 <div class="form-check switch-select me-3">
-                                    <input class="form-check-input color-input color-bg-3" type="radio" name="theme-background"
-                                        id="switcher-background2">
+                                    <input class="form-check-input color-input color-bg-3" type="radio"
+                                        name="theme-background" id="switcher-background2">
                                 </div>
                                 <div class="form-check switch-select me-3">
                                     <input class="form-check-input color-input color-bg-4" type="radio"
@@ -431,7 +463,8 @@
                                     <input class="form-check-input color-input color-bg-5" type="radio"
                                         name="theme-background" id="switcher-background4">
                                 </div>
-                                <div class="form-check switch-select ps-0 mt-1 tooltip-static-demo color-bg-transparent">
+                                <div
+                                    class="form-check switch-select ps-0 mt-1 tooltip-static-demo color-bg-transparent">
                                     <div class="theme-container-background"></div>
                                     <div class="pickr-container-background"></div>
                                 </div>
@@ -449,8 +482,8 @@
                                         name="theme-background" id="switcher-bg-img1">
                                 </div>
                                 <div class="form-check switch-select m-2">
-                                    <input class="form-check-input bgimage-input bg-img3" type="radio" name="theme-background"
-                                        id="switcher-bg-img2">
+                                    <input class="form-check-input bgimage-input bg-img3" type="radio"
+                                        name="theme-background" id="switcher-bg-img2">
                                 </div>
                                 <div class="form-check switch-select m-2">
                                     <input class="form-check-input bgimage-input bg-img4" type="radio"
@@ -476,62 +509,99 @@
 
     <div class="container-lg">
         <div class="row justify-content-center align-items-center authentication authentication-basic h-100">
-            <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-6 col-sm-8 col-12">
-                <div class="my-5 d-flex justify-content-center"> 
-                    <a href="index.html"> 
-                        <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
-                    </a> 
+            <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                <div class="my-5 d-flex justify-content-center">
+                    <a href="www.watch-team.com">
+                        <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
+                    </a>
                 </div>
                 <div class="card custom-card my-4 auth-circle">
-                    <form action="/sign-up" method="post"  >
-                            <div class="card-body p-5 " >
-                                <p class="h4 mb-2 fw-semibold">Sign Up</p>
-                                <p class="mb-4 text-muted">Try Watch Team for 30 Days!</p>
-                                <div class="row gy-3">
-                                    <div class="col-xl-12">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" name="company_name" id="validationCustom01"  placeholder="" required>
-                                            <div class="valid-feedback">
-                                                Looks good!
+                    <!-- <form action="/sign-up" method="post"  > -->
+                    <form action="/sign-up/send-code" method="post">
+                        <div class="card-body p-5 ">
+                            <p class="h4 mb-2 fw-semibold">Sign Up</p>
+                            <p class="mb-4 text-muted">Join Watch Team Security Group Today!!!</p>
+                            <div class="row gy-3">
+                                <div class="col-xl-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" name="company_name"
+                                            id="validationCustom01" placeholder="" required>
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <label for="">Company Name*</label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="signup-email" name="full_name"
+                                            placeholder="Enter Email ID" required>
+                                        <label for="signup-email">Full Name*</label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="signup-email" name="username"
+                                            placeholder="Enter Email ID" required>
+                                        <label for="signup-email">Company Email Address*</label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <div class="form-floating position-relative">
+                                        <input type="password" class="form-control" id="password" name="password"
+                                            placeholder="Password" required>
+                                        <label for="signup-password">Password*</label>
+                                        <a href="javascript:void(0);"
+                                            class="show-password-button text-muted position-absolute top-50 end-0 translate-middle-y me-3"
+                                            onclick="createpassword('password', this)" id="button-addon2">
+                                            <i class="ri-eye-off-line align-middle"></i>
+                                        </a>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="progress" style="height: 6px;">
+                                            <div id="passwordStrengthBar" class="progress-bar bg-danger"
+                                                style="width: 0%;">
                                             </div>
-                                            <label for="">Company Name*</label>
                                         </div>
-                                    </div>
-                                    <div class="col-xl-12">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control" id="signup-email" name="full_name" placeholder="Enter Email ID" required>
-                                            <label for="signup-email">Full Name*</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-12">
-                                        <div class="form-floating">
-                                            <input type="email" class="form-control" id="signup-email" name="username" placeholder="Enter Email ID" required>
-                                            <label for="signup-email">Company Email Address*</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-12">
-                                        <div class="form-floating position-relative">
-                                            <input type="password" class="form-control" id="signup-password" name="password" placeholder="Password" required>
-                                            <label for="signup-password">Password*</label>
-                                            <a href="javascript:void(0);" class="show-password-button text-muted position-absolute top-50 end-0 translate-middle-y me-3" onclick="createpassword('signup-password', this)" id="button-addon2">
-                                                <i class="ri-eye-off-line align-middle"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-12">
-                                        <div class="form-floating position-relative">
-                                            <input type="password" class="form-control" id="signup-password" name="cpassword" placeholder="Password" required>
-                                            <label for="signup-password">Confirm Password*</label>
-                                            <a href="javascript:void(0);" class="show-password-button text-muted position-absolute top-50 end-0 translate-middle-y me-3" onclick="createpassword('signup-password', this)" id="button-addon2">
-                                                <i class="ri-eye-off-line align-middle"></i>
-                                            </a>
-                                        </div>
+                                        <small id="passwordStrengthText" class="text-danger fw-semibold">Password
+                                            strength</small>
                                     </div>
                                 </div>
-                                <div class="text-center my-4 authentication-barrier">
-                                    <span class="text-muted fs-11">Or Join With</span>
+                                <div class="col-xl-12">
+                                    <div class="form-floating position-relative">
+                                        <input type="password" class="form-control" id="cpassword"
+                                            name="cpassword" placeholder="Password" required>
+                                        <label for="signup-password">Confirm Password*</label>
+                                        <a href="javascript:void(0);"
+                                            class="show-password-button text-muted position-absolute top-50 end-0 translate-middle-y me-3"
+                                            onclick="createpassword('cpassword', this)" id="button-addon2">
+                                            <i class="ri-eye-off-line align-middle"></i>
+                                        </a>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small id="passwordMatchText" class="text-danger fw-semibold">
+                                            ✗ Passwords do not match
+                                        </small>
+                                    </div>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-center gap-2 mb-3 flex-wrap">
+
+                            </div>
+                            <div class="text-center my-4 authentication-barrier">
+                                <span class="text-muted fs-11">Or Join With</span>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" required id="consentCheck">
+
+                                <label class="form-check-label" for="consentCheck" style="text-align: center;">
+                                    I agree to the
+                                    <a href="/terms-and-conditions" target="_blank">Terms & Conditions</a>,
+                                    <a href="/privacy-policy" target="_blank">Privacy Policy</a>,
+                                    and
+                                    <a href="/data-processing-consent" target="_blank">Data Processing & Location
+                                        Consent</a>.
+                                </label>
+                            </div>
+                            <!-- <div class="d-flex align-items-center justify-content-center gap-2 mb-3 flex-wrap">
                                     <button class="btn btn-icon btn-orange-light">
                                         <i class="ri-google-line fs-17 align-middle icon-custom"></i>
                                     </button>
@@ -539,16 +609,17 @@
                                         <i class="ri-facebook-line fs-17 align-middle icon-custom"></i>
                                     </button>
                                     
-                                </div>
-                                <div class="d-grid mt-4">
-                                    <button type="submit" class="btn btn-primary">Sign Up </button>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-muted mt-3 mb-0">Already have an account? <a href="/sign-in" class="text-primary">Sign In</a></p>
-                                </div>
+                                </div> -->
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary">Sign Up </button>
                             </div>
+                            <div class="text-center">
+                                <p class="text-muted mt-3 mb-0">Already have an account? <a href="/sign-in"
+                                        class="text-primary">Sign In</a></p>
+                            </div>
+                        </div>
                     </form>
-                    
+
                 </div>
             </div>
         </div>
@@ -559,6 +630,90 @@
 
     <!-- Show Password JS -->
     <script src="../assets/js/show-password.js"></script>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const password = document.getElementById("password");
+  const cpassword = document.getElementById("cpassword");
+  const bar = document.getElementById("passwordStrengthBar");
+  const text = document.getElementById("passwordStrengthText");
+  const matchText = document.getElementById("passwordMatchText");
+  const submitBtn = document.querySelector('button[type="submit"]');
+
+  function checkStrength(value) {
+    let score = 0;
+
+    if (value.length >= 8) score++;
+    if (/[A-Z]/.test(value)) score++;
+    if (/[a-z]/.test(value)) score++;
+    if (/[0-9]/.test(value)) score++;
+    if (/[^A-Za-z0-9]/.test(value)) score++;
+
+    if (!value) {
+      bar.style.width = "0%";
+      bar.className = "progress-bar bg-danger";
+      text.textContent = "Password strength";
+      text.className = "text-danger fw-semibold";
+      return false;
+    }
+
+    if (score <= 2) {
+      bar.style.width = "33%";
+      bar.className = "progress-bar bg-danger";
+      text.textContent = "Weak password";
+      text.className = "text-danger fw-semibold";
+      return false;
+    }
+
+    if (score === 3 || score === 4) {
+      bar.style.width = "66%";
+      bar.className = "progress-bar";
+      bar.style.backgroundColor = "#8B4513";
+      text.textContent = "Normal password";
+      text.className = "fw-semibold";
+      text.style.color = "#8B4513";
+      return false;
+    }
+
+    bar.style.width = "100%";
+    bar.className = "progress-bar bg-success";
+    text.textContent = "Strong password";
+    text.className = "text-success fw-semibold";
+    return true;
+  }
+
+  function checkMatch() {
+    if (!cpassword.value) {
+      matchText.textContent = "";
+      return false;
+    }
+
+    if (password.value === cpassword.value) {
+      matchText.textContent = "✓ Passwords match";
+      matchText.className = "text-success fw-semibold";
+      return true;
+    }
+
+    matchText.textContent = "✗ Passwords do not match";
+    matchText.className = "text-danger fw-semibold";
+    return false;
+  }
+
+  function validateForm() {
+    const strong = checkStrength(password.value);
+    const match = checkMatch();
+
+    if (submitBtn) {
+      submitBtn.disabled = !(strong && match);
+    }
+  }
+
+  password.addEventListener("input", validateForm);
+  cpassword.addEventListener("input", validateForm);
+
+  validateForm();
+});
+</script>
 
 </body>
 

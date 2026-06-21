@@ -18,7 +18,7 @@
       </div>
 
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <% if (userInfo.userType !== "Client") { %>
+        <% if (userInfo.userType !== "Clientss") { %>
         <a href="/report-template-web" class="btn btn-primary btn-wave">
           <i class="ri-add-line me-1 fw-medium align-middle"></i> New Report Template
         </a>
@@ -244,7 +244,7 @@
             <h5 class="mb-1">No Report Templates Found</h5>
             <p class="text-muted mb-3">No templates available for your company.</p>
             <% if (userInfo.userType !== "Client") { %>
-            <a href="/report-template-create" class="btn btn-primary btn-wave">
+            <a href="/report-template-web" class="btn btn-primary btn-wave">
               <i class="ri-add-line me-1"></i> Create Template
             </a>
             <% } %>

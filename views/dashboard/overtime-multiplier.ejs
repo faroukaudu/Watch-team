@@ -1,0 +1,577 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+    <!-- FlatPickr CSS -->
+    <link rel="icon" href="../assets/images/brand-logos/favicon.ico" type="image/x-icon">
+
+    <!-- Choices JS -->
+    <script src="../assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Main Theme Js -->
+    <script src="../assets/js/main.js"></script>
+
+    <!-- Bootstrap Css -->
+    <link id="style" href="../assets/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Style Css -->
+    <link href="../assets/css/styles.css" rel="stylesheet">
+
+    <!-- Icons Css -->
+    <link href="../assets/css/icons.css" rel="stylesheet">
+
+    <!-- Node Waves Css -->
+    <link href="../assets/libs/node-waves/waves.min.css" rel="stylesheet">
+
+    <!-- Simplebar Css -->
+    <link href="../assets/libs/simplebar/simplebar.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Color Picker Css -->
+    <!-- <link rel="stylesheet" href="../assets/libs/flatpickr/flatpickr.min.css"> -->
+    <!-- <link rel="stylesheet" href="../assets/libs/@simonwep/pickr/themes/nano.min.css"> -->
+
+    <!-- Choices Css -->
+    <link rel="stylesheet" href="../assets/libs/choices.js/public/assets/styles/choices.min.css">
+
+    <!-- FlatPickr CSS -->
+    <link rel="stylesheet" href="../assets/libs/flatpickr/flatpickr.min.css">
+
+    <!-- Auto Complete CSS -->
+    <!-- <link rel="stylesheet" href="../assets/libs/@tarekraafat/autocomplete.js/css/autoComplete.css"> -->
+
+
+    <style>
+        /* Scroll container */
+        .payroll-scroll {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        /* Chrome, Edge, Safari */
+        .payroll-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .payroll-scroll::-webkit-scrollbar-track {
+            background: #a10a0a;
+            border-radius: 10px;
+        }
+
+        .payroll-scroll::-webkit-scrollbar-thumb {
+            background: #8d0952;
+            border-radius: 10px;
+        }
+
+        .payroll-scroll::-webkit-scrollbar-thumb:hover {
+            background: #0cbe29;
+        }
+
+        /* Firefox */
+        .payroll-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #465b77 #040d1a;
+        }
+
+        .payroll-scroll {
+            max-height: 420px;
+            /* adjust height for ~8 rows */
+            overflow-y: scroll;
+        }
+
+        /* Make table header sticky */
+        .payroll-scroll thead th {
+            position: sticky;
+            top: 0;
+            /* background: white; */
+            z-index: 2;
+        }
+    </style>
+
+
+    <!-- Start::app-content -->
+    <div class="main-content app-content">
+        <div class="container-fluid">
+
+            <!-- Start::page-header -->
+
+            <!-- End::page-header -->
+
+            <!-- Start:: row-1 -->
+            <!-- Modal -->
+
+
+            <div class="row">
+                <div class="col-xxl-9">
+
+                </div>
+                <!-- END of 6 cards top -->
+
+                <!-- Another -->
+                <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-6 col-12 mt-5">
+                    <div class="card custom-card">
+                        <div class="card-header justify-content-between">
+                            <div class="card-title">
+                                Overtime Multiplier
+                            </div>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-primary btn-wave waves-light" data-bs-toggle="modal"
+                                    data-bs-target="#create-task"><i
+                                        class="ri-add-line fw-medium align-middle me-1"></i> Overtime Multiplier</button>
+                                <!-- Start::add task modal -->
+                                <div class="modal fade" id="create-task" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <form action="/overtime-multiplier" method="post">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h6 class="modal-title">Generate Overtime Report</h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body px-4">
+                                                    <div class="row gy-2">
+                                                        <div class="col-xl-12">
+                                                            <label class="form-label">Select Guard</label>
+                                                            <select class="form-control" data-trigger name="guardId"
+                                                                id="choices-multiple-remove-button1">
+
+                                                                <% guards.forEach(function(g){ %>
+
+                                                                    <option value="<%= g.fullname+" -"+g.id%>">
+                                                                        <%= g.fullname%>
+                                                                    </option>
+                                                                    <% }) %>
+                                                                        <!-- <option value="New">New</option>
+                                                                <option value="Completed">Completed</option>
+                                                                <option value="Inprogress">Inprogress</option>
+                                                                <option value="Pending">Pending</option> -->
+                                                            </select>
+                                                        </div><br>
+
+                                                        <div class="col-xl-6">
+                                                            <label class="form-label check-all">From</label>
+                                                            <div class="form-group">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-text text-muted"> <i
+                                                                            class="ri-calendar-line"></i> </div>
+                                                                    <input type="text" class="form-control"
+                                                                        id="assignedDate" name="fromDate"
+                                                                        placeholder="Choose date and time">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6">
+                                                            <label class="form-label">To</label>
+                                                            <div class="form-group">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-text text-muted"> <i
+                                                                            class="ri-calendar-line"></i> </div>
+                                                                    <input type="text" class="form-control" id="dueDate"
+                                                                        name="toDate"
+                                                                        placeholder="Choose date and time">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- <div class="col-xl-6">
+                                                            <label class="form-label">Priority</label>
+                                                            <select class="form-control" data-trigger name="choices-single-default" id="choices-multiple-remove-button1">
+                                                                <option value="High">High</option>
+                                                                <option value="Medium">Medium</option>
+                                                                <option value="Low">Low</option>
+                                                            </select>
+                                                        </div> -->
+                                                        <!-- <div class="col-xl-12">
+                                                            <label class="form-label">Assigned To</label>
+                                                            <select class="form-control" name="choices-multiple-remove-button1" id="choices-multiple-remove-button1" multiple>
+                                                                <option value="Choice 1">Angelina May</option>
+                                                                <option value="Choice 2">Kiara advain</option>
+                                                                <option value="Choice 3">Hercules Jhon</option>
+                                                                <option value="Choice 4">Mayor Kim</option>
+                                                            </select>
+                                                        </div> -->
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light"
+                                                        data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Generate</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- End::add task modal -->
+                                <div class="dropdown ms-2">
+                                    <button class="btn btn-icon btn-secondary-light btn-sm btn-wave waves-light"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="ti ti-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Payment Per Hour</a></li>
+                                        <!-- <li><a class="dropdown-item" href="javascript:void(0);">Pending Tasks</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Completed Tasks</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);">Inprogress Tasks</a> -->
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                        <% if(result.length==0){ %>
+                            <!-- EMPTY LIST -->
+                            <div style="margin: auto;">
+                                <img src="assets/images/brand-logos/no-rec.png" width="250px" alt="">
+                            </div>
+                            <% }else{ %>
+
+                                <!-- TABLE LIST -->
+                                <div class="card-body p-0">
+                                    <div class="table-responsive payroll-scroll">
+                                        <table class="table text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        <input class="form-check-input " type="checkbox" id="all-tasks"
+                                                            value="" aria-label="...">
+                                                    </th>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col">Status</th>
+
+                                                    <th scope="col">Hours Worked</th>
+                                                    <th scope="col">Overtime</th>
+                                                    <th scope="col">Shift</th>
+                                                    <th scope="col">Amount</th>
+                                                    <th scope="col">Date</th>
+                                                    <!-- <th scope="col">Priority</th> -->
+                                                    <!-- <th scope="col">Assigned To</th> -->
+                                                    <th scope="col">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+
+
+
+                                                
+                                                <% result.details.forEach(function(results){ %>
+                                                    <tr class="task-list">
+                                                        <td class="task-checkbox"><input class="form-check-input"
+                                                                type="checkbox" value="" aria-label="..."></td>
+                                                        <td>
+                                                            <span class="fw-medium">
+                                                                <%= results.guardName %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <!-- <span class="badge bg-success-transparent">paid</span> for paid -->
+                                                            <span class="badge bg-secondary-transparent">Pending
+                                                                Payment</span>
+                                                        </td>
+                                                        <td>
+                                                            <%= results.workTotalHour %>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-warning-transparent"><%= results.overtime || "0:00:00" %></span>
+                                                        </td>
+                                                        <td>
+                                                            <%= results.shiftTitle || "N/A" %>
+                                                        </td>
+                                                        <td>
+                                                            <span class="fw-medium text-primary">
+                                                                $ <%= (Math.ceil(results.workTotalSeconds * 0.00556 *
+                                                                    1000) / 1000).toFixed(2) %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <%= new
+                                                                Date(results.checkInTime).toLocaleDateString("en-US", {
+                                                                month: "short" , day: "2-digit" , year: "numeric" }) %>
+                                                        </td>
+
+
+                                                        <td>
+                                                            <button class="btn btn-primary-light btn-icon btn-sm"
+                                                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                                                data-bs-title="Edit"><i
+                                                                    class="ri-edit-line"></i></button>
+                                                            <button
+                                                                class="btn btn-danger-light btn-icon ms-1 btn-sm task-delete-btn"><i
+                                                                    class="ri-delete-bin-5-line"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                                        <!-- <tr class="task-list">
+                                                <td class="task-checkbox"><input class="form-check-input" type="checkbox" value="" aria-label="..." checked></td>
+                                                <td>
+                                                    <span class="fw-medium">New Project Buleprint</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium">SPK - 04</span>
+                                                </td>
+                                                <td>
+                                                    05-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium text-secondary">Inprogress</span>
+                                                </td>
+                                                <td>
+                                                    15-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-danger-transparent">High</span>
+                                                </td>
+                                                <td>
+                                                    <div class="avatar-list-stacked">
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/12.jpg" alt="img">
+                                                        </span>
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/11.jpg" alt="img">
+                                                        </span>
+                                                        <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                                            +4
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-primary-light btn-icon btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="ri-edit-line"></i></button>
+                                                    <button class="btn btn-danger-light btn-icon ms-1 btn-sm task-delete-btn"><i class="ri-delete-bin-5-line"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr class="task-list">
+                                                <td class="task-checkbox"><input class="form-check-input" type="checkbox" value="" aria-label="..."></td>
+                                                <td>
+                                                    <span class="fw-medium">Server Side Validation</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium">SPK - 11</span>
+                                                </td>
+                                                <td>
+                                                    12-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium text-warning">Pending</span>
+                                                </td>
+                                                <td>
+                                                    16-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success-transparent">Low</span>
+                                                </td>
+                                                <td>
+                                                    <div class="avatar-list-stacked">
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/5.jpg" alt="img">
+                                                        </span>
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/9.jpg" alt="img">
+                                                        </span>
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/13.jpg" alt="img">
+                                                        </span>
+                                                        <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                                            +5
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-primary-light btn-icon btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="ri-edit-line"></i></button>
+                                                    <button class="btn btn-danger-light btn-icon ms-1 btn-sm task-delete-btn"><i class="ri-delete-bin-5-line"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr class="task-list">
+                                                <td class="task-checkbox"><input class="form-check-input" type="checkbox" value="" aria-label="..."></td>
+                                                <td>
+                                                    <span class="fw-medium">New Plugin Development</span>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium">SPK - 24</span>
+                                                </td>
+                                                <td>
+                                                    08-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="fw-medium text-success">Completed</span>
+                                                </td>
+                                                <td>
+                                                    17-06-2024
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success-transparent">Low</span>
+                                                </td>
+                                                <td>
+                                                    <div class="avatar-list-stacked">
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/2.jpg" alt="img">
+                                                        </span>
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/8.jpg" alt="img">
+                                                        </span>
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="../assets/images/faces/2.jpg" alt="img">
+                                                        </span>
+                                                        <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                                            +2
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-primary-light btn-icon btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit"><i class="ri-edit-line"></i></button>
+                                                    <button class="btn btn-danger-light btn-icon ms-1 btn-sm task-delete-btn"><i class="ri-delete-bin-5-line"></i></button>
+                                                </td>
+                                            </tr> -->
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <% } %>
+
+
+
+
+
+                                    <div class="card-body">
+                                        <!-- This is for the chart, import the JS to work -->
+                                        <!-- <div id="activecustomers"></div> -->
+
+                                        <!-- <div style="margin-bottom: 100px;"></div> -->
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="row mt-0">
+                                            <div class="col-4 text-center">
+                                                <p class="text-muted mb-1 fs-12">Activity Count</p>
+                                                <h6 class="text-primary">
+                                                    <%=(!result || !result.summary || !result.summary.matchedReportCount) ? "0" : result.summary.matchedReportCount%>
+                                                </h6>
+                                            </div>
+                                            <div class="col-4 border-end border-inline-end-dashed text-center">
+                                                <p class="text-muted mb-1 fs-12">Total Work Hours</p>
+                                                <h6 class="text-secondary">
+                                                    <%= (!result || !result.summary || !result.summary.totalWorkSeconds)
+                                                        ? "0:00:00" : (()=> {
+                                                        const t = result.summary.totalWorkSeconds;
+                                                        const h = Math.floor(t / 3600);
+                                                        const m = String(Math.floor((t % 3600) / 60)).padStart(2, "0");
+                                                        const s = String(t % 60).padStart(2, "0");
+                                                        return `${h}:${m}:${s}`;
+                                                        })()
+                                                        %>
+                                                </h6>
+                                            </div>
+                                            <div class="col-4 border-end border-inline-end-dashed text-center">
+                                                <p class="text-muted mb-1 fs-12">Overtime Payment Estimate </p>
+                                                <h6 class="text-secondary">$
+                                                    <%= (!result || !result.summary ||
+                                                        result.summary.totalWorkSeconds===0) ? "0.00" :
+                                                        (Math.ceil(result.summary.totalWorkSeconds * 0.00556 * 1000) /
+                                                        1000).toFixed(2) %>
+                                                </h6>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                    </div>
+                </div>
+
+                <!-- bar chart -->
+
+
+                <!-- repoty num -->
+
+
+
+
+
+
+
+
+
+
+            </div>
+            <!-- End:: row-1 -->
+
+        </div>
+    </div>
+    <!-- End::app-content -->
+
+
+    <!-- Footer Start -->
+    <%- include("../includes/footer"); -%>
+        <!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                                aria-label="Search Anything ..." aria-describedby="button-addon2">
+                            <button class="btn btn-primary" type="button" id="button-addon2"><i
+                                    class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+
+        <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="../assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="../assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="../assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="../assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="../assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="../assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="../assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="../assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="../assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="../assets/js/custom-switcher.min.js"></script>
+
+        <!-- Apex Charts JS -->
+        <script src="../assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Flat Picker JS -->
+        <!-- <script src="../assets/libs/flatpickr/flatpickr.min.js"></script> -->
+
+        <!-- Internal Invoice List JS -->
+        <script src="../assets/js/task-list.js"></script>
+
+        <!-- Custom JS -->
+        <script src="../assets/js/custom.js"></script>
+
+
+        </body>
+
+        </html>

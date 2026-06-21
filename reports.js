@@ -36,7 +36,7 @@ function notification(userName, userEmail, notType, notID) {
 
 app.post("/work-report", (req, res) => {
   console.log("I am linking here");
-  const { clockId, workt, breakt, guardInfo, guardComp, startT, stopT, docId } = req.body;
+  const { clockId, workt, breakt, guardInfo, guardComp, startT, stopT, docId, shiftTemplateId, shiftTitle, shiftStartTime, shiftEndTime } = req.body;
 
 
   console.log("start time", startT,);
@@ -53,10 +53,42 @@ app.post("/work-report", (req, res) => {
     const clockReport = found.checkedReport.id(docId);
     console.log("ReportINFOIS", clockReport);
 
-    const timeInfo = { clockInTime: startT, clockOutTime: stopT, workTime: workt, breakTime: breakt };
+    function secondsFromDuration(value) {
+      const str = String(value || "0:00:00");
+      const parts = str.split(":");
+      const h = parseInt(parts[0] || "0", 10);
+      const m = parseInt(parts[1] || "0", 10);
+      const sec = parseFloat(parts[2] || "0");
+      return (h * 3600) + (m * 60) + sec;
+    }
+
+    function secondsFromTimeRange(start, end) {
+      if (!start || !end) return 0;
+      const s = String(start).split(":");
+      const e = String(end).split(":");
+      let startSec = (parseInt(s[0] || "0", 10) * 3600) + (parseInt(s[1] || "0", 10) * 60);
+      let endSec = (parseInt(e[0] || "0", 10) * 3600) + (parseInt(e[1] || "0", 10) * 60);
+      if (endSec < startSec) endSec += 86400;
+      return endSec - startSec;
+    }
+
+    function formatSeconds(total) {
+      total = Math.max(0, Math.floor(total || 0));
+      const h = Math.floor(total / 3600);
+      const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+      const sec = String(total % 60).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
+    }
+
+    const workedSeconds = secondsFromDuration(workt);
+    const assignedSeconds = secondsFromTimeRange(shiftStartTime, shiftEndTime);
+    const overtimeSeconds = assignedSeconds > 0 ? Math.max(0, workedSeconds - assignedSeconds) : 0;
+
+    const timeInfo = { clockInTime: startT, clockOutTime: stopT, workTime: workt, breakTime: breakt, shiftTemplateId, shiftTitle, shiftStartTime, shiftEndTime, overtime: formatSeconds(overtimeSeconds), overtimeSeconds };
     clockReport.clock.push(timeInfo);
 
     const activity = notification(guardInfo.fullname, guardInfo.username, "Clock In", docId);
+    activity.message = `${guardInfo.fullname} submitted time clock for ${shiftTitle || 'shift'}`;
     found.activity.push(activity);
 
     found.save();
@@ -561,9 +593,9 @@ app.get("/report-template-web", (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect("/sign-in");
   }
-  if (isClientUser(req.user)) {
-    return res.redirect("/report-template-manager");
-  }
+  // if (isClientUser(req.user)) {
+  //   return res.redirect("/report-template-manager");
+  // }
   res.render("dashboard/report-tem-add", { userInfo: req.user });
 
 
@@ -581,9 +613,9 @@ app.post("/report-templates", async (req, res) => {
     }
 
     const user = req.user;
-    if (isClientUser(user)) {
-      return res.status(403).send("Unauthorized");
-    }
+    // if (isClientUser(user)) {
+    //   return res.status(403).send("Unauthorized");
+    // }
 
     // 🔹 Extract form fields
     const {

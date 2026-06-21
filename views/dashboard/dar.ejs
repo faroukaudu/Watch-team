@@ -1,0 +1,167 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+    <div class="main-content app-content">
+        <div class="container-fluid">
+
+            <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h1 class="page-title fw-medium fs-18 mb-2">Daily Activity Report</h1>
+                    <p class="text-muted mb-0">Summary of all guard activities for the selected day.</p>
+                </div>
+            </div>
+
+            <div class="card custom-card">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="darDate" class="form-control">
+                        </div>
+                       
+                        <div class="col-md-4">
+                            <label class="form-label">Post Site</label>
+                            <select id="darPostSite" class="form-select">
+                                <option value="all">All Post Sites</option>
+
+                                <% postSites.forEach(function(site) { %>
+                                    <option value="<%= site._id %>">
+                                        <%= site.siteName %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <button class="btn btn-primary w-100" onclick="loadDAR()">Load DAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="summaryCards"></div>
+
+            <div class="card custom-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">DAR Activity Details</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                    <th>Guard</th>
+                                    <th>Post Site</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="darTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        Select a date and post site to load DAR.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const companyId = "<%= userInfo.assignedCompanyID %>";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("darDate").value = new Date().toISOString().split("T")[0];
+            loadDAR();
+        });
+
+        function formatDateTime(value) {
+            if (!value) return "N/A";
+            return new Date(value).toLocaleString();
+        }
+
+        async function loadDAR() {
+            const date = document.getElementById("darDate").value;
+            const postSiteId = document.getElementById("darPostSite").value;
+
+            const url = `/api/dar?companyId=${companyId}&date=${date}&postSiteId=${postSiteId}`;
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            const tbody = document.getElementById("darTableBody");
+            const summaryCards = document.getElementById("summaryCards");
+
+            if (!data.success) {
+                tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center text-danger py-4">
+            Failed to load DAR.
+          </td>
+        </tr>`;
+                return;
+            }
+
+            const s = data.summary;
+
+            summaryCards.innerHTML = `
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>Total</small><h4>${s.totalActivities}</h4>
+        </div></div>
+      </div>
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>Events</small><h4>${s.events}</h4>
+        </div></div>
+      </div>
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>Incidents</small><h4>${s.incidents}</h4>
+        </div></div>
+      </div>
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>Passdowns</small><h4>${s.passdowns}</h4>
+        </div></div>
+      </div>
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>WatchMode</small><h4>${s.watchModes}</h4>
+        </div></div>
+      </div>
+      <div class="col-md-2">
+        <div class="card custom-card"><div class="card-body">
+          <small>TimeClock</small><h4>${s.timeClockRecords}</h4>
+        </div></div>
+      </div>
+    `;
+
+            if (!data.activities.length) {
+                tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">
+            No activity found for selected date.
+          </td>
+        </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.activities.map(item => `
+      <tr>
+        <td>${formatDateTime(item.time)}</td>
+        <td><span class="badge bg-primary">${item.type}</span></td>
+        <td>${item.guardName || "Guard"}</td>
+        <td>${item.postSiteName || "N/A"}</td>
+        <td style="white-space: normal;">${item.description}</td>
+      </tr>
+    `).join("");
+        }
+    </script>
+
+    <%- include("../includes/footer"); -%>

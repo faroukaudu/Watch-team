@@ -30,6 +30,15 @@ const userInfoSchema = new mongoose.Schema({
   assignedCompanyID:String,
   status:Boolean,
   lastLogin:String,
+  passwordResetCode:String,
+passwordResetExpires:Date,
+emailVerificationCode: String,
+emailVerificationExpires: Date,
+emailVerified: {
+  type: Boolean,
+  default: false
+},
+passwordResetVerified:{ type:Boolean, default:false },
   guardClients:[{
      name: { type: String, required: true },
       id: { type: String, required: true }

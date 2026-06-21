@@ -15,6 +15,8 @@ require('dotenv').config();
 // const billingRoutes = require("./src/routes/billing.js");
 const cors = require("cors");
 const { MongoStore } = require("connect-mongo");
+const { registerAuthResetRoutes } = require("./auth-reset-routes");
+const { emailSent } = require("./nodemailer");
 
 // const appDb = require("./middleware/appDb");
 // const registerStrategy = require("./middleware/passportConfig");
@@ -32,6 +34,7 @@ const Chat = require(__dirname + "/db/chatdb.js");
 const registerReportRoutes = require("./src/routes/reports");
 const registerUploadRoutes = require("./src/routes/uploads");
 const { registerUserRoutes } = require("./routes/chat_api");
+// const siteTourRoutes = require("./site_tour");
 
 
 
@@ -45,6 +48,7 @@ app.use(cors());
 app.use("/webhooks/stripe", require("express").raw({ type: "application/json" }));
 app.use(express.json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(siteTourRoutes);
 // app.use(billingRoutes);
 
 // after app.use(express.json()) etc:
@@ -165,6 +169,7 @@ registerChatRoutes(app,);
 // The main server and socket logic are now handled in app.js
 registerReportRoutes(app,);
 registerUploadRoutes(app,);
+registerAuthResetRoutes(app, User, emailSent);
 
 
 
@@ -181,9 +186,19 @@ registerUploadRoutes(app,);
 
 app.get("/sign-in", (req, res) => {
     const webLoginError = req.session.webLoginError || null;
+    const resetModal = req.session.resetModal || null;
+    const signupSuccess = req.session.signupSuccess || null;
+delete req.session.signupSuccess;
+
     delete req.session.webLoginError;
-    res.render("auth/sign-in", { webLoginError });
-})
+    delete req.session.resetModal;
+
+    res.render("auth/sign-in", {
+  webLoginError,
+  resetModal,
+  signupSuccess
+});
+});
 
 app.get("/sign-up", (req, res) => {
     res.render("auth/sign-up");

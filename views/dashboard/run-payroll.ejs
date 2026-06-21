@@ -239,6 +239,8 @@
                                                     <th scope="col">Status</th>
 
                                                     <th scope="col">Hours Worked</th>
+                                                    <th scope="col">Overtime</th>
+                                                    <th scope="col">Shift</th>
                                                     <th scope="col">Amount</th>
                                                     <th scope="col">Date</th>
                                                     <!-- <th scope="col">Priority</th> -->
@@ -268,6 +270,12 @@
                                                         </td>
                                                         <td>
                                                             <%= results.workTotalHour %>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-warning-transparent"><%= results.overtime || "0:00:00" %></span>
+                                                        </td>
+                                                        <td>
+                                                            <%= results.shiftTitle || "N/A" %>
                                                         </td>
                                                         <td>
                                                             <span class="fw-medium text-primary">

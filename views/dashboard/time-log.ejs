@@ -29,7 +29,7 @@
                         </ol>
                     </div>
                 </div>
-                <p>oidne</p>
+                <!-- <p>oidne</p> -->
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <div class="d-flex gap-2">
@@ -226,8 +226,10 @@
                                         <th scope="col" style="font-weight: 700; font-size: 16px;">Client</th>
                                         <th scope="col" style="font-weight: 700; font-size: 16px;">Post Site</th>
                                         <!-- <th scope="col" style="font-weight: 700; font-size: 16px;">type</th> -->
-                                        <th scope="col" style="font-weight: 700; font-size: 16px;">CheckedIn/<span style="font-size:xx-small;">Clock-in</span></th>
-                                        <th scope="col" style="font-weight: 700; font-size: 16px;">CheckedOut/<span style="font-size: xx-small;">Clock-in</span></th>
+                                        <th scope="col" style="font-weight: 700; font-size: 16px;">CheckedIn/<span
+                                                style="font-size:xx-small;">Clock-in</span></th>
+                                        <th scope="col" style="font-weight: 700; font-size: 16px;">CheckedOut/<span
+                                                style="font-size: xx-small;">Clock-in</span></th>
                                         <th scope="col" style="font-weight: 700; font-size: 16px;">Duration</th>
                                         <th scope="col" style="font-weight: 700; font-size: 16px;"></th>
 
@@ -243,31 +245,34 @@
                                                     <span class="avatar avatar-xs me-2 online avatar-rounded">
                                                         <img src="../assets/images/faces/3.jpg" alt="img">
                                                     </span>
-                                                    <%=time.guardName %>
+                                                    <%= time?.guardName || "Unknown Guard" %>
                                                 </div>
                                             </td>
                                             <td>
-                                                <%=time.clientName %>
+                                                <%= time?.clientName || "No Client" %>
                                             </td>
 
                                             <td>
-                                                <%=time.postSiteInfo.siteName %>
+                                                <%= time?.postSiteInfo?.siteName || "No Post Site" %>
                                             </td>
                                             <!-- <td>CheckedIn
                                             </td> -->
                                             <td>
-                                                <%= new Date(time.checkInTime).toLocaleString('en-US', { year: 'numeric' ,
+                                                <%= time?.checkInTime ? new
+                                                    Date(time.checkInTime).toLocaleString('en-US', { year: 'numeric' ,
                                                     month: 'short' , day: '2-digit' , hour: '2-digit' ,
-                                                    minute: '2-digit' })%> <br> 
-                                                    <span style="font-size: x-small;"><%= time?.clock?.[0]?.clockInTime || "No Clock In" %></span>
+                                                    minute: '2-digit' }) : "No Check In" %></span>
                                             </td>
                                             <td>
-                                                <%= new Date(time.checkOutTime).toLocaleString('en-US', { year: 'numeric' ,
+                                                <%= time?.checkOutTime ? new
+                                                    Date(time.checkOutTime).toLocaleString('en-US', { year: 'numeric' ,
                                                     month: 'short' , day: '2-digit' , hour: '2-digit' ,
-                                                    minute: '2-digit' })%> <br> 
-                                                    <span style="font-size: x-small;"><%= time?.clock?.[1]?.clockOutTime || "No Clock Out" %></span>
+                                                    minute: '2-digit' }) : "No Check Out" %></span>
                                             </td>
-                                            <td><%= time?.clock?.[0]?.workTime.split('.')[0] || "No Work" %> <br><span class="badge bg-primary-transparent">Team Lead</span>
+                                            <td>
+                                                <%= time?.clock?.[0]?.workTime ? time.clock[0].workTime.split('.')[0]
+                                                    : "No Work" %> <br><span class="badge bg-primary-transparent">Team
+                                                        Lead</span>
                                             </td>
 
                                             <td>
@@ -293,92 +298,7 @@
                                         </tr>
                                         <% }) %>
 
-                                            <tr>
-                                                <!-- <th scope="row"><input class="form-check-input" type="checkbox" id="checkboxNoLabel3" value="" aria-label="..."></th> -->
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="avatar avatar-xs me-2 online avatar-rounded">
-                                                            <img src="../assets/images/faces/14.jpg" alt="img">
-                                                        </span>Simon Cowel
-                                                    </div>
-                                                </td>
-                                                <td>Service Manager</td>
-
-                                                <td>simoncowel234@gmail.com</td>
-                                                <td>+234567896
-                                                </td>
-                                                <td>Apr 14, 2025 00:00 <br> <span style="font-size: x-small;">Pacific
-                                                        Standard Time</span></td>
-                                                <td>Apr 14, 2025 06:25 <br> <span style="font-size: x-small;">Pacific
-                                                        Standard Time</span></td>
-                                                <td> 06:25 <br> <span
-                                                        class="badge bg-success-transparent">Approved</span></td>
-
-                                                <td>
-                                                    <div class="dropdown">
-                                                        <a aria-label="anchor" href="javascript:void(0);"
-                                                            class="btn btn-light btn-icon btn-sm text-muted"
-                                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="fe fe-more-vertical"></i>
-                                                        </a>
-                                                        <ul class="dropdown-menu" role="menu">
-                                                            <li class=""><a class="dropdown-item"
-                                                                    href="javascript:void(0);"><i class="ti ti-eye"></i>
-                                                                    &nbsp; View Details</a></li>
-                                                            <li class=""><a class="dropdown-item"
-                                                                    href="javascript:void(0);"><i
-                                                                        class="ti ti-archive"></i> &nbsp;
-                                                                    &nbsp;Archive</a>
-                                                            </li>
-
-                                                        </ul>
-                                                    </div>
-                                                </td>
-
-                                            </tr>
-                                            <tr>
-                                                <!-- <th scope="row"><input class="form-check-input" type="checkbox" id="checkboxNoLabel13" value="" aria-label="..."></th> -->
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="avatar avatar-xs me-2 online avatar-rounded">
-                                                            <img src="../assets/images/faces/5.jpg" alt="img">
-                                                        </span>Mirinda Hers
-                                                    </div>
-                                                </td>
-                                                <td>Recruiter</td>
-
-                                                <td>mirindahers@gmail.com</td>
-                                                <td>
-                                                    +321456987
-                                                </td>
-                                                <td>Apr 14, 2025 00:00 <br> <span style="font-size: x-small;">Pacific
-                                                        Standard Time</span></td>
-                                                <td>Apr 14, 2025 06:25 <br> <span style="font-size: x-small;">Pacific
-                                                        Standard Time</span></td>
-                                                <td> 06:25 <br><span class="badge bg-danger-transparent">Pending</span>
-                                                </td>
-
-                                                <td>
-                                                    <div class="dropdown">
-                                                        <a aria-label="anchor" href="javascript:void(0);"
-                                                            class="btn btn-light btn-icon btn-sm text-muted"
-                                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="fe fe-more-vertical"></i>
-                                                        </a>
-                                                        <ul class="dropdown-menu" role="menu">
-                                                            <li class=""><a class="dropdown-item"
-                                                                    href="javascript:void(0);"><i class="ti ti-eye"></i>
-                                                                    &nbsp; View Details</a></li>
-                                                            <li class=""><a class="dropdown-item"
-                                                                    href="javascript:void(0);"><i
-                                                                        class="ti ti-archive"></i> &nbsp;
-                                                                    &nbsp;Archive</a>
-                                                            </li>
-
-                                                    </div>
-                                                </td>
-
-                                            </tr>
+                                           
                                 </tbody>
                             </table>
                         </div>

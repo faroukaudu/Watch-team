@@ -6,6 +6,7 @@ const TimeOffRequest = require("./src/models/TimeOffRequest");
 
 const app = myModule.main;
 const User = myModule.userDB;
+const Company = mongoose.model("Company");
 
 function normalizeArray(value) {
     if (!value) return [];
@@ -315,6 +316,7 @@ app.get("/attendance", async (req, res) => {
 
 
 // MOBILE: CREATE SHIFT EXCHANGE REQUEST
+// MOBILE: CREATE SHIFT EXCHANGE REQUEST
 app.post("/api/mobile/shift-exchange/request", async (req, res) => {
     try {
         const {
@@ -328,6 +330,20 @@ app.post("/api/mobile/shift-exchange/request", async (req, res) => {
             receivedByGuardId,
             receivedByGuardName
         } = req.body;
+
+        const existingPending = await ShiftExchange.findOne({
+            companyId: String(companyId),
+            shiftTemplateId: String(shiftTemplateId),
+            receivedByGuardId: String(receivedByGuardId),
+            status: "Pending"
+        });
+
+        if (existingPending) {
+            return res.status(409).json({
+                success: false,
+                message: "Exchange request already sent"
+            });
+        }
 
         const exchange = new ShiftExchange({
             companyId,
@@ -356,6 +372,110 @@ app.post("/api/mobile/shift-exchange/request", async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to send shift exchange request"
+        });
+    }
+});
+
+
+// MOBILE: GET RECEIVED SHIFT EXCHANGE REQUESTS
+app.get("/api/mobile/shift-exchange/received", async (req, res) => {
+    try {
+        const { companyId, guardId, shiftTemplateId } = req.query;
+
+        const filter = {
+            companyId: String(companyId),
+            receivedByGuardId: String(guardId),
+            status: "Pending"
+        };
+
+        if (shiftTemplateId) {
+            filter.shiftTemplateId = String(shiftTemplateId);
+        }
+
+        const exchanges = await ShiftExchange.find(filter).sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            exchanges
+        });
+
+    } catch (err) {
+        console.log("Fetch received shift exchange error:", err);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch shift exchange requests"
+        });
+    }
+});
+
+
+// MOBILE: ACCEPT OR REJECT SHIFT EXCHANGE
+app.post("/api/mobile/shift-exchange/respond", async (req, res) => {
+    try {
+        const { exchangeId, status } = req.body;
+
+        if (!["Accepted", "Rejected"].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid status"
+            });
+        }
+
+        const exchange = await ShiftExchange.findById(exchangeId);
+
+        if (!exchange) {
+            return res.status(404).json({
+                success: false,
+                message: "Exchange request not found"
+            });
+        }
+
+        if (exchange.status !== "Pending") {
+            return res.status(409).json({
+                success: false,
+                message: "Already Assigned"
+            });
+        }
+
+        if (status === "Accepted") {
+            const shift = await ShiftTemplate.findById(exchange.shiftTemplateId);
+
+            if (!shift) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Shift template not found"
+                });
+            }
+
+            shift.selectedGuards = [
+                {
+                    guardId: exchange.receivedByGuardId,
+                    guardName: exchange.receivedByGuardName,
+                    selectedAt: new Date()
+                }
+            ];
+
+            await shift.save();
+
+            exchange.acceptedByReceiverOnShiftDetail = true;
+        }
+
+        exchange.status = status;
+        exchange.responseDate = new Date();
+
+        await exchange.save();
+
+        res.json({
+            success: true,
+            message: `Shift exchange ${status.toLowerCase()}`,
+            exchange
+        });
+
+    } catch (err) {
+        console.log("Respond shift exchange error:", err);
+        res.status(500).json({
+            success: false,
+            message: err.message || "Failed to respond to shift exchange"
         });
     }
 });
@@ -477,6 +597,13 @@ app.post("/api/mobile/shift-exchange/respond", async (req, res) => {
         const exchange = await ShiftExchange.findById(exchangeId);
 
         if (!exchange) {
+
+            if (exchange.status !== "Pending") {
+                return res.status(409).json({
+                    success: false,
+                    message: "Already Assigned"
+                });
+            }
             return res.status(404).json({
                 success: false,
                 message: "Exchange request not found"
@@ -485,6 +612,10 @@ app.post("/api/mobile/shift-exchange/respond", async (req, res) => {
 
         exchange.status = status;
         exchange.responseDate = new Date();
+
+        if (status === "Accepted") {
+            exchange.acceptedByReceiverOnShiftDetail = true;
+        }
 
         await exchange.save();
 
@@ -499,6 +630,13 @@ app.post("/api/mobile/shift-exchange/respond", async (req, res) => {
                         selectedAt: new Date()
                     }
                 ];
+
+                if (shift.selectedGuards && shift.selectedGuards.length > 0) {
+                    return res.status(409).json({
+                        success: false,
+                        message: "Already Assigned"
+                    });
+                }
 
                 await shift.save();
             }
@@ -716,3 +854,42 @@ app.get("/api/mobile/my-schedule", async (req, res) => {
     }
 });
 
+
+
+// MOBILE/WEB: NOTIFICATIONS FROM COMPANY ACTIVITY
+app.get("/api/notifications", async (req, res) => {
+    try {
+        const companyId = req.query.companyId || (req.user && req.user.assignedCompanyID);
+        const viewerId = String(req.query.viewerId || (req.user && req.user._id) || "");
+        if (!companyId) return res.json({ success: false, notifications: [], unread: 0 });
+
+        const company = await Company.findById(companyId);
+        const notifications = ((company && company.activity) || []).slice(-50).reverse();
+        const unread = notifications.filter(n => !(n.readBy || []).map(String).includes(viewerId)).length;
+        res.json({ success: true, notifications, unread });
+    } catch (err) {
+        console.log("Notifications error:", err);
+        res.status(500).json({ success: false, notifications: [], unread: 0 });
+    }
+});
+
+app.post("/api/notifications/clear", async (req, res) => {
+    try {
+        const companyId = req.body.companyId || (req.user && req.user.assignedCompanyID);
+        const viewerId = String(req.body.viewerId || (req.user && req.user._id) || "");
+        if (!companyId || !viewerId) return res.json({ success: false });
+
+        const company = await Company.findById(companyId);
+        if (company && company.activity) {
+            company.activity.forEach(a => {
+                a.readBy = a.readBy || [];
+                if (!a.readBy.map(String).includes(viewerId)) a.readBy.push(viewerId);
+            });
+            await company.save();
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.log("Clear notifications error:", err);
+        res.status(500).json({ success: false });
+    }
+});

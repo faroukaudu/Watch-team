@@ -1,0 +1,257 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+    <div class="main-content app-content">
+        <div class="container-fluid">
+
+            <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h1 class="page-title fw-medium fs-18 mb-2">Passdown</h1>
+                    <nav>
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="javascript:void(0);">Operations</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Passdown Logs</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div>
+                        <h5 class="card-title mb-1">
+                            <i class="ri-chat-forward-line me-1 text-primary"></i> Passdown Logs
+                        </h5>
+                        <small class="text-muted">Shift-to-shift handover notes created by guards.</small>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Guard Name</th>
+                                    <th>Post Site</th>
+                                    <th>Title</th>
+                                    <th>Priority</th>
+                                    <th>Visibility</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th class="text-end">View</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <% if (passdowns && passdowns.length> 0) { %>
+                                    <% passdowns.forEach(function(item, index){ %>
+                                        <tr>
+                                            <td>
+                                                <%= item.guardName || "Guard" %>
+                                            </td>
+                                            <td>
+                                                <%= item.postSiteName || "Post Site" %>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold">
+                                                    <%= item.title || "Passdown Note" %>
+                                                </div>
+                                                <small class="text-muted">
+                                                    <%= item.message ? item.message.substring(0, 60) + "..." : "" %>
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <% if (item.priority==="Urgent" ) { %>
+                                                    <span class="badge bg-danger">Urgent</span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-secondary">Normal</span>
+                                                        <% } %>
+                                            </td>
+                                            <td>
+                                                <%= item.visibility || "All Guards" %>
+                                            </td>
+                                            <td>
+                                                <% if (item.status==="Closed" ) { %>
+                                                    <span class="badge bg-success">Closed</span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-warning">Open</span>
+                                                        <% } %>
+                                            </td>
+                                            <td>
+                                                <%= item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A"
+                                                    %>
+                                            </td>
+                                            <td class="text-end">
+                                                <button type="button" class="btn btn-sm btn-light passdown-view-btn"
+                                                    data-index="<%= index %>">
+                                                    <i class="ri-eye-line"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="8" class="text-center py-5 text-muted">
+                                                        <i class="ri-chat-forward-line" style="font-size:45px;"></i>
+                                                        <h6 class="mt-2">No Passdown Logs Found</h6>
+                                                        <p class="mb-0">Passdown notes created from the mobile app will
+                                                            appear here.</p>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="passdownViewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passdownModalTitle">Passdown Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body" id="passdownModalBody"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+  window.passdownData = <%- JSON.stringify(passdowns || []) %>;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".passdown-view-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const index = this.getAttribute("data-index");
+        viewPassdown(window.passdownData[index]);
+      });
+    });
+  });
+</script>
+
+    <script>
+        function viewPassdown(item) {
+            document.getElementById("passdownModalTitle").innerText =
+                item.title || "Passdown Details";
+
+            const readBy = item.readBy || [];
+
+            document.getElementById("passdownModalBody").innerHTML = `
+      <div class="row gy-3">
+        <div class="col-md-6">
+          <strong>Guard Name:</strong><br>${item.guardName || "Guard"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Post Site:</strong><br>${item.postSiteName || "Post Site"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Priority:</strong><br>${item.priority || "Normal"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Visibility:</strong><br>${item.visibility || "All Guards"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Status:</strong><br>${item.status || "Open"}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Date Created:</strong><br>${item.createdAt ? new Date(item.createdAt).toLocaleString() : "N/A"}
+        </div>
+
+        <div class="col-md-12">
+          <strong>Message:</strong>
+          <div class="border rounded p-3 mt-2 bg-light">
+            ${item.message || ""}
+          </div>
+        </div>
+
+        <div class="col-md-12">
+          <strong>Read By:</strong>
+          ${readBy.length === 0
+                    ? '<p class="text-muted mb-0 mt-2">No guard has confirmed reading this yet.</p>'
+                    : '<ul class="mt-2">' + readBy.map(function (r) {
+                        return '<li>' + (r.guardName || "Guard") + ' - ' + (r.readAt ? new Date(r.readAt).toLocaleString() : "N/A") + '</li>';
+                    }).join("") + '</ul>'
+                }
+        </div>
+      </div>
+    `;
+
+            new bootstrap.Modal(document.getElementById("passdownViewModal")).show();
+        }
+    </script>
+
+    <%- include("../includes/footer"); -%>
+        <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+        <!-- Apex Charts JS -->
+        <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Sales Dashboard -->
+        <script src="assets/js/sales-dashboard.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+        <!-- Google Maps JS -->
+        <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/js/google-maps.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+        <script src="../assets/js/apexcharts-column.js"></script>
+
+        </body>
+
+        </html>

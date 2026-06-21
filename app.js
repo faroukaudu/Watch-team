@@ -60,6 +60,10 @@ require("./visitors");
 require("./checklist");
 require("./scheduler");
 require("./tasks");
+require("./site_tour");
+require("./passdown");
+require("./watchmode");
+require("./dar");
 
 // require("./src/routes/billing.js");
 

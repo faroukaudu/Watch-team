@@ -329,6 +329,17 @@ async function createPublicBatchAndSendEmail({
     throw new Error("No reports to send.");
   }
 
+  const emailRecipients = Array.isArray(clientEmail)
+    ? clientEmail.map(e => String(e).trim().toLowerCase()).filter(Boolean)
+    : [String(clientEmail || "").trim().toLowerCase()].filter(Boolean);
+
+  if (!emailRecipients.length) {
+    throw new Error("No recipient email found.");
+  }
+
+  const mainRecipient = emailRecipients[0];
+  const ccRecipients = emailRecipients.slice(1);
+
   const token = crypto.randomBytes(32).toString("hex");
 
   const expiry = new Date();
@@ -337,7 +348,8 @@ async function createPublicBatchAndSendEmail({
   await PublicReportBatch.create({
     token,
     reportIds: reports.map((r) => r._id),
-    clientEmail,
+    clientEmail: mainRecipient,
+    ccRecipients: ccRecipients,
     title: reportTitle,
     expiresAt: expiry,
   });
@@ -346,14 +358,11 @@ async function createPublicBatchAndSendEmail({
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
       user: "surerealintegratedserviceltd@gmail.com",
       pass: "vvheoqjyhbksmffr",
-    },
-    tls: {
-      rejectUnauthorized: false,
     },
   });
 
@@ -387,7 +396,7 @@ async function createPublicBatchAndSendEmail({
             <p style="margin:0 0 16px;font-size:15px;color:#334155;">Hello ${escapeHtml(clientName || "Client")},</p>
 
             <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#475569;">
-              Your scheduled report package is ready. Please use the button below to view the report${reports.length > 1 ? "s" : ""} online.
+              Your report package is ready. Please use the button below to view the report${reports.length > 1 ? "s" : ""} online.
             </p>
 
             <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;margin-bottom:24px;">
@@ -397,21 +406,17 @@ async function createPublicBatchAndSendEmail({
               <div style="font-size:14px;color:#64748b;"><strong>Total Reports:</strong> ${reports.length}</div>
             </div>
 
-            <div style="margin-bottom:24px;">
-              <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                <thead>
-                  <tr style="background:#eff6ff;">
-                    <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">#</th>
-                    <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Report Name</th>
-                    <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Incident Type</th>
-                    <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${reportListHtml}
-                </tbody>
-              </table>
-            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead>
+                <tr style="background:#eff6ff;">
+                  <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">#</th>
+                  <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Report Name</th>
+                  <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Incident Type</th>
+                  <th style="padding:10px 12px;border:1px solid #e2e8f0;text-align:left;">Date</th>
+                </tr>
+              </thead>
+              <tbody>${reportListHtml}</tbody>
+            </table>
 
             <div style="margin:28px 0;text-align:center;">
               <a href="${publicReportLink}"
@@ -420,9 +425,6 @@ async function createPublicBatchAndSendEmail({
               </a>
             </div>
 
-            <p style="margin:24px 0 8px;font-size:13px;color:#64748b;line-height:1.7;">
-              If the button above does not work, copy and paste this link into your browser:
-            </p>
             <p style="margin:0;font-size:13px;word-break:break-all;color:#0d6efd;">
               ${publicReportLink}
             </p>
@@ -437,8 +439,9 @@ async function createPublicBatchAndSendEmail({
   `;
 
   await transporter.sendMail({
-    from: process.env.MAIL_FROM || "surerealintegratedserviceltd@gmail.com",
-    to: clientEmail,
+    from: process.env.MAIL_FROM || "Watch Team Security <surerealintegratedserviceltd@gmail.com>",
+    to: mainRecipient,
+    cc: ccRecipients.length ? ccRecipients.join(",") : undefined,
     subject: reportTitle,
     html,
   });
@@ -656,6 +659,59 @@ app.get("/reports-by-date-range", async (req, res) => {
 //   }
 // });
 // MADE TO USE THE HELPER FUNCTION REPORT
+// app.post("/send-post-site-report", async (req, res) => {
+//   try {
+//     if (!req.isAuthenticated || !req.isAuthenticated()) {
+//       return res.redirect("/sign-in");
+//     }
+
+//     const {
+//       clientName,
+//       clientEmail,
+//       reportTitle,
+//       reportIds,
+//       startDate,
+//       endDate,
+//       frequency,
+//     } = req.body;
+
+//     const ids = String(reportIds || "")
+//       .split(",")
+//       .map((v) => v.trim())
+//       .filter(Boolean);
+
+//     if (!clientEmail || !reportTitle || !startDate || !endDate || !ids.length) {
+//       return res.status(400).send("Missing required fields.");
+//     }
+
+//     const reports = await MobileReport.find({
+//       _id: { $in: ids },
+//     }).select("_id title category createdAt fields");
+
+//     if (!reports || !reports.length) {
+//       return res.status(404).send("No reports found.");
+//     }
+
+//     const baseUrl = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+
+//     await createPublicBatchAndSendEmail({
+//       clientName,
+//       clientEmail,
+//       reportTitle,
+//       reports,
+//       frequency,
+//       startDate,
+//       endDate,
+//       baseUrl,
+//     });
+
+//     console.log(`Report email sent successfully to ${clientEmail}`);
+//     return res.redirect("/view-post-site?success=report_sent");
+//   } catch (err) {
+//     console.error("POST /send-post-site-report error:", err);
+//     return res.redirect("/view-post-site?error=report_failed");
+//   }
+// });
 app.post("/send-post-site-report", async (req, res) => {
   try {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -670,16 +726,49 @@ app.post("/send-post-site-report", async (req, res) => {
       startDate,
       endDate,
       frequency,
+      postSiteId,
+      extraRecipients,
     } = req.body;
+
+    let parsedExtraRecipients = [];
+
+    try {
+      parsedExtraRecipients = JSON.parse(extraRecipients || "[]");
+    } catch (err) {
+      parsedExtraRecipients = [];
+    }
+
+    parsedExtraRecipients = parsedExtraRecipients
+      .map((email) => String(email).trim().toLowerCase())
+      .filter(Boolean);
 
     const ids = String(reportIds || "")
       .split(",")
       .map((v) => v.trim())
       .filter(Boolean);
 
-    if (!clientEmail || !reportTitle || !startDate || !endDate || !ids.length) {
+    if (!clientEmail || !reportTitle || !startDate || !endDate || !ids.length || !postSiteId) {
       return res.status(400).send("Missing required fields.");
     }
+
+    const saveResult = await Company.updateOne(
+      {
+        _id: req.user.assignedCompanyID,
+        "postSite._id": postSiteId,
+      },
+      {
+        $set: {
+          "postSite.$.reportRecipients": parsedExtraRecipients,
+        },
+      }
+    );
+
+    console.log("Recipient save result:", saveResult);
+
+    const allRecipients = [
+      String(clientEmail || "").trim().toLowerCase(),
+      ...parsedExtraRecipients,
+    ].filter(Boolean);
 
     const reports = await MobileReport.find({
       _id: { $in: ids },
@@ -689,11 +778,12 @@ app.post("/send-post-site-report", async (req, res) => {
       return res.status(404).send("No reports found.");
     }
 
-    const baseUrl = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+    const baseUrl =
+      process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
 
     await createPublicBatchAndSendEmail({
       clientName,
-      clientEmail,
+      clientEmail: allRecipients,
       reportTitle,
       reports,
       frequency,
@@ -702,7 +792,7 @@ app.post("/send-post-site-report", async (req, res) => {
       baseUrl,
     });
 
-    console.log(`Report email sent successfully to ${clientEmail}`);
+    console.log(`Report email sent successfully to ${allRecipients.join(", ")}`);
     return res.redirect("/view-post-site?success=report_sent");
   } catch (err) {
     console.error("POST /send-post-site-report error:", err);
@@ -712,6 +802,64 @@ app.post("/send-post-site-report", async (req, res) => {
 
 
 // SHEDULE REPORT ROUTE
+// app.post("/schedule-post-site-report", async (req, res) => {
+//   try {
+//     if (!req.isAuthenticated || !req.isAuthenticated()) {
+//       return res.redirect("/sign-in");
+//     }
+
+//     const {
+//       clientName,
+//       clientEmail,
+//       reportTitle,
+//       frequency,
+//       startDate,
+//       postSiteId,
+//     } = req.body;
+
+//     if (!clientEmail || !frequency || !startDate || !postSiteId) {
+//       return res.redirect("/view-post-site?error=report_failed");
+//     }
+// // test code in min
+//     if (!["5min", "10min", "Daily", "Weekly", "Monthly"].includes(frequency)) {
+//   return res.redirect("/view-post-site?error=report_failed");
+// }
+
+//     const parsedStartDate = new Date(startDate);
+//     if (Number.isNaN(parsedStartDate.getTime())) {
+//       return res.redirect("/view-post-site?error=report_failed");
+//     }
+
+//     const nextSendAt = getFirstNextSendAt(parsedStartDate, frequency);
+
+//     await ScheduledPostSiteReport.findOneAndUpdate(
+//       {
+//         companyId: String(req.user.assignedCompanyID),
+//         postSiteId: String(postSiteId),
+//         clientEmail: String(clientEmail).trim().toLowerCase(),
+//       },
+//       {
+//         $set: {
+//           companyId: String(req.user.assignedCompanyID),
+//           postSiteId: String(postSiteId),
+//           clientName: clientName || "",
+//           clientEmail: String(clientEmail).trim().toLowerCase(),
+//           reportTitle: reportTitle || "Scheduled Site Report",
+//           frequency,
+//           startDate: parsedStartDate,
+//           nextSendAt,
+//           isActive: true,
+//         },
+//       },
+//       { upsert: true, new: true }
+//     );
+
+//     return res.redirect("/view-post-site?success=report_scheduled");
+//   } catch (err) {
+//     console.error("POST /schedule-post-site-report error:", err);
+//     return res.redirect("/view-post-site?error=report_failed");
+//   }
+// });
 app.post("/schedule-post-site-report", async (req, res) => {
   try {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -725,17 +873,43 @@ app.post("/schedule-post-site-report", async (req, res) => {
       frequency,
       startDate,
       postSiteId,
+      extraRecipients,
     } = req.body;
+
+    let parsedExtraRecipients = [];
+
+    try {
+      parsedExtraRecipients = JSON.parse(extraRecipients || "[]");
+    } catch (err) {
+      parsedExtraRecipients = [];
+    }
+
+    parsedExtraRecipients = parsedExtraRecipients
+      .map((email) => String(email).trim().toLowerCase())
+      .filter(Boolean);
+await Company.updateOne(
+  {
+    _id: req.user.assignedCompanyID,
+    "postSite._id": postSiteId
+  },
+  {
+    $set: {
+      "postSite.$.reportRecipients": parsedExtraRecipients
+    }
+  }
+);
+
 
     if (!clientEmail || !frequency || !startDate || !postSiteId) {
       return res.redirect("/view-post-site?error=report_failed");
     }
-// test code in min
+
     if (!["5min", "10min", "Daily", "Weekly", "Monthly"].includes(frequency)) {
-  return res.redirect("/view-post-site?error=report_failed");
-}
+      return res.redirect("/view-post-site?error=report_failed");
+    }
 
     const parsedStartDate = new Date(startDate);
+
     if (Number.isNaN(parsedStartDate.getTime())) {
       return res.redirect("/view-post-site?error=report_failed");
     }
@@ -754,6 +928,7 @@ app.post("/schedule-post-site-report", async (req, res) => {
           postSiteId: String(postSiteId),
           clientName: clientName || "",
           clientEmail: String(clientEmail).trim().toLowerCase(),
+          extraRecipients: parsedExtraRecipients,
           reportTitle: reportTitle || "Scheduled Site Report",
           frequency,
           startDate: parsedStartDate,

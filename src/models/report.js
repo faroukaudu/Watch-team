@@ -28,7 +28,7 @@ const ReportSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["general", "incident", "standard", "log", "nfc"],
+      enum: ["general", "incident", "standard", "log", "nfc", "code_red"],
       default: "general",
     },
 

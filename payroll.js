@@ -103,6 +103,9 @@ async function getGuardWorkTimeDetailed(companyId, guardId, fromDate, toDate) {
               checkInTime: "$checkedReport.checkInTime",
 
               workTime: "$workTimeStr",
+              overtime: { $ifNull: ["$checkedReport.clock.overtime", "0:00:00"] },
+              overtimeSeconds: { $ifNull: ["$checkedReport.clock.overtimeSeconds", 0] },
+              shiftTitle: "$checkedReport.clock.shiftTitle",
               workTotalSeconds: 1,
 
 
@@ -150,6 +153,7 @@ async function getGuardWorkTimeDetailed(companyId, guardId, fromDate, toDate) {
             $group: {
               _id: null,
               totalWorkSeconds: { $sum: "$workTotalSeconds" },
+              totalOvertimeSeconds: { $sum: { $ifNull: ["$checkedReport.clock.overtimeSeconds", 0] } },
               matchedClockHits: { $sum: 1 }, // each unwind of clock
               matchedReportIds: { $addToSet: "$checkedReport._id" },
             },
@@ -212,4 +216,22 @@ app.post("/generate-payroll", async (req, res) => {
     console.error(err);
     return res.status(500).json({ error: "Server error" });
   }
+});
+
+
+app.get("/overtime-multiplier", async (req, res) => {
+  if (!req.isAuthenticated()) return res.redirect("/sign-in");
+  const guards = await User.find({ assignedCompanyID: req.user.assignedCompanyID, userType: "AmobileGuard" });
+  res.render("dashboard/overtime-multiplier", { userInfo: req.user, guards, result: [] });
+});
+
+app.post("/overtime-multiplier", async (req, res) => {
+  if (!req.isAuthenticated()) return res.redirect("/sign-in");
+  const { guardId, fromDate, toDate } = req.body;
+  const [, iD] = guardId.split("-");
+  const fDate = fromDate.split(" ")[0];
+  const tDate = toDate.split(" ")[0];
+  const result = await getGuardWorkTimeDetailed(req.user.assignedCompanyID, iD, fDate, tDate);
+  const guards = await User.find({ assignedCompanyID: req.user.assignedCompanyID, userType: "AmobileGuard" });
+  res.render("dashboard/overtime-multiplier", { userInfo: req.user, guards, result });
 });

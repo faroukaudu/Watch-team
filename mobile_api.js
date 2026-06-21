@@ -13,65 +13,90 @@ const User = myModule.userDB;
 const Company = mongoose.model("Company", companyInfo);
 
 
-app.post("/guard-signin", (req, res) => {
+app.post("/guard-signin", async (req, res, next) => {
+  try {
     const { username, password } = req.body;
-    console.log(username, "and this is his role", password);
 
-    req.body.username = _.capitalize(username);
-    User.findByUsername(req.body.username).then((mobileUser)=>{
-        console.log("This is Mobile"+ mobileUser);
-        
-        if(mobileUser.userType === "AmobileGuard" && mobileUser.status){
-            var userLogin = new User({ username: req.body.username, password: password });
-            req.login(userLogin, function (err) {
-        if (!err) {
-            console.log("UserInfo ISS::", req.user);
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required.",
+      });
+    }
+
+const rawUsername = String(username || "").trim();
+
+const cleanUsername =
+  rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1);
+
+console.log("RAW USERNAME:", JSON.stringify(username));
+console.log("CLEAN USERNAME:", JSON.stringify(cleanUsername));
+console.log("RAW LENGTH:", username.length);
+console.log("CLEAN LENGTH:", cleanUsername.length);
+    
+
+    const mobileUser = await User.findByUsername(cleanUsername);
+
+    if (!mobileUser) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect username or password.",
+      });
+    }
+
+    if (mobileUser.userType !== "AmobileGuard") {
+      return res.status(403).json({
+        success: false,
+        message: "Only mobile guards can sign in.",
+      });
+    }
+
+    if (!mobileUser.status) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is inactive. Please contact your administrator.",
+      });
+    }
 
 
-            passport.authenticate("local", {
+// VERY IMPORTANT
+req.body.username = cleanUsername;
 
-                // successRedirect: "/dashboard",
-                failureRedirect: "/error911",
-                failureMessage: true
-            })(req, res, function () {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
 
-                req.session.lastLog = new Date();
-                // console.log(req.user);
-                //   Redirecting to user Dashboard
-                // res.redirect("/dashboard");
-                //  res.render("dashboard/dashb");
-                res.status(200).json({
-                    message: `Welcome ${username}, you have admin access.`,
-                    email: username,
-                    userId: req.user._id,
-                });
-            })
-        } else {
-            // res.render("userdash/animations/usererr", {errorMsg:"Invalid Login Details !!!"});
-            res.status(401).json({
-                message: 'Unauthorized access.',
-            });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Incorrect username or password.",
+        });
+      }
+
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          return next(loginErr);
         }
-    })
-        }else{
-             res.status(401).json({
-                message: 'Unauthorized access.',
-            });
-            console.log("Only Guards can sign-in");
-            
-        }
 
+        req.session.lastLog = new Date();
 
-    }).catch((err)=>{
-        console.log(err);
-         res.status(401).json({
-                message: 'Unauthorized access.',
-            });
-        
+        return res.status(200).json({
+          success: true,
+          message: `Welcome ${user.username}. Login successful.`,
+          email: user.username,
+          userId: user._id,
+        });
+      });
+    })(req, res, next);
+  } catch (error) {
+    console.error("Guard sign-in error:", error);
 
-    })
-
-
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again.",
+    });
+  }
 });
 
 // var userLogin = new User({ username: req.body.username, password: password });
@@ -361,5 +386,85 @@ app.get("/api/users", async (req, res) => {
   } catch (err) {
     console.error("GET /api/users error:", err);
     return res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+
+// MOBILE APP API: Post Site Contacts + Security Team
+app.get("/api/mobile/post-site-directory", async (req, res) => {
+  try {
+    const { companyId, postSiteId } = req.query;
+
+    if (!companyId || !postSiteId) {
+      return res.status(400).json({
+        success: false,
+        message: "companyId and postSiteId are required.",
+      });
+    }
+
+    const siteObjectId = mongoose.Types.ObjectId.isValid(postSiteId)
+      ? new mongoose.Types.ObjectId(postSiteId)
+      : postSiteId;
+
+    const company = await Company.findOne(
+      {
+        _id: companyId,
+        "postSite._id": siteObjectId,
+      },
+      {
+        companyName: 1,
+        postSite: { $elemMatch: { _id: siteObjectId } },
+      }
+    ).lean();
+
+    if (!company || !company.postSite || company.postSite.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Post site not found.",
+      });
+    }
+
+    const site = company.postSite[0];
+
+    const guards = await User.find({
+      assignedCompanyID: String(companyId),
+      userType: "AmobileGuard",
+      guardPostSite: {
+        $elemMatch: {
+          postSiteID: String(postSiteId),
+        },
+      },
+    })
+      .select("fullname username email phone status guardPostSite")
+      .sort({ fullname: 1 })
+      .lean();
+
+    let client = null;
+
+    if (site.clientID) {
+      client = await User.findById(site.clientID)
+        .select("fullname username email phone status userType")
+        .lean();
+    }
+
+    return res.status(200).json({
+      success: true,
+      postSite: {
+        id: site._id,
+        siteName: site.siteName,
+        address: site.address,
+        clientID: site.clientID,
+        clientName: site.clientName,
+      },
+      client,
+      guards,
+    });
+  } catch (error) {
+    console.error("post-site-directory error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error fetching post site directory.",
+    });
   }
 });

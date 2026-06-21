@@ -97,7 +97,7 @@ const ReportTemplateSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["incident", "standard", "log", "general", "nfc"],
+      enum: ["incident", "standard", "log", "general", "nfc", "code_red"],
       default: "general",
     },
     templateId: {
