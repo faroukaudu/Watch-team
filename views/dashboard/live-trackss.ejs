@@ -164,7 +164,10 @@
         m.setPopupContent(`Guard: ${guardName}`);       // <-- popup update here
       }
 
-      if (pan) map.setView(latlng, 18);
+      if (pan) map.flyTo([lat, lng], 17, {
+    animate: true,
+    duration: 1.2
+});
     }
 
     setStatus("waiting for guard to check in…");

@@ -16,11 +16,80 @@ const { log } = require('handlebars');
 const ScheduledPostSiteReport = require("./src/models/ScheduledPostSiteReport");
 const ScheduledPostSiteReportLog = require("./src/models/ScheduledPostSiteReportLog");
 
-const { getResolvedFeatures, getLimitValue, isUnlimited } = require("./src/utils/subscriptionLimits");
+const { getResolvedFeatures, getLimitValue, isUnlimited,
+  isPlatformAdmin } = require("./src/utils/subscriptionLimits");
 const { redirectToPricingWithUpgradeMessage } = require("./src/utils/upgradeRedirect");
 const Checklist = require("./src/models/Checklist");
 const PostSiteTask = require("./src/models/PostSiteTask");
+const SiteTour = require("./src/models/SiteTour");
+const Visitor = require("./src/models/Visitor");
 
+
+
+// DELETE POST SITE WHILE PRESERVING REPORTS AND COMPANY ACTIVITY HISTORY
+app.post("/delete-post-site/:postSiteId", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const companyId = String(req.user.assignedCompanyID || "");
+    const postSiteId = String(req.params.postSiteId || "");
+
+    if (!companyId || !mongoose.Types.ObjectId.isValid(postSiteId)) {
+      return res.status(400).send("Invalid post site.");
+    }
+
+    const company = await Company.findOne({
+      _id: companyId,
+      "postSite._id": postSiteId,
+    });
+
+    if (!company) {
+      return res.status(404).send("Post site not found.");
+    }
+
+    // Remove the post site and embedded guard assignments.
+    await Company.updateOne(
+      { _id: companyId },
+      {
+        $pull: {
+          postSite: { _id: new mongoose.Types.ObjectId(postSiteId) },
+          "guards.$[].assignPost": { postSiteID: postSiteId },
+        },
+      }
+    );
+
+    // Remove the assignment from guard user accounts.
+    await User.updateMany(
+      {
+        assignedCompanyID: companyId,
+        "guardPostSite.postSiteID": postSiteId,
+      },
+      {
+        $pull: { guardPostSite: { postSiteID: postSiteId } },
+      }
+    );
+
+    // Delete operational records tied to this post site.
+    await Promise.all([
+      ScheduledPostSiteReport.deleteMany({ companyId, postSiteId }),
+      ScheduledPostSiteReportLog.deleteMany({ companyId, postSiteId }),
+      Note.deleteMany({ companyID: companyId, postSiteID: postSiteId }),
+      PostSiteTask.deleteMany({ companyId, postSiteId }),
+      Visitor.deleteMany({ companyId, postSiteId }),
+      SiteTour.deleteMany({ companyId, postSiteId }),
+      Checklist.deleteMany({ companyId, postSiteId }),
+    ]);
+
+    // Intentionally preserved:
+    // - MobileReport documents
+    // - company.activity records
+
+    return res.redirect("/post-site?success=post_site_deleted");
+  } catch (error) {
+    console.error("Delete post site error:", error);
+    return res.status(500).send("Unable to delete post site.");
+  }
+});
 
 // View Client Details.
 // Rendering Client Edit
@@ -140,7 +209,7 @@ app.post("/create-post-site", async (req, res) => {
         const features = await getResolvedFeatures(companyId);
         const maxPostSites = getLimitValue(features, "maxPostSites");
 
-        if (!isUnlimited(maxPostSites)) {
+        if (!isPlatformAdmin(req.user) && !isUnlimited(maxPostSites)) {
           const currentPostSites = Array.isArray(company.postSite)
             ? company.postSite.length
             : 0;
@@ -218,6 +287,19 @@ app.get("/view-post-site", async (req, res) => {
 
     const postSiteID = req.session.postSiteID;
     delete req.session.clientId;
+
+    if (req.user && req.user.userType === "Client") {
+      const clientId = String(req.user._id || req.user.id || "");
+      const scopedCompany = await Company.findOne({
+        _id: req.user.assignedCompanyID,
+        postSite: { $elemMatch: { _id: postSiteID, clientID: clientId } }
+      }).select("_id");
+
+      if (!scopedCompany) {
+        req.session.toast = { type: "warning", message: "You can only view your assigned post site." };
+        return res.redirect("/post-site");
+      }
+    }
 
     if (!postSiteID) {
       return res.status(400).send("No post site selected.");

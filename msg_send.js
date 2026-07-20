@@ -87,7 +87,7 @@ sendTemplateWhatsappMsg();
 // Email
 async function guardVerify({username:name, email:email, compId:companyId, postSite:siteId, fullname:fulln}){
     console.log("Senidng mail to: "+ email +"& Name is"+ name);
-    const link = `http://localhost:9000/verify-guard/${companyId}/${siteId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}`;
+    const link = `https://app.watch-team.com/verify-guard/${companyId}/${siteId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}`;
     const source = fs.readFileSync('email_template.html', 'utf-8').toString();
     const template = handlebars.compile(source);
     const replacements = {
@@ -357,12 +357,12 @@ async function createPublicBatchAndSendEmail({
   const publicReportLink = `${baseUrl}/public/reports/${token}`;
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
     secure: true,
     auth: {
-      user: "surerealintegratedserviceltd@gmail.com",
-      pass: "vvheoqjyhbksmffr",
+      user: process.env.SERVER_EMAIL,
+      pass: process.env.SERVER_PASSWORD,
     },
   });
 
@@ -439,7 +439,7 @@ async function createPublicBatchAndSendEmail({
   `;
 
   await transporter.sendMail({
-    from: process.env.MAIL_FROM || "Watch Team Security <surerealintegratedserviceltd@gmail.com>",
+    from: process.env.MAIL_FROM || "Watch Team Security <Secure@watch_team.com>",
     to: mainRecipient,
     cc: ccRecipients.length ? ccRecipients.join(",") : undefined,
     subject: reportTitle,

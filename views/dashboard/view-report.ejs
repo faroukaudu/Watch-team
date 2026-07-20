@@ -244,21 +244,34 @@
                             </h5>
 
                             <ul class="list-unstyled mb-0">
-                                <% Object.entries(reports.fields || {}).forEach(([k, v])=> { %>
-                                    <div class="fs-15 fw-medium mb-2">
-                                        <%= k%> :
-                                    </div>
-                                    <p class="text-muted task-description">
-                                        <% if (k==="postSiteId" && reports.fields.postSiteName) { %>
-                                            <%= reports.fields.postSiteName %>
-                                                <% } else { %>
-                                                    <%= v %>
-                                                        <% } %>
-                                    </p>
-                                    <!-- <div class="fs-15 fw-medium mb-2">Key tasks :</div> -->
-                                    <p>
+                                <% (reportFields || []).forEach((field) => { %>
 
-                                        <% }) %>
+    <% if (field.keyName !== "postSiteName") { %>
+
+        <div class="fs-15 fw-medium mb-2">
+            <%= field.label %>:
+        </div>
+
+        <p class="text-muted task-description">
+
+            <% if (
+                field.keyName === "postSiteId" &&
+                reports.fields.postSiteName
+            ) { %>
+
+                <%= reports.fields.postSiteName %>
+
+            <% } else { %>
+
+                <%= field.value %>
+
+            <% } %>
+
+        </p>
+
+    <% } %>
+
+<% }) %>
                             </ul>
                             </p>
                             <!-- <div class="mb-3">

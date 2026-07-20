@@ -49,7 +49,7 @@ const UserSubscriptionSchema = new mongoose.Schema(
 
     planName: {
       type: String,
-      enum: ["Essential", "Advanced", "Professional"],
+      enum: ["Basic", "Essential", "Advanced", "Professional"],
       required: true,
     },
 
@@ -82,6 +82,13 @@ const UserSubscriptionSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+
+    isBlocked: { type: Boolean, default: false, index: true },
+    blockedAt: { type: Date, default: null },
+    blockedReason: { type: String, default: "" },
+    commitmentMonths: { type: Number, default: 1 },
+    renewalCount: { type: Number, default: 0 },
+    lastSuccessfulPaymentAt: { type: Date, default: null },
 
     startsAt: {
       type: Date,
@@ -153,9 +160,10 @@ const UserSubscriptionSchema = new mongoose.Schema(
       checklistDays: { type: Number, default: 0 },
       supportLevel: { type: String, default: "none" },
       maxSuperAdmins: { type: Number, default: 1 },
-      maxClients: { type: Number, default: 2 },
-      maxSecurityGuards: { type: Number, default: 3 },
+      maxClients: { type: Number, default: 3 },
+      maxSecurityGuards: { type: Number, default: 2 },
       maxPostSites: { type: Number, default: 3 },
+      maxBackOfficeUsers: { type: Number, default: 2 },
     },
 
     rawGatewayPayload: {

@@ -59,6 +59,162 @@
       pointer-events: none;
       user-select: none;
     }
+
+
+    .map-shell { position: relative; }
+    .map-legend {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 999;
+      background: rgba(8, 30, 44, 0.88);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+    }
+    .legend-row { display:flex; align-items:center; gap:8px; margin:4px 0; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .legend-dot.me { background:#0d6efd; box-shadow:0 0 0 4px rgba(13,110,253,.22); }
+    .legend-dot.guard { background:#ff8a00; box-shadow:0 0 0 4px rgba(255,138,0,.20); }
+
+    .current-user-marker { position:relative; width:52px; height:62px; }
+    .current-user-pulse {
+      position:absolute; left:16px; top:24px; width:20px; height:20px;
+      border-radius:50%; background:rgba(13,110,253,.28);
+      animation:userPulse 1.6s ease-out infinite;
+    }
+    @keyframes userPulse { from { transform:scale(.8); opacity:1; } to { transform:scale(3.4); opacity:0; } }
+    .current-user-pin {
+      position:absolute; left:11px; top:6px; width:30px; height:30px;
+      border-radius:50% 50% 50% 0; transform:rotate(-45deg);
+      background:#0d6efd; border:3px solid #fff;
+      box-shadow:0 8px 18px rgba(0,0,0,.35);
+    }
+    .current-user-pin i {
+      position:absolute; inset:5px; display:grid; place-items:center;
+      color:#fff; transform:rotate(45deg); font-size:14px;
+    }
+    .marker-label {
+      position:absolute; left:50%; top:-22px; transform:translateX(-50%);
+      white-space:nowrap; background:#0d4a6b; color:#fff;
+      padding:4px 8px; border-radius:7px; font-size:11px; font-weight:700;
+      box-shadow:0 5px 14px rgba(0,0,0,.25);
+    }
+    .guard-label {
+      position:absolute; left:50%; top:-28px; transform:translateX(-50%);
+      white-space:nowrap; background:#8f4e00; color:#fff;
+      padding:3px 7px; border-radius:6px; font-size:10px; font-weight:700;
+      box-shadow:0 4px 12px rgba(0,0,0,.24);
+    }
+
+
+    /* Guard marker: orange circle with a small sharp pointer */
+    .guard-police-pin {
+      position: absolute;
+      left: 50%;
+      top: 1px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: #ff8a00;
+      color: #fff;
+      border: 3px solid #fff;
+      box-shadow: 0 7px 16px rgba(0,0,0,.34);
+      z-index: 2;
+    }
+
+    .guard-police-pin::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid #fff;
+      z-index: -2;
+    }
+
+    .guard-police-pin::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -5px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 8px solid #ff8a00;
+      z-index: -1;
+    }
+
+    .guard-police-pin i {
+      position: relative;
+      z-index: 3;
+      font-size: 19px;
+      line-height: 1;
+    }
+
+
+    .tracking-panel {
+      overflow: hidden;
+      border: 1px solid rgba(65, 145, 190, .18);
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(8, 29, 46, .98), rgba(7, 20, 34, .98));
+    }
+    .tracking-panel-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 15px 17px; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .tracking-panel-title { margin:0; color:#f3f8fc; font-size:14px; font-weight:700; }
+    .tracking-panel-subtitle { margin:3px 0 0; color:#8298aa; font-size:11px; }
+    .tracking-live-pill {
+      display:inline-flex; align-items:center; gap:7px; padding:6px 10px;
+      border:1px solid rgba(32,219,142,.25); border-radius:999px;
+      color:#6ee7b7; background:rgba(32,219,142,.08); font-size:10px; font-weight:700;
+    }
+    .tracking-live-pill::before {
+      content:""; width:7px; height:7px; border-radius:50%; background:#20db8e;
+      box-shadow:0 0 0 5px rgba(32,219,142,.10), 0 0 12px rgba(32,219,142,.65);
+      animation:trackingDot 1.8s ease-out infinite;
+    }
+    @keyframes trackingDot { 0%{box-shadow:0 0 0 0 rgba(32,219,142,.35)} 100%{box-shadow:0 0 0 8px rgba(32,219,142,0)} }
+    .tracking-table-wrap { overflow-x:auto; }
+    .tracking-table { min-width:760px; margin:0; color:#dce8f1; }
+    .tracking-table thead th {
+      padding:11px 15px; border:0; background:rgba(255,255,255,.025);
+      color:#7890a4; font-size:9px; letter-spacing:.10em; text-transform:uppercase;
+    }
+    .tracking-table tbody td { padding:13px 15px; border-color:rgba(255,255,255,.055); vertical-align:middle; font-size:11px; }
+    .tracking-user { display:flex; align-items:center; gap:10px; }
+    .tracking-avatar {
+      width:32px; height:32px; display:grid; place-items:center; flex:0 0 32px;
+      border-radius:10px; color:#6cb6ff; background:rgba(51,140,255,.12); border:1px solid rgba(51,140,255,.22);
+    }
+    .tracking-name { color:#edf6fc; font-weight:700; }
+    .tracking-role { color:#71899d; font-size:9px; margin-top:2px; }
+    .tracking-status {
+      display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px;
+      font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+    }
+    .tracking-status.online { color:#6ee7b7; background:rgba(32,219,142,.10); border:1px solid rgba(32,219,142,.20); }
+    .tracking-status.offline { color:#94a3b8; background:rgba(148,163,184,.08); border:1px solid rgba(148,163,184,.16); }
+    .tracking-status span { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .tracking-location { max-width:260px; color:#a8bac8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tracking-empty { padding:30px !important; text-align:center; color:#70879a; }
+    .history-link { color:#7ec1ff; font-size:11px; font-weight:700; text-decoration:none; }
+    .history-link:hover { color:#a8d7ff; }
+
   </style>
          <!-- Start::app-content -->
            <div class="main-content app-content">
@@ -115,10 +271,47 @@
                                 <div class="card-title">Map With Popup</div>
                             </div>
                             <div class="card-body">
-                                <div id="liveMap"></div>
+                                <div class="map-shell">
+                                  <div id="liveMap"></div>
+                                  <div class="map-legend">
+                                    <div class="legend-row"><span class="legend-dot me"></span><span>Your current location</span></div>
+                                    <div class="legend-row"><span class="legend-dot guard"></span><span>Checked-in guard</span></div>
+                                  </div>
+                                </div>
                                 <div class="status-badge">Status: <span id="statusText">waiting…</span></div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="col-xl-12 mt-3">
+                      <div class="tracking-panel">
+                        <div class="tracking-panel-head">
+                          <div>
+                            <h3 class="tracking-panel-title">Live Tracking Information</h3>
+                            <p class="tracking-panel-subtitle">Latest known activity for guards and logged-in web users.</p>
+                          </div>
+                          <div class="d-flex align-items-center gap-3">
+                            <span class="tracking-live-pill">Live Feed</span>
+                            <a href="/tracking-history" class="history-link">View Tracking History <i class="ri-arrow-right-line"></i></a>
+                          </div>
+                        </div>
+                        <div class="tracking-table-wrap">
+                          <table class="table tracking-table">
+                            <thead>
+                              <tr>
+                                <th>User</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Last Update</th>
+                              </tr>
+                            </thead>
+                            <tbody id="liveTrackingRows">
+                              <tr><td colspan="5" class="tracking-empty">Loading tracking information...</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                     
                 </div>
@@ -126,151 +319,459 @@
 
             </div>
         
-        <script>
-    const companyId   = "<%= userInfo.assignedCompanyID %>";
-    const pageGuardId = "<%= guardId || '' %>"; // one guard id (recommended)
-    const allowedGuardIds = <%- JSON.stringify(typeof allowedGuardIds !== "undefined" ? allowedGuardIds : []) %>;
-    const hasGuardFilter = Array.isArray(allowedGuardIds) && allowedGuardIds.length > 0;
+      <script>
+const companyId = <%- JSON.stringify(String(userInfo.assignedCompanyID || "")) %>;
+const currentUserName = <%- JSON.stringify(userInfo.fullname || userInfo.username || "Current User") %>;
+const rawUserType = <%- JSON.stringify(userInfo.userType || "User") %>;
 
-    const statusText = document.getElementById("statusText");
-    const setStatus = (t) => statusText.textContent = t;
+function displayUserType(value) {
+  const normalized = String(value || "").trim().toLowerCase().replace(/[_-]+/g, " ");
+  if (normalized === "super admin") return "Super Admin";
+  if (normalized === "platform admin") return "Platform Admin";
+  if (normalized === "client" || normalized === "clients") return "Client";
+  return value || "User";
+}
 
-    // URLs for Leaflet's default marker images
-    const LEAFLET_PIN_URL =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
-    const LEAFLET_PIN_URL_2X =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png";
-    const LEAFLET_SHADOW_URL =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png";
+const currentUserType = displayUserType(rawUserType);
+const statusText = document.getElementById("statusText");
+const setStatus = (text) => { statusText.textContent = text; };
 
-    // ===== map =====
-    const map = L.map("liveMap").setView([9.0765, 7.3986], 16);
+const map = L.map("liveMap", { zoomControl: true }).setView([9.0765, 7.3986], 14);
+const satellite = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 19, attribution: "Tiles © Esri" }
+).addTo(map);
+const dark = L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }
+);
+L.control.layers({ Satellite: satellite, Dark: dark }).addTo(map);
+setTimeout(() => map.invalidateSize(), 250);
 
-    const satellite = L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { maxZoom: 19, attribution: "Tiles © Esri" }
-    ).addTo(map);
+const guardMarkers = new Map();
+let currentUserMarker = null;
+let currentAccuracyCircle = null;
+let hasCenteredOnUser = false;
+let currentUserWatchId = null;
+let lastAcceptedUserLocation = null;
 
-    const dark = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }
-    );
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;"
+  })[char]);
+}
 
-    L.control.layers({ "Satellite": satellite, "Dark": dark }).addTo(map);
-    setTimeout(() => map.invalidateSize(), 200);
+const CURRENT_USER_ICON = L.divIcon({
+  className: "",
+  html: `
+    <div class="current-user-marker">
+      <span class="marker-label">${escapeHtml(currentUserType)}</span>
+      <span class="current-user-pulse"></span>
+      <span class="current-user-pin"><i class="ri-user-location-fill"></i></span>
+    </div>`,
+  iconSize: [52, 62],
+  iconAnchor: [26, 56],
+  popupAnchor: [0, -54],
+});
 
-    // ===== marker store =====
-    const markers = new Map();
-
-    // ===== cache last location (ONLY used after guard becomes online) =====
-    function saveLastLoc(guardId, payload) {
-      try { localStorage.setItem("lastLoc:" + guardId, JSON.stringify(payload)); } catch {}
-    }
-    function loadLastLoc(guardId) {
-      try {
-        const s = localStorage.getItem("lastLoc:" + guardId);
-        return s ? JSON.parse(s) : null;
-      } catch { return null; }
-    }
-
-    // ✅ Create a DivIcon that visually uses Leaflet's default pin + pulse
-    function createDefaultPinWithPulse() {
-      // Use srcset so retina devices look crisp
-      const html = `
-        <div class="lf-wrap">
-          <div class="lf-pulse"></div>
-          <img class="lf-pin"
-               src="${LEAFLET_PIN_URL}"
-               srcset="${LEAFLET_PIN_URL_2X} 2x"
-               alt="pin" />
-        </div>
-      `;
+    function guardIcon(label) {
+      const safeLabel = escapeHtml(label || "Guard");
 
       return L.divIcon({
         className: "",
-        html,
+        html: `
+          <div class="lf-wrap">
+            <span class="guard-label">${safeLabel}</span>
+            <div
+              class="lf-pulse"
+              style="
+                background: rgba(255,138,0,.34);
+                box-shadow: 0 0 0 8px rgba(255,138,0,.18);
+              "
+            ></div>
+            <!-- CHANGE THE POLICE/GUARD ICON CLASS ON THE NEXT LINE. -->
+            <span class="guard-police-pin" aria-hidden="true">
+              <i class="ri-shield-user-fill"></i>
+            </span>
+          </div>
+        `,
         iconSize: [25, 41],
-        iconAnchor: [12, 41],   // tip of the pin
-        popupAnchor: [0, -36],
+        iconAnchor: [12, 41],
+        popupAnchor: [0, -36]
       });
     }
 
-    const DEFAULT_PIN_ICON = createDefaultPinWithPulse();
+        function updateDashboardStatus() {
+      const count = guardMarkers.size;
+      const guardText = `${count} checked-in guard${count === 1 ? "" : "s"}`;
 
-    // ✅ Create/update marker using our default-pin-with-pulse icon
-    function upsertMarkerFromPayload(p, { pan = false } = {}) {
-      const lat = Number(p.lat);
-      const lng = Number(p.lng);
-      if (Number.isNaN(lat) || Number.isNaN(lng)) return;
-
-      const guardId = String(p.guardId);
-      const guardName = (p.guardName && String(p.guardName).trim())
-        ? String(p.guardName).trim()
-        : guardId;
-
-      const latlng = [lat, lng];
-
-      if (!markers.has(guardId)) {
-        const marker = L.marker(latlng, { icon: DEFAULT_PIN_ICON }).addTo(map);
-        marker.bindPopup(`Guard: ${guardName}`);        // <-- popup text here
-        markers.set(guardId, marker);
+      if (currentUserMarker) {
+        setStatus(`showing your location and ${guardText}`);
       } else {
-        const m = markers.get(guardId);
-        m.setLatLng(latlng);
-        m.setPopupContent(`👮‍♂️: ${guardName}`);       // <-- popup update here
+        setStatus(`showing ${guardText}`);
       }
-
-      if (pan) map.setView(latlng, 18);
     }
 
-    setStatus("waiting for guard to check in…");
+function updateCurrentUserLocation(position) {
+  const latitude = Number(position.coords.latitude);
+  const longitude = Number(position.coords.longitude);
+  const accuracy = Number(position.coords.accuracy || 0);
 
-    // ===== socket =====
-    const socket = io();
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return;
+  }
 
-    socket.on("connect", () => {
-      const joinPayload = { companyId };
-      if (pageGuardId) joinPayload.guardId = pageGuardId;
-      socket.emit("join", joinPayload);
-      setStatus("connected (waiting…)");
-    });
+  const latlng = L.latLng(latitude, longitude);
 
-    socket.on("guard:location", (p) => {
-      if (pageGuardId && String(p.guardId) !== String(pageGuardId)) return;
-      if (hasGuardFilter && !allowedGuardIds.includes(String(p.guardId))) return;
-
-      upsertMarkerFromPayload(p, { pan: false });
-      saveLastLoc(String(p.guardId), p);
-      setStatus("online (tracking)");
-    });
-
-    socket.on("guard:online", ({ guardId }) => {
-      const gid = String(guardId);
-      if (pageGuardId && gid !== String(pageGuardId)) return;
-      if (hasGuardFilter && !allowedGuardIds.includes(String(gid))) return;
-      if (hasGuardFilter && !allowedGuardIds.includes(String(gid))) return;
-
-      const cached = loadLastLoc(gid);
-      if (cached) {
-        upsertMarkerFromPayload(cached, { pan: true });
-        setStatus("online (restored last loc)");
-      } else {
-        setStatus("online (waiting for GPS)");
+  /*
+   * Laptop/Wi-Fi location readings can shift slightly even when the user
+   * is stationary. Keep the existing marker and ignore movements below
+   * two metres so the pointer does not jump or flicker.
+   */
+  if (lastAcceptedUserLocation) {
+    const movedMetres = lastAcceptedUserLocation.distanceTo(latlng);
+    if (movedMetres < 2) {
+      if (currentAccuracyCircle) {
+        currentAccuracyCircle.setRadius(Math.max(accuracy, 8));
       }
+      return;
+    }
+  }
+
+  lastAcceptedUserLocation = latlng;
+
+  /*
+   * Create the current-user marker only once. Every later location result
+   * simply moves the existing marker, preserving the current marker style.
+   */
+  if (!currentUserMarker) {
+    currentUserMarker = L.marker(latlng, {
+      icon: CURRENT_USER_ICON,
+      zIndexOffset: 2000,
+      title: `${currentUserName} - ${currentUserType}`,
+      keyboard: true,
+      riseOnHover: true,
+    }).addTo(map);
+
+    currentUserMarker.bindPopup(`
+      <div style="min-width:180px">
+        <strong>${escapeHtml(currentUserName)}</strong><br>
+        <span>${escapeHtml(currentUserType)}</span><br>
+        <small>Your current browser location</small>
+      </div>
+    `);
+  } else {
+    currentUserMarker.setLatLng(latlng);
+  }
+
+  if (!currentAccuracyCircle) {
+    currentAccuracyCircle = L.circle(latlng, {
+      radius: Math.max(accuracy, 8),
+      weight: 1,
+      opacity: .7,
+      fillOpacity: .08,
+      interactive: false,
+    }).addTo(map);
+  } else {
+    currentAccuracyCircle.setLatLng(latlng);
+    currentAccuracyCircle.setRadius(Math.max(accuracy, 8));
+  }
+
+  /*
+   * The first successful location result immediately moves the map to
+   * the user's current location. Later updates do not keep recentering
+   * the map while the user is viewing checked-in guards.
+   */
+  if (!hasCenteredOnUser) {
+    map.flyTo(latlng, 17, {
+      animate: true,
+      duration: 1.1,
     });
+    hasCenteredOnUser = true;
+  }
 
-    socket.on("guard:offline", ({ guardId }) => {
-      const gid = String(guardId);
-      if (pageGuardId && gid !== String(pageGuardId)) return;
+  setStatus(
+    `showing your location and ${guardMarkers.size} checked-in guard${guardMarkers.size === 1 ? "" : "s"}`
+  );
+}
 
-      const m = markers.get(gid);
-      if (m) {
-        map.removeLayer(m);
-        markers.delete(gid);
+function handleLocationError(error) {
+  const messages = {
+    1: "Location permission denied. Allow location access in your browser.",
+    2: "Your current location is unavailable.",
+    3: "Location request timed out.",
+  };
+
+  /*
+   * Do not remove the last known marker during a temporary location error.
+   * Keeping it visible prevents the pointer from disappearing and returning.
+   */
+  if (currentUserMarker) {
+    setStatus(
+      `${messages[error.code] || "Location update failed."} Showing your last known location.`
+    );
+    return;
+  }
+
+  setStatus(messages[error.code] || "Could not load your current location.");
+}
+
+function beginContinuousLocationUpdates() {
+  if (currentUserWatchId !== null) {
+    return;
+  }
+
+  currentUserWatchId = navigator.geolocation.watchPosition(
+    updateCurrentUserLocation,
+    handleLocationError,
+    {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 5000,
+    }
+  );
+}
+
+function startCurrentUserTracking() {
+  if (!navigator.geolocation) {
+    setStatus("This browser does not support location services.");
+    return;
+  }
+
+  setStatus("requesting your current location...");
+
+  /*
+   * getCurrentPosition triggers the permission prompt and supplies the
+   * first location. Once permission is accepted, the map immediately
+   * loads and centers on the user's current position.
+   */
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      updateCurrentUserLocation(position);
+      beginContinuousLocationUpdates();
+    },
+    (error) => {
+      handleLocationError(error);
+
+      /*
+       * Start watching after a non-permission error so the page can recover
+       * automatically when location becomes available.
+       */
+      if (error.code !== 1) {
+        beginContinuousLocationUpdates();
       }
-      setStatus("offline (checked out)");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 0,
+    }
+  );
+}
+
+window.addEventListener("beforeunload", () => {
+  if (currentUserWatchId !== null && navigator.geolocation) {
+    navigator.geolocation.clearWatch(currentUserWatchId);
+  }
+});
+
+function getGuardId(payload) {
+  return String(payload.guardId || payload.guardID || payload.userId || payload._id || "");
+}
+
+function upsertGuardMarker(payload) {
+  const guardId = getGuardId(payload);
+  const lat = Number(payload.lat ?? payload.latitude);
+  const lng = Number(payload.lng ?? payload.long ?? payload.longitude);
+  if (!guardId || Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+  const guardName = payload.guardName || payload.fullname || payload.name || `Guard ${guardId.slice(-4)}`;
+  const latlng = [lat, lng];
+
+  if (!guardMarkers.has(guardId)) {
+    const marker = L.marker(latlng, {
+      icon: guardIcon(guardName),
+      zIndexOffset: 1000,
+      title: guardName,
+    }).addTo(map);
+    marker.bindPopup(`<strong>${guardName}</strong><br><span>Checked-in Guard</span>`);
+    guardMarkers.set(guardId, marker);
+  } else {
+    const marker = guardMarkers.get(guardId);
+    marker.setLatLng(latlng);
+    marker.setIcon(guardIcon(guardName));
+    marker.setPopupContent(`<strong>${guardName}</strong><br><span>Checked-in Guard</span>`);
+  }
+
+  setStatus(`showing your location and ${guardMarkers.size} checked-in guard${guardMarkers.size === 1 ? "" : "s"}`);
+}
+
+function removeGuardMarker(guardId) {
+  const id = String(guardId || "");
+  const marker = guardMarkers.get(id);
+  if (marker) {
+    map.removeLayer(marker);
+    guardMarkers.delete(id);
+  }
+  setStatus(`showing your location and ${guardMarkers.size} checked-in guard${guardMarkers.size === 1 ? "" : "s"}`);
+}
+
+const socket = io();
+socket.on("connect", () => {
+  socket.emit("join", { companyId });
+  setStatus("connected - loading locations...");
+});
+socket.on("guard:location", upsertGuardMarker);
+socket.on("guard:online", ({ guardName }) => {
+  setStatus(`${guardName || "A guard"} checked in - waiting for GPS...`);
+});
+socket.on("guard:offline", ({ guardId }) => removeGuardMarker(guardId));
+socket.on("disconnect", () => setStatus("live connection interrupted - reconnecting..."));
+
+
+let latestCurrentPosition = null;
+let lastWebLocationSavedAt = 0;
+
+function formatTrackingTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString([], {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit"
+  });
+}
+
+function renderTrackingRows(rows) {
+  const body = document.getElementById("liveTrackingRows");
+  if (!body) return;
+  if (!Array.isArray(rows) || rows.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" class="tracking-empty">No tracking activity has been recorded yet.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map((row) => {
+    const status = row.status === "online" ? "online" : "offline";
+    const source = row.source === "guard" ? "Guard App" : "Web Dashboard";
+    const icon = row.source === "guard" ? "ri-shield-user-line" : "ri-computer-line";
+    const location = row.locationLabel || (
+      Number.isFinite(Number(row.latitude)) && Number.isFinite(Number(row.longitude))
+        ? `${Number(row.latitude).toFixed(6)}, ${Number(row.longitude).toFixed(6)}`
+        : "Location unavailable"
+    );
+    return `
+      <tr>
+        <td>
+          <div class="tracking-user">
+            <span class="tracking-avatar"><i class="${icon}"></i></span>
+            <div><div class="tracking-name">${escapeHtml(row.userName || "User")}</div><div class="tracking-role">${escapeHtml(row.userType || "User")}</div></div>
+          </div>
+        </td>
+        <td>${source}</td>
+        <td><span class="tracking-status ${status}"><span></span>${status}</span></td>
+        <td><div class="tracking-location" title="${escapeHtml(location)}">${escapeHtml(location)}</div></td>
+        <td>${formatTrackingTime(row.recordedAt)}</td>
+      </tr>`;
+  }).join("");
+}
+
+async function loadCurrentTracking() {
+  try {
+    const response = await fetch("/api/tracking/current", {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
     });
-  </script>
+    const data = await response.json();
+
+    if (response.ok && data.ok) {
+      const rows = Array.isArray(data.rows) ? data.rows : [];
+      renderTrackingRows(rows);
+
+      // Rebuild checked-in guard markers from MongoDB after every page refresh.
+      // Previously, saved guard coordinates were only displayed in the table,
+      // while the map waited for a new Socket.IO GPS event.
+      const onlineGuardIds = new Set();
+
+      rows.forEach((row) => {
+        if (row.source !== "guard" || row.status !== "online") return;
+
+        const guardId = getGuardId(row);
+        const lat = Number(row.latitude ?? row.lat);
+        const lng = Number(row.longitude ?? row.lng ?? row.long);
+
+        if (!guardId || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+        onlineGuardIds.add(guardId);
+        upsertGuardMarker({
+          ...row,
+          guardId,
+          guardName: row.userName || row.guardName || row.fullname || "Guard",
+          lat,
+          lng,
+        });
+      });
+
+      // Remove markers whose latest saved record is checkout/offline.
+      for (const guardId of Array.from(guardMarkers.keys())) {
+        if (!onlineGuardIds.has(String(guardId))) {
+          removeGuardMarker(guardId);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Current tracking load failed:", error);
+  }
+}
+
+async function saveWebLocation(position) {
+  const now = Date.now();
+  if (now - lastWebLocationSavedAt < 20000) return;
+  lastWebLocationSavedAt = now;
+  latestCurrentPosition = position;
+
+  try {
+    await fetch("/api/tracking/web-location", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      }),
+    });
+  } catch (error) {
+    console.error("Web location history save failed:", error);
+  }
+}
+
+const originalUpdateCurrentUserLocation = updateCurrentUserLocation;
+updateCurrentUserLocation = function(position) {
+  originalUpdateCurrentUserLocation(position);
+  latestCurrentPosition = position;
+  saveWebLocation(position);
+};
+
+socket.on("tracking:changed", loadCurrentTracking);
+socket.on("web-user:location", loadCurrentTracking);
+setInterval(loadCurrentTracking, 30000);
+loadCurrentTracking();
+
+window.addEventListener("pagehide", () => {
+  const coords = latestCurrentPosition && latestCurrentPosition.coords;
+  const payload = JSON.stringify({
+    latitude: coords ? coords.latitude : null,
+    longitude: coords ? coords.longitude : null,
+    accuracy: coords ? coords.accuracy : null,
+  });
+  navigator.sendBeacon("/api/tracking/web-offline", new Blob([payload], { type: "application/json" }));
+});
+
+startCurrentUserTracking();
+</script>
        
         <!-- End::app-content -->
 

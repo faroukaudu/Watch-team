@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Watch Team Report</title>
+</head>
+
+<body
+    style="
+        margin: 0;
+        padding: 0;
+        background-color: #f3f6fb;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #1d2939;
+    "
+>
+    <table
+        width="100%"
+        cellpadding="0"
+        cellspacing="0"
+        role="presentation"
+        style="background-color: #f3f6fb; padding: 30px 15px;"
+    >
+        <tr>
+            <td align="center">
+
+                <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    role="presentation"
+                    style="
+                        max-width: 650px;
+                        background-color: #ffffff;
+                        border-radius: 14px;
+                        overflow: hidden;
+                        box-shadow: 0 8px 25px rgba(16, 24, 40, 0.08);
+                    "
+                >
+                    <!-- Header -->
+                    <tr>
+                        <td
+                            style="
+                                background-color: #101828;
+                                padding: 28px 35px;
+                            "
+                        >
+                            <h1
+                                style="
+                                    margin: 0;
+                                    color: #ffffff;
+                                    font-size: 25px;
+                                "
+                            >
+                                Watch Team
+                            </h1>
+
+                            <p
+                                style="
+                                    margin: 7px 0 0;
+                                    color: #d0d5dd;
+                                    font-size: 14px;
+                                "
+                            >
+                                Security Operations Report
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 35px;">
+
+                            <p
+                                style="
+                                    margin: 0 0 18px;
+                                    font-size: 16px;
+                                    line-height: 1.6;
+                                "
+                            >
+                                Hello
+                                <strong>
+                                    <%= recipientName || "Team Member" %>
+                                </strong>,
+                            </p>
+
+                            <p
+                                style="
+                                    margin: 0 0 25px;
+                                    font-size: 15px;
+                                    line-height: 1.7;
+                                    color: #475467;
+                                "
+                            >
+                                A new report has been submitted through
+                                Watch Team. The report details are provided
+                                below.
+                            </p>
+
+                            <table
+                                width="100%"
+                                cellpadding="0"
+                                cellspacing="0"
+                                role="presentation"
+                                style="
+                                    border-collapse: collapse;
+                                    border: 1px solid #eaecf0;
+                                    border-radius: 10px;
+                                "
+                            >
+                                <tr>
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            background-color: #f9fafb;
+                                            border-bottom: 1px solid #eaecf0;
+                                            width: 35%;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Report Category
+                                    </td>
+
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            border-bottom: 1px solid #eaecf0;
+                                        "
+                                    >
+                                        <%= report?.category || "General Report" %>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            background-color: #f9fafb;
+                                            border-bottom: 1px solid #eaecf0;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Post Site
+                                    </td>
+
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            border-bottom: 1px solid #eaecf0;
+                                        "
+                                    >
+                                        <%= postSite?.postSiteName || postSite?.name || "Not specified" %>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            background-color: #f9fafb;
+                                            border-bottom: 1px solid #eaecf0;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Company
+                                    </td>
+
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            border-bottom: 1px solid #eaecf0;
+                                        "
+                                    >
+                                        <%= company?.companyName || company?.name || "Not specified" %>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            background-color: #f9fafb;
+                                            border-bottom: 1px solid #eaecf0;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Submitted By
+                                    </td>
+
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            border-bottom: 1px solid #eaecf0;
+                                        "
+                                    >
+                                        <%= submittedBy?.name || submittedBy?.fullName || "Watch Team User" %>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td
+                                        style="
+                                            padding: 13px;
+                                            background-color: #f9fafb;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Date Submitted
+                                    </td>
+
+                                    <td style="padding: 13px;">
+                                        <% if (report?.createdAt) { %>
+                                            <%= new Date(report.createdAt).toLocaleString() %>
+                                        <% } else { %>
+                                            Not specified
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <% if (report?.description || report?.message) { %>
+                                <div
+                                    style="
+                                        margin-top: 25px;
+                                        padding: 18px;
+                                        background-color: #f9fafb;
+                                        border-left: 4px solid #175cd3;
+                                        border-radius: 6px;
+                                    "
+                                >
+                                    <p
+                                        style="
+                                            margin: 0 0 8px;
+                                            font-weight: bold;
+                                        "
+                                    >
+                                        Report Summary
+                                    </p>
+
+                                    <p
+                                        style="
+                                            margin: 0;
+                                            color: #475467;
+                                            line-height: 1.7;
+                                        "
+                                    >
+                                        <%= report.description || report.message %>
+                                    </p>
+                                </div>
+                            <% } %>
+
+                            <% if (reportUrl) { %>
+                                <table
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    role="presentation"
+                                    style="margin-top: 30px;"
+                                >
+                                    <tr>
+                                        <td align="center">
+                                            <a
+                                                href="<%= reportUrl %>"
+                                                style="
+                                                    display: inline-block;
+                                                    padding: 14px 24px;
+                                                    background-color: #175cd3;
+                                                    color: #ffffff;
+                                                    text-decoration: none;
+                                                    border-radius: 8px;
+                                                    font-weight: bold;
+                                                    font-size: 15px;
+                                                "
+                                            >
+                                                View Report
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            <% } %>
+
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td
+                            style="
+                                padding: 22px 35px;
+                                background-color: #f9fafb;
+                                border-top: 1px solid #eaecf0;
+                                text-align: center;
+                            "
+                        >
+                            <p
+                                style="
+                                    margin: 0 0 6px;
+                                    color: #667085;
+                                    font-size: 13px;
+                                "
+                            >
+                                This message was sent automatically by
+                                Watch Team.
+                            </p>
+
+                            <p
+                                style="
+                                    margin: 0;
+                                    color: #98a2b3;
+                                    font-size: 12px;
+                                "
+                            >
+                                © <%= currentYear %> Watch Team.
+                                All rights reserved.
+                            </p>
+
+                            <p
+                                style="
+                                    margin: 8px 0 0;
+                                    font-size: 12px;
+                                "
+                            >
+                                <a
+                                    href="mailto:<%= supportEmail %>"
+                                    style="
+                                        color: #175cd3;
+                                        text-decoration: none;
+                                    "
+                                >
+                                    <%= supportEmail %>
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

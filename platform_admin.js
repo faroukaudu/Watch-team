@@ -1,185 +1,103 @@
 const myModule = require("./index.js");
 const mongoose = require("mongoose");
-
 const requirePlatformAdmin = require("./src/middleware/requirePlatformAdmin");
 const UserSubscription = require("./src/models/UserSubscription");
+const Report = require("./src/models/report");
+const companyInfo = require("./db/companyinfodb.js");
 
 const app = myModule.main;
 const User = myModule.userDB;
-
-const companyInfo = require(__dirname + "/db/companyinfodb.js");
-const Company = mongoose.model("Company", companyInfo);
+const Company = mongoose.models.Company || mongoose.model("Company", companyInfo);
 
 app.get("/platform-admin", requirePlatformAdmin, async (req, res) => {
-    console.log("HIT /platform-admin/dashboard");
   try {
     const companies = await Company.find({}).lean();
     const subscriptions = await UserSubscription.find({}).lean();
+    const users = await User.find({}).lean();
+    const reportCounts = await Report.aggregate([{ $group: { _id: "$companyID", count: { $sum: 1 } } }]);
 
-    const subscriptionMap = {};
-    subscriptions.forEach((sub) => {
-      subscriptionMap[String(sub.companyId)] = sub;
-    });
-
-    const companyIds = companies.map((c) => String(c._id));
-
-    const users = await User.find({
-      assignedCompanyID: { $in: companyIds }
-    }).lean();
-
-    const countsMap = {};
-    companyIds.forEach((id) => {
-      countsMap[id] = {
-        clients: 0,
-        guards: 0,
-        admins: 0,
-      };
-    });
-
-    users.forEach((user) => {
-      const compId = String(user.assignedCompanyID || "");
-      if (!countsMap[compId]) {
-        countsMap[compId] = { clients: 0, guards: 0, admins: 0 };
-      }
-
-      if (user.userType === "Client") countsMap[compId].clients += 1;
-      if (user.userType === "AmobileGuard") countsMap[compId].guards += 1;
-      if (user.userType === "Super Admin") countsMap[compId].admins += 1;
-    });
-
-    const companyRows = companies.map((company) => {
-      const companyId = String(company._id);
-      const sub = subscriptionMap[companyId] || null;
-      const counts = countsMap[companyId] || { clients: 0, guards: 0, admins: 0 };
-
+    const subMap = Object.fromEntries(subscriptions.map(s => [String(s.companyId), s]));
+    const reportMap = Object.fromEntries(reportCounts.map(r => [String(r._id), r.count]));
+    const companyRows = companies.map(company => {
+      const id = String(company._id);
+      const companyUsers = users.filter(u => String(u.assignedCompanyID || "") === id);
       return {
-        _id: companyId,
-        companyName: company.companyName || company.name || "Unnamed Company",
-        companyEmail: company.companyEmail || company.email || "-",
-        clientsCount: counts.clients,
-        guardsCount: counts.guards,
-        adminsCount: counts.admins,
-        planName: sub?.planName || "-",
-        subscriptionStatus: sub?.subscriptionStatus || "none",
-        isActive: sub?.isActive || false,
-        expiresAt: sub?.expiresAt || null,
-        gateway: sub?.gateway || "-",
+        ...company,
+        subscription: subMap[id] || null,
+        planName: subMap[id]?.planName || "-",
+        subscriptionStatus: subMap[id]?.subscriptionStatus || "none",
+        isActive: !!subMap[id]?.isActive && !subMap[id]?.isBlocked,
+        expiresAt: subMap[id]?.expiresAt || null,
+        gateway: subMap[id]?.gateway || "-",
+        clientsCount: companyUsers.filter(u => u.userType === "Client").length,
+        guardsCount: companyUsers.filter(u => u.userType === "AmobileGuard").length,
+        adminsCount: companyUsers.filter(u => u.userType === "Super Admin").length,
+        reportsCount: reportMap[id] || 0,
       };
     });
 
-    const totals = {
-      companies: companies.length,
-      clients: companyRows.reduce((sum, row) => sum + row.clientsCount, 0),
-      guards: companyRows.reduce((sum, row) => sum + row.guardsCount, 0),
-      activeSubscriptions: companyRows.filter((row) => row.isActive).length,
-      inactiveSubscriptions: companyRows.filter((row) => !row.isActive).length,
-    };
-
-    return res.render("dashboard/platform-admin-dashboard", {
+    res.render("dashboard/platform-admin-dashboard", {
       userInfo: req.user,
-      totals,
       companies: companyRows,
+      totals: {
+        companies: companies.length,
+        clients: users.filter(u => u.userType === "Client").length,
+        guards: users.filter(u => u.userType === "AmobileGuard").length,
+        activeSubscriptions: subscriptions.filter(s => s.isActive && !s.isBlocked).length,
+        inactiveSubscriptions: subscriptions.filter(s => !s.isActive || s.isBlocked).length,
+      }
     });
   } catch (err) {
-    console.error("Platform admin dashboard error:", err);
-    return res.status(500).send("Unable to load platform admin dashboard.");
+    console.error(err);
+    res.status(500).send("Unable to load platform administration.");
   }
 });
 
 app.get("/platform-admin/company/:companyId", requirePlatformAdmin, async (req, res) => {
-    console.log("<><><><><><><>><><><><><><><, you are !!!!!!")
   try {
-    const { companyId } = req.params;
-    
-
-    const company = await Company.findById(companyId).lean();
-    if (!company) {
-      return res.status(404).send("Company not found");
-    }
-
-    const subscription = await UserSubscription.findOne({
-      companyId: String(companyId),
-    }).lean();
-
-    const clients = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "Client",
-    }).lean();
-
-    const guards = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "AmobileGuard",
-    }).lean();
-
-    const companyAdmins = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "Super Admin",
-    }).lean();
-
-    return res.render("dashboard/platform-admin-company-details", {
-      userInfo: req.user,
-      company,
-      subscription,
-      clients,
-      guards,
-      companyAdmins,
+    const company = await Company.findById(req.params.companyId).lean();
+    if (!company) return res.status(404).send("Company not found");
+    const subscription = await UserSubscription.findOne({ companyId: String(company._id) }).sort({ createdAt: -1 }).lean();
+    const users = await User.find({ assignedCompanyID: String(company._id) }).lean();
+    const reports = await Report.find({ companyID: String(company._id) }).sort({ createdAt: -1 }).limit(100).lean();
+    res.render("dashboard/platform-admin-company-details", {
+      userInfo: req.user, company, subscription, reports,
+      clients: users.filter(u => u.userType === "Client"),
+      guards: users.filter(u => u.userType === "AmobileGuard"),
+      companyAdmins: users.filter(u => u.userType === "Super Admin"),
     });
   } catch (err) {
-    console.error("Platform admin company details error:", err);
-    return res.status(500).send("Unable to load company details.");
+    console.error(err);
+    res.status(500).send("Unable to load company details.");
   }
 });
 
-app.get("/monkey",(req,res)=>{
-    res.send("close up");
-})
+app.post("/platform-admin/company/:companyId/toggle-block", requirePlatformAdmin, async (req, res) => {
+  const company = await Company.findById(req.params.companyId);
+  if (!company) return res.status(404).json({ ok: false, message: "Company not found" });
+  company.isBlocked = !company.isBlocked;
+  company.blockedAt = company.isBlocked ? new Date() : null;
+  await company.save();
+  res.json({ ok: true, isBlocked: company.isBlocked });
+});
 
+app.post("/platform-admin/user/:userId/toggle-block", requirePlatformAdmin, async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  if (!user) return res.status(404).json({ ok: false, message: "User not found" });
+  user.isBlocked = !user.isBlocked;
+  // user.status == true ? user.status=false : 
+  user.blockedAt = user.isBlocked ? new Date() : null;
+  await user.save();
+  res.json({ ok: true, isBlocked: user.isBlocked });
+});
 
-app.get("/monkey/luffy/:companyId", async (req,res)=>{
-
-    // res.send(req.params.companyId);
-     try {
-    const { companyId } = req.params;
-    
-
-    const company = await Company.findById(companyId).lean();
-    if (!company) {
-      return res.status(404).send("Company not found");
-    }
-
-    const subscription = await UserSubscription.findOne({
-      companyId: String(companyId),
-    }).lean();
-
-    const clients = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "Client",
-    }).lean();
-
-    const guards = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "AmobileGuard",
-    }).lean();
-
-    const companyAdmins = await User.find({
-      assignedCompanyID: String(companyId),
-      userType: "Super Admin",
-    }).lean();
-    res.send(companyAdmins,);
-
-    // return res.render("dashboard/platform-admin-company-details", {
-    //   userInfo: req.user,
-    //   company,
-    //   subscription,
-    //   clients,
-    //   guards,
-    //   companyAdmins,
-    // });
-  } catch (err) {
-    console.error("Platform admin company details error:", err);
-    return res.status(500).send("Unable to load company details.");
-  }
-})
-
+app.post("/platform-admin/subscription/:subscriptionId/toggle-block", requirePlatformAdmin, async (req, res) => {
+  const subscription = await UserSubscription.findById(req.params.subscriptionId);
+  if (!subscription) return res.status(404).json({ ok: false, message: "Subscription not found" });
+  subscription.isBlocked = !subscription.isBlocked;
+  subscription.blockedAt = subscription.isBlocked ? new Date() : null;
+  await subscription.save();
+  res.json({ ok: true, isBlocked: subscription.isBlocked });
+});
 
 module.exports = app;

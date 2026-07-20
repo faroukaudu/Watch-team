@@ -8,6 +8,7 @@ const { Server } = require("socket.io");
 
 const Chat = require("./db/chatdb.js");
 const Message = require("./db/messagedb.js");
+const NotificationService = require("./src/services/NotificationService");
 
 const userRoom = (userId) => `user:${userId}`;
 const companyRoom = (companyId) => `company:${companyId}`;
@@ -48,6 +49,7 @@ function normalizeErrAck(ack, err) {
 }
 
 function registerSocketLogic(io, User) {
+  const notificationApp = { get: (key) => key === "socketio" ? io : null };
   // AUTH: only accept userId from browser; derive companyId from DB
   io.use(async (socket, next) => {
     try {
@@ -171,14 +173,21 @@ function registerSocketLogic(io, User) {
 
         io.to(chatRoom(chatId)).emit("message:new", payload);
 
-        // notifications (for chat list badges etc.)
-        for (const uid of participants) {
+        // Notify only the other participant(s), never the sender.
+        for (const uid of otherUserIds) {
           io.to(userRoom(uid)).emit("message:notify", {
-            chatId: String(chatId),
-            from: userId,
-            messageId: String(msg._id),
-            createdAt: msg.createdAt,
+            chatId: String(chatId), from: userId, messageId: String(msg._id), createdAt: msg.createdAt,
           });
+        }
+        try {
+          const sender = await User.findById(userId).select("fullname username");
+          await NotificationService.notifyChatMessage(notificationApp, {
+            companyId, senderId: userId, receiverIds: otherUserIds,
+            senderName: sender?.fullname || sender?.username || "A user",
+            chatId: String(chatId), messageId: String(msg._id),
+          });
+        } catch (notificationError) {
+          console.error("Chat notification:", notificationError.message);
         }
 
         normalizeAck(ack, { ok: true, message: payload });

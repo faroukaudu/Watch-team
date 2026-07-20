@@ -29,6 +29,9 @@ const userInfoSchema = new mongoose.Schema({
   userType:String,
   assignedCompanyID:String,
   status:Boolean,
+  isBlocked:{ type:Boolean, default:false },
+  blockedAt:{ type:Date, default:null },
+  blockedReason:{ type:String, default:"" },
   lastLogin:String,
   passwordResetCode:String,
 passwordResetExpires:Date,
@@ -48,7 +51,7 @@ passwordResetVerified:{ type:Boolean, default:false },
       siteName: { type: String, required: true },
       postSiteID: { type: String, required: true }
     }
-  ]
+  ],
 //   phone:String,
 //   regDate:String,
 //   country:String,
@@ -58,7 +61,13 @@ passwordResetVerified:{ type:Boolean, default:false },
 //   auth:String,
 //   admin:Boolean,
 //   bank_info:[bankInfoSchema],
-
+mobilePasswordResetOtpHash: String,
+  mobilePasswordResetExpires: Date,
+  mobilePasswordResetVerified: {
+    type: Boolean,
+    default: false,
+  },
+  mobilePasswordResetTokenHash: String,
 },
 {timestamps: true}
 

@@ -5,6 +5,8 @@ const passport = require("passport");
 const session = require("express-session");
 const passportLocalMongoose = require("passport-local-mongoose");
 const attachSubscription = require("./src/middleware/attachSubscription");
+const attachNotifications = require("./src/middleware/attachNotifications");
+const registerNotificationRoutes = require("./src/routes/notifications");
 const { requireActiveSubscription, requireFeature, requireNumericFeature } = require("./src/middleware/requireSubscription");
 const { getResolvedFeatures, getLimitValue, isUnlimited } = require("./src/utils/subscriptionLimits");
 const { isClientUser, getClientScope } = require("./src/utils/clientScope");
@@ -30,10 +32,19 @@ app.locals.timeAgo = timeAgo; // Make it a GLobally Accessable in all EJS temp.
 // const clientSchema = require("./db/clientDb");
 const Message = require(__dirname + "/db/messagedb.js");
 const Chat = require(__dirname + "/db/chatdb.js");
+const Report = require("./src/models/report");
 
 const registerReportRoutes = require("./src/routes/reports");
 const registerUploadRoutes = require("./src/routes/uploads");
 const { registerUserRoutes } = require("./routes/chat_api");
+
+  const {
+    registerMobileGuardPasswordResetRoutes,
+  } = require("./mobile_guard_password_reset");
+
+  const {
+    registerSupportAndPasswordRoutes,
+  } = require("./support_and_password_routes");
 // const siteTourRoutes = require("./site_tour");
 
 
@@ -113,6 +124,7 @@ app.use(passport.session());
 
 //sub 
 app.use(attachSubscription);
+app.use(attachNotifications);
 
 app.use((req, res, next) => {
     res.locals.userInfo = req.user || null;
@@ -170,6 +182,11 @@ registerChatRoutes(app,);
 registerReportRoutes(app,);
 registerUploadRoutes(app,);
 registerAuthResetRoutes(app, User, emailSent);
+// for gaurd reset password
+registerMobileGuardPasswordResetRoutes(app, User);
+
+registerSupportAndPasswordRoutes(app);
+registerNotificationRoutes(app);
 
 
 
@@ -287,6 +304,13 @@ app.get("/dashboard", requireActiveSubscription,
             let bCount;
             let pCount;
             let gCount;
+            let reportStats = {
+                total: 0,
+                incident: { count: 0, percentage: 0 },
+                general: { count: 0, percentage: 0 },
+                codeRed: { count: 0, percentage: 0 },
+                others: { count: 0, percentage: 0 }
+            };
             // Updating User Login.
             try {
                 await User.findByIdAndUpdate(req.user._id, {
@@ -302,6 +326,66 @@ app.get("/dashboard", requireActiveSubscription,
                 bCount = await bOfficeCount(req.user.assignedCompanyID);
                 pCount = await postSiteCount(req.user.assignedCompanyID);
                 gCount = await guardsCount(req.user.assignedCompanyID);
+
+                const companyId = String(req.user.assignedCompanyID || "");
+
+                const reportAggregation = await Report.aggregate([
+                    {
+                        $match: {
+                            companyID: companyId
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$category",
+                            count: { $sum: 1 }
+                        }
+                    }
+                ]);
+
+                const reportCountsByCategory = reportAggregation.reduce((result, row) => {
+                    result[String(row._id || "general").toLowerCase()] = Number(row.count || 0);
+                    return result;
+                }, {});
+
+                const incidentReports = reportCountsByCategory.incident || 0;
+                const generalReports = reportCountsByCategory.general || 0;
+                const codeRedReports = reportCountsByCategory.code_red || 0;
+
+                const otherReports = Object.entries(reportCountsByCategory)
+                    .filter(([category]) => !["incident", "general", "code_red"].includes(category))
+                    .reduce((total, [, count]) => total + Number(count || 0), 0);
+
+                const totalReports =
+                    incidentReports +
+                    generalReports +
+                    codeRedReports +
+                    otherReports;
+
+                const percentageOfReports = (count) => {
+                    if (!totalReports) return 0;
+                    return Number(((Number(count || 0) / totalReports) * 100).toFixed(1));
+                };
+
+                reportStats = {
+                    total: totalReports,
+                    incident: {
+                        count: incidentReports,
+                        percentage: percentageOfReports(incidentReports)
+                    },
+                    general: {
+                        count: generalReports,
+                        percentage: percentageOfReports(generalReports)
+                    },
+                    codeRed: {
+                        count: codeRedReports,
+                        percentage: percentageOfReports(codeRedReports)
+                    },
+                    others: {
+                        count: otherReports,
+                        percentage: percentageOfReports(otherReports)
+                    }
+                };
 
                 console.log("Retuened Post COunt:", pCount);
             } catch (error) {
@@ -329,7 +413,7 @@ app.get("/dashboard", requireActiveSubscription,
 
                 res.render("dashboard/dashb", {
                     userInfo: req.user, activeClient: myCount, backOUser: bCount, compPostSite: pCount,
-                    guardCount: gCount, companyInfo: myCC, guardId
+                    guardCount: gCount, companyInfo: myCC, guardId, reportStats
                 });
             } else {
                 const myCC = await Company.findById(req.user.assignedCompanyID);
@@ -337,7 +421,7 @@ app.get("/dashboard", requireActiveSubscription,
                 // console.log("My COM INFO", myC);
                 res.render("dashboard/dashb", {
                     userInfo: req.user, activeClient: myCount, backOUser: bCount, compPostSite: pCount,
-                    guardCount: gCount, companyInfo: myCC, guardId
+                    guardCount: gCount, companyInfo: myCC, guardId, reportStats
                 });
             }
 
@@ -345,6 +429,138 @@ app.get("/dashboard", requireActiveSubscription,
             res.redirect("/sign-in");
         }
     })
+
+
+// Profile page
+app.get("/profile", (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/sign-in");
+    }
+
+    const toast = req.session.profileToast || null;
+    delete req.session.profileToast;
+
+    return res.render("dashboard/profile", {
+        userInfo: req.user,
+        toast,
+    });
+});
+
+// Update editable profile fields
+app.post("/profile", async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/sign-in");
+    }
+
+    try {
+        const phone = String(req.body.phone || "").trim();
+
+        if (phone && !/^[0-9+()\-\s.]{7,24}$/.test(phone)) {
+            req.session.profileToast = {
+                type: "error",
+                message: "Please enter a valid phone number.",
+            };
+            return res.redirect("/profile");
+        }
+
+        req.user.phone = phone;
+        await req.user.save();
+
+        req.session.profileToast = {
+            type: "success",
+            message: "Your profile information has been updated successfully.",
+        };
+        return res.redirect("/profile");
+    } catch (error) {
+        console.error("Profile update error:", error);
+        req.session.profileToast = {
+            type: "error",
+            message: "Unable to update your profile right now.",
+        };
+        return res.redirect("/profile");
+    }
+});
+
+// Change password from profile page
+app.post("/profile/change-password", async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/sign-in");
+    }
+
+    try {
+        const oldPassword = String(req.body.oldPassword || "");
+        const newPassword = String(req.body.newPassword || "");
+        const confirmPassword = String(req.body.confirmPassword || "");
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            req.session.profileToast = {
+                type: "error",
+                message: "Complete all password fields.",
+            };
+            return res.redirect("/profile");
+        }
+
+        if (newPassword !== confirmPassword) {
+            req.session.profileToast = {
+                type: "error",
+                message: "The new passwords do not match.",
+            };
+            return res.redirect("/profile");
+        }
+
+        if (
+            newPassword.length < 8 ||
+            !/[A-Z]/.test(newPassword) ||
+            !/[a-z]/.test(newPassword) ||
+            !/\d/.test(newPassword)
+        ) {
+            req.session.profileToast = {
+                type: "error",
+                message: "Use at least 8 characters with uppercase, lowercase, and a number.",
+            };
+            return res.redirect("/profile");
+        }
+
+        if (oldPassword === newPassword) {
+            req.session.profileToast = {
+                type: "error",
+                message: "Your new password must be different from your current password.",
+            };
+            return res.redirect("/profile");
+        }
+
+        const authenticatedUser = await new Promise((resolve, reject) => {
+            req.user.authenticate(oldPassword, (error, user) => {
+                if (error) return reject(error);
+                return resolve(user || null);
+            });
+        });
+
+        if (!authenticatedUser) {
+            req.session.profileToast = {
+                type: "error",
+                message: "Your current password is incorrect.",
+            };
+            return res.redirect("/profile");
+        }
+
+        await req.user.setPassword(newPassword);
+        await req.user.save();
+
+        req.session.profileToast = {
+            type: "success",
+            message: "Your password has been changed successfully.",
+        };
+        return res.redirect("/profile");
+    } catch (error) {
+        console.error("Profile password change error:", error);
+        req.session.profileToast = {
+            type: "error",
+            message: "Unable to change your password right now.",
+        };
+        return res.redirect("/profile");
+    }
+});
 
 app.get("/activities", async (req, res) => {
     if (req.isAuthenticated()) {
@@ -380,10 +596,21 @@ app.get("/clients", requireActiveSubscription, requireFeature("clients"), async 
         try {
             const companyId = req.user.assignedCompanyID;
 
-            const clientList = await User.find({
+            let clientQuery = {
                 userType: "Client",
                 assignedCompanyID: companyId
-            });
+            };
+
+            if (isClientUser(req.user)) {
+                const { assignedPostSite } = await getClientScope(req.user);
+                const relatedClientIds = new Set([String(req.user._id || req.user.id || "")]);
+                if (assignedPostSite && assignedPostSite.clientID) {
+                    relatedClientIds.add(String(assignedPostSite.clientID));
+                }
+                clientQuery._id = { $in: Array.from(relatedClientIds) };
+            }
+
+            const clientList = await User.find(clientQuery);
 
             let maxClients = -1;
             let clientsLeft = -1;
@@ -459,9 +686,6 @@ app.get("/post-site", async (req, res) => {
   }
 
   try {
-    if (isClientUser(req.user)) {
-      return res.redirect("/activities");
-    }
     const toastPost = req.session.post;
     delete req.session.post;
 
@@ -496,7 +720,9 @@ app.get("/post-site", async (req, res) => {
 
     return res.render("dashboard/post-site", {
       userInfo: req.user,
-      postSiteList: company.postSite,
+      postSiteList: isClientUser(req.user)
+        ? (company.postSite || []).filter((site) => String(site.clientID || "") === String(req.user._id || req.user.id || ""))
+        : (company.postSite || []),
       success: toastPost ? true : false,
       maxPostSites,
       postSitesLeft,
@@ -605,46 +831,145 @@ app.get("/guards", requireActiveSubscription, requireFeature("securityTeam"), as
 
 
 
-app.get("/bo-user", (req, res) => {
-    const toast = req.session.admin_toast;
-    const dateNow = new Date();
-    // const lastLogin = new Date(Date.now());
+app.get("/bo-user", async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/sign-in");
+    }
 
-    if (req.isAuthenticated()) {
-        if (isClientUser(req.user)) {
-            return res.redirect("/activities");
-        }
+    if (isClientUser(req.user)) {
+        req.session.accessNotice = "Only meant for Admin.";
+        return res.redirect("/activities");
+    }
 
-        // Clear it so it only shows once
-
+    try {
+        const toast = req.session.admin_toast;
+        const upgradeMessage = req.session.upgradeMessage || null;
 
         delete req.session.admin_toast;
-        const lastLog = new Date(req.user.lastLogin);
+        delete req.session.upgradeMessage;
 
-        console.log(timeAgo(lastLog));
-        User.find().then((users) => {
-            // console.log("this is my TOASE  ", toast);
-            res.render("dashboard/back-office-user", { userInfo: req.user, allUsers: users, success: toast ? true : false, });
-        })
-    } else {
-        res.redirect("/sign-in");
-    }
-})
+        const companyId = String(req.user.assignedCompanyID || "").trim();
+        const isPlatformAdminUser = req.user.userType === "Platform Admin";
 
-app.get("/new-bo-user", (req, res) => {
-    if (req.isAuthenticated()) {
-        if (isClientUser(req.user)) {
-            return res.redirect("/activities");
+        /*
+         * Back Office Users are stored as userType "Super Admin".
+         * The primary company Super Admin is also a Back Office User,
+         * so include that account in the list and plan counter.
+         */
+        const backOfficeQuery = isPlatformAdminUser
+            ? {
+                userType: "Super Admin"
+              }
+            : {
+                assignedCompanyID: companyId,
+                userType: "Super Admin"
+              };
+
+        const backOfficeUsers = await User.find(backOfficeQuery).lean();
+
+        let maxBackOfficeUsers = -1;
+        let backOfficeUsersLeft = -1;
+        let backOfficeLimitReached = false;
+
+        /*
+         * Platform Admin is unlimited.
+         */
+        if (!isPlatformAdminUser) {
+            const features = await getResolvedFeatures(companyId);
+            maxBackOfficeUsers = getLimitValue(
+                features,
+                "maxBackOfficeUsers"
+            );
+
+            if (!isUnlimited(maxBackOfficeUsers)) {
+                backOfficeUsersLeft = Math.max(
+                    0,
+                    Number(maxBackOfficeUsers) - backOfficeUsers.length
+                );
+
+                backOfficeLimitReached = backOfficeUsersLeft === 0;
+            }
         }
-        const randomString = Math.random().toString(36).substring(2, 10);
-        // console.log("Random String pass", randomString);
-        User.find({ assignedCompanyID: req.user.assignedCompanyID, userType: "Client" }).then((users) => {
-            res.render("dashboard/new-bo-user", { userInfo: req.user, clientUsers: users, password: randomString });
-        }).catch((err) => {
-            res.send(err);
-        })
-    } else {
-        res.redirect("/sign-in");
+
+        return res.render("dashboard/back-office-user", {
+            user: req.user,
+            userInfo: req.user,
+            allUsers: backOfficeUsers,
+            success: Boolean(toast),
+            maxBackOfficeUsers,
+            backOfficeUsersLeft,
+            backOfficeLimitReached,
+            upgradeMessage
+        });
+    } catch (error) {
+        console.error("LOAD BACK OFFICE USERS ERROR:", error);
+        return res
+            .status(500)
+            .send("Unable to load Back Office Users.");
+    }
+});
+
+app.get("/new-bo-user", async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/sign-in");
+    }
+
+    if (isClientUser(req.user)) {
+        req.session.accessNotice = "Only meant for Admin.";
+        return res.redirect("/activities");
+    }
+
+    try {
+        const companyId = String(req.user.assignedCompanyID || "").trim();
+        const isPlatformAdminUser = req.user.userType === "Platform Admin";
+
+        /*
+         * Platform Admin bypasses all limits.
+         */
+        if (!isPlatformAdminUser) {
+            const features = await getResolvedFeatures(companyId);
+            const maxBackOfficeUsers = getLimitValue(
+                features,
+                "maxBackOfficeUsers"
+            );
+
+            if (!isUnlimited(maxBackOfficeUsers)) {
+                const currentBackOfficeUsers = await User.countDocuments({
+                    assignedCompanyID: companyId,
+                    userType: "Super Admin"
+                });
+
+                if (currentBackOfficeUsers >= maxBackOfficeUsers) {
+                    req.session.upgradeMessage =
+                        "Your current plan allows only " +
+                        maxBackOfficeUsers +
+                        " Back Office User account(s). Upgrade your plan to add more.";
+
+                    return res.redirect("/bo-user");
+                }
+            }
+        }
+
+        const randomString = Math.random()
+            .toString(36)
+            .substring(2, 10);
+
+        const users = await User.find({
+            assignedCompanyID: companyId,
+            userType: "Client"
+        });
+
+        return res.render("dashboard/new-bo-user", {
+            user: req.user,
+            userInfo: req.user,
+            clientUsers: users,
+            password: randomString
+        });
+    } catch (error) {
+        console.error("OPEN NEW BACK OFFICE USER ERROR:", error);
+        return res
+            .status(500)
+            .send("Unable to open the New Back Office User page.");
     }
 })
 

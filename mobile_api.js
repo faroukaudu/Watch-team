@@ -14,35 +14,72 @@ const Company = mongoose.model("Company", companyInfo);
 
 
 app.post("/guard-signin", async (req, res, next) => {
-  try {
-    const { username, password } = req.body;
+  console.log("==================================");
+  console.log("GUARD LOGIN ROUTE HIT");
+  console.log("MOBILE API FILE:", __filename);
+  console.log("SERVER WORKING DIRECTORY:", process.cwd());
+  console.log("==================================");
 
-    if (!username || !password) {
+  try {
+    const rawUsername = String(
+      req.body.username || req.body.email || ""
+    ).trim();
+
+    const password = String(req.body.password || "");
+
+    console.log(
+      "RAW USERNAME:",
+      JSON.stringify(rawUsername)
+    );
+
+    console.log(
+      "USERNAME LENGTH:",
+      rawUsername.length
+    );
+
+    console.log(
+      "PASSWORD PROVIDED:",
+      password.length > 0
+    );
+
+    if (!rawUsername || !password) {
       return res.status(400).json({
         success: false,
         message: "Username and password are required.",
       });
     }
 
-const rawUsername = String(username || "").trim();
+    /*
+     * Do not capitalize or otherwise change the username.
+     * Your database stores the username in lowercase.
+     */
+    const cleanUsername = _.capitalize(rawUsername);
 
-const cleanUsername =
-  rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1);
-
-console.log("RAW USERNAME:", JSON.stringify(username));
-console.log("CLEAN USERNAME:", JSON.stringify(cleanUsername));
-console.log("RAW LENGTH:", username.length);
-console.log("CLEAN LENGTH:", cleanUsername.length);
-    
-
-    const mobileUser = await User.findByUsername(cleanUsername);
+    const mobileUser = await User.findByUsername(
+      cleanUsername
+    );
 
     if (!mobileUser) {
+      console.log(
+        "LOGIN FAILED: Guard account not found:",
+        cleanUsername
+      );
+
       return res.status(401).json({
         success: false,
         message: "Incorrect username or password.",
       });
     }
+
+    console.log("MOBILE GUARD FOUND:", {
+      id: mobileUser._id.toString(),
+      username: mobileUser.username,
+      userType: mobileUser.userType,
+      status: mobileUser.status,
+      isBlocked: mobileUser.isBlocked,
+      hasSalt: Boolean(mobileUser.salt),
+      hasHash: Boolean(mobileUser.hash),
+    });
 
     if (mobileUser.userType !== "AmobileGuard") {
       return res.status(403).json({
@@ -51,46 +88,100 @@ console.log("CLEAN LENGTH:", cleanUsername.length);
       });
     }
 
-    if (!mobileUser.status) {
+    if (
+      mobileUser.status === false ||
+      mobileUser.isBlocked === true
+    ) {
       return res.status(403).json({
         success: false,
-        message: "Your account is inactive. Please contact your administrator.",
+        message:
+          "Your account is inactive. Please contact your administrator.",
       });
     }
 
+    /*
+     * Passport must receive the exact username stored
+     * in the database.
+     */
+    req.body.username = mobileUser.username;
+    req.body.password = password;
 
-// VERY IMPORTANT
-req.body.username = cleanUsername;
+    passport.authenticate(
+      "local",
+      (err, user, info) => {
+        if (err) {
+          console.error(
+            "PASSPORT AUTHENTICATION ERROR:",
+            err
+          );
 
-    passport.authenticate("local", (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
-
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Incorrect username or password.",
-        });
-      }
-
-      req.login(user, (loginErr) => {
-        if (loginErr) {
-          return next(loginErr);
+          return next(err);
         }
 
-        req.session.lastLog = new Date();
+        if (!user) {
+          console.log(
+            "PASSPORT REJECTED LOGIN:",
+            info
+          );
 
-        return res.status(200).json({
-          success: true,
-          message: `Welcome ${user.username}. Login successful.`,
-          email: user.username,
-          userId: user._id,
+          return res.status(401).json({
+            success: false,
+            message: "Incorrect username or password.",
+          });
+        }
+
+        req.login(user, (loginErr) => {
+          if (loginErr) {
+            console.error(
+              "SESSION LOGIN ERROR:",
+              loginErr
+            );
+
+            return next(loginErr);
+          }
+
+          req.session.lastLog = new Date();
+
+          /*
+           * Save the session before returning success.
+           */
+          req.session.save((sessionError) => {
+            if (sessionError) {
+              console.error(
+                "SESSION SAVE ERROR:",
+                sessionError
+              );
+
+              return next(sessionError);
+            }
+
+            console.log(
+              "MOBILE GUARD LOGIN SUCCESSFUL:",
+              user.username
+            );
+
+            return res.status(200).json({
+              success: true,
+              message: `Welcome ${
+                user.fullname || user.username
+              }. Login successful.`,
+              email: user.email || user.username,
+              username: user.username,
+              userId: user._id.toString(),
+              fullname: user.fullname || "",
+              userType: user.userType,
+              assignedCompanyID:
+                user.assignedCompanyID || "",
+            });
+          });
         });
-      });
-    })(req, res, next);
+      }
+    )(req, res, next);
   } catch (error) {
-    console.error("Guard sign-in error:", error);
+    console.error(
+      "GUARD SIGN-IN ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
@@ -468,3 +559,262 @@ app.get("/api/mobile/post-site-directory", async (req, res) => {
     });
   }
 });
+
+
+// 1. Phone-number login route
+function normalizePhoneNumber(value = "") {
+  return String(value)
+    .trim()
+    .replace(/[^\d+]/g, "");
+}
+
+function authenticateGuardPassword(user, password) {
+  return new Promise((resolve, reject) => {
+    user.authenticate(password, (error, authenticatedUser) => {
+      if (error) {
+        return reject(error);
+      }
+
+      resolve(authenticatedUser || null);
+    });
+  });
+}
+
+app.post("/guard-phone-signin", async (req, res, next) => {
+  try {
+    const phone = normalizePhoneNumber(req.body.phone);
+    const password = String(req.body.password || "");
+
+    if (!phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number and password are required.",
+      });
+    }
+
+    /*
+     * Phone numbers may previously have been saved with spaces,
+     * dashes, brackets, or without a country-code plus sign.
+     *
+     * Fetch mobile guards and normalize their phone numbers in code
+     * so old records can still match.
+     */
+    const guards = await User.find({
+      userType: "AmobileGuard",
+    });
+
+    const phoneMatches = guards.filter((guard) => {
+      return normalizePhoneNumber(guard.phone) === phone;
+    });
+
+    if (phoneMatches.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect phone number or password.",
+      });
+    }
+
+    const authenticatedGuards = [];
+
+    for (const guard of phoneMatches) {
+      const authenticatedGuard =
+        await authenticateGuardPassword(guard, password);
+
+      if (authenticatedGuard) {
+        authenticatedGuards.push(authenticatedGuard);
+      }
+    }
+
+    if (authenticatedGuards.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect phone number or password.",
+      });
+    }
+
+    const activeGuards = authenticatedGuards.filter(
+      (guard) => guard.status === true
+    );
+
+    if (activeGuards.length === 0) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "The matching account is inactive. Please contact your administrator.",
+      });
+    }
+
+    /*
+     * Only one account matches, so complete login immediately.
+     */
+    if (activeGuards.length === 1) {
+      const guard = activeGuards[0];
+
+      return req.login(guard, (loginError) => {
+        if (loginError) {
+          return next(loginError);
+        }
+
+        req.session.lastLog = new Date();
+
+        return res.status(200).json({
+          success: true,
+          requiresAccountSelection: false,
+          message: `Welcome ${guard.fullname || guard.username}.`,
+          userId: guard._id,
+          username: guard.username,
+          fullname: guard.fullname,
+          phone: guard.phone,
+          assignedCompanyID: guard.assignedCompanyID,
+          guardPostSite: guard.guardPostSite || [],
+        });
+      });
+    }
+
+    /*
+     * More than one guard has the same phone and password.
+     * Store the verified IDs temporarily in the session.
+     *
+     * This prevents someone from submitting an arbitrary user ID
+     * in the second request.
+     */
+    req.session.pendingGuardPhoneLogin = {
+      userIds: activeGuards.map((guard) =>
+        String(guard._id)
+      ),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    };
+
+    return res.status(200).json({
+      success: true,
+      requiresAccountSelection: true,
+      message:
+        "Multiple guard accounts use these login details. Select your account.",
+      accounts: activeGuards.map((guard) => ({
+        userId: guard._id,
+        fullname:
+          guard.fullname ||
+          guard.username ||
+          "Guard Account",
+        username: guard.username,
+        phone: guard.phone,
+        assignedCompanyID: guard.assignedCompanyID,
+        guardPostSite: guard.guardPostSite || [],
+      })),
+    });
+  } catch (error) {
+    console.error("Guard phone sign-in error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again.",
+    });
+  }
+});
+
+app.post(
+  "/guard-phone-signin/select-account",
+  async (req, res, next) => {
+    try {
+      const userId = String(req.body.userId || "").trim();
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Please select a guard account.",
+        });
+      }
+
+      const pendingLogin =
+        req.session.pendingGuardPhoneLogin;
+
+      if (
+        !pendingLogin ||
+        !Array.isArray(pendingLogin.userIds)
+      ) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Your login selection has expired. Please sign in again.",
+        });
+      }
+
+      if (
+        !pendingLogin.expiresAt ||
+        Date.now() > pendingLogin.expiresAt
+      ) {
+        delete req.session.pendingGuardPhoneLogin;
+
+        return res.status(401).json({
+          success: false,
+          message:
+            "Your login selection has expired. Please sign in again.",
+        });
+      }
+
+      if (!pendingLogin.userIds.includes(userId)) {
+        return res.status(403).json({
+          success: false,
+          message: "This guard account was not verified.",
+        });
+      }
+
+      const guard = await User.findById(userId);
+
+      if (!guard) {
+        return res.status(404).json({
+          success: false,
+          message: "Guard account not found.",
+        });
+      }
+
+      if (guard.userType !== "AmobileGuard") {
+        return res.status(403).json({
+          success: false,
+          message: "Only mobile guards can sign in.",
+        });
+      }
+
+      if (!guard.status) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Your account is inactive. Please contact your administrator.",
+        });
+      }
+
+      return req.login(guard, (loginError) => {
+        if (loginError) {
+          return next(loginError);
+        }
+
+        delete req.session.pendingGuardPhoneLogin;
+        req.session.lastLog = new Date();
+
+        return res.status(200).json({
+          success: true,
+          requiresAccountSelection: false,
+          message: `Welcome ${guard.fullname || guard.username}.`,
+          userId: guard._id,
+          username: guard.username,
+          fullname: guard.fullname,
+          phone: guard.phone,
+          assignedCompanyID: guard.assignedCompanyID,
+          guardPostSite: guard.guardPostSite || [],
+        });
+      });
+    } catch (error) {
+      console.error(
+        "Guard phone account-selection error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Server error. Please try again.",
+      });
+    }
+  }
+);
+
+

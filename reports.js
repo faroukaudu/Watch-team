@@ -428,40 +428,95 @@ async function findCompany(compID, postSiteID) {
   return compInfo;
 }
 
-app.post("/reports-view", (req, res) => {
-  const reportInfo = req.body.reportId;
-  console.log("report IDS", reportInfo);
+app.post("/reports-view", async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.redirect("/sign-in");
+    }
 
-  if (req.isAuthenticated()) {
+    const reportId = req.body.reportId;
 
-    MobileReport.findById(reportInfo).then(async (singleReport) => {
-      if (isClientUser(req.user)) {
-        const { assignedPostSiteId } = await getClientScope(req.user);
-        if (String(singleReport?.fields?.postSiteId || "") !== String(assignedPostSiteId || "")) {
-          return res.status(403).send("Unauthorized");
-        }
+    const singleReport = await MobileReport.findById(reportId);
+
+    if (!singleReport) {
+      return res.status(404).send("Report not found.");
+    }
+
+    if (isClientUser(req.user)) {
+      const { assignedPostSiteId } = await getClientScope(req.user);
+
+      if (
+        String(singleReport?.fields?.postSiteId || "") !==
+        String(assignedPostSiteId || "")
+      ) {
+        return res.status(403).send("Unauthorized");
       }
-      console.log('FOUNDED ID FOR POST SITE', singleReport.fields.postSiteId);
+    }
 
-      const myCom = await findCompany(
-        req.user.assignedCompanyID,
-        singleReport.fields.postSiteId
-      );
+    const myCom = await findCompany(
+      req.user.assignedCompanyID,
+      singleReport.fields?.postSiteId
+    );
 
-      // 🔥 Inject readable post site name into fields
-      if (singleReport.fields?.postSiteId && myCom?.postSite?.[0]) {
-        singleReport.fields.postSiteName = myCom.postSite[0].siteName;
+    if (
+      singleReport.fields?.postSiteId &&
+      myCom?.postSite?.[0]
+    ) {
+      singleReport.fields.postSiteName =
+        myCom.postSite[0].siteName;
+    }
+
+    let template = null;
+
+    if (singleReport.templateId) {
+      template = await ReportTemplate.findById(
+        singleReport.templateId
+      ).lean();
+    }
+
+    const templateFieldMap = {};
+
+    if (template?.fields?.length) {
+      template.fields.forEach((field) => {
+        templateFieldMap[field.keyName] = field.label;
+      });
+    }
+
+    const reportFields = Object.entries(
+      singleReport.fields || {}
+    ).map(([keyName, value]) => {
+      let label = templateFieldMap[keyName];
+
+      /*
+       * Fallback for old reports or fields that do not
+       * exist in the report template.
+       */
+      if (!label) {
+        label = keyName
+          .replace(/[_-]+/g, " ")
+          .replace(/\b\w/g, (letter) =>
+            letter.toUpperCase()
+          );
       }
-      console.log("My COMPUUUUUU", myCom);
 
+      return {
+        keyName,
+        label,
+        value,
+      };
+    });
 
-      res.render("dashboard/view-report", { userInfo: req.user, reports: singleReport, companyInfo: myCom });
-    }).catch((err) => {
-      res.send(err);
-    })
+    return res.render("dashboard/view-report", {
+      userInfo: req.user,
+      reports: singleReport,
+      companyInfo: myCom,
+      reportFields,
+    });
+  } catch (error) {
+    console.error("View report error:", error);
+    return res.status(500).send("Server error viewing report.");
   }
-
-})
+});
 
 // TESTER FAKE
 app.get("/reports-viewss/:reportId", (req, res) => {

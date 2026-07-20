@@ -16,6 +16,27 @@
 </script>
 <% } %>
 
+<% if (upgradeMessage) { %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        Swal.fire({
+            icon: "info",
+            title: "Plan Limit Reached",
+            text: <%- JSON.stringify(upgradeMessage) %>,
+            showCancelButton: true,
+            confirmButtonText: "Upgrade Plan",
+            cancelButtonText: "Cancel",
+            allowOutsideClick: false
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                window.location.href = "/pricing";
+            }
+        });
+    });
+</script>
+<% } %>
+
 
     <!-- Start::app-content -->
     <div class="main-content app-content">
@@ -39,11 +60,41 @@
                 <!-- <p>oidne</p> -->
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <div class="d-flex gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                        <% if (maxBackOfficeUsers === -1) { %>
+                            <span class="badge bg-success-transparent fs-12 px-3 py-2">
+                                Back Office Users:
+                                <strong><%= allUsers.length %> / Unlimited</strong>
+                            </span>
+                        <% } else { %>
+                            <span class="badge <%= backOfficeLimitReached ? 'bg-danger-transparent' : 'bg-primary-transparent' %> fs-12 px-3 py-2">
+                                Back Office Users:
+                                <strong>
+                                    <%= allUsers.length %> / <%= maxBackOfficeUsers %>
+                                </strong>
+                                &nbsp;—&nbsp;
+                                <%= backOfficeUsersLeft %> remaining
+                            </span>
+                        <% } %>
+
                         <div class="position-relative">
-                            <a href="/new-bo-user" class="small-space btn btn-secondary btn-wave" type="button">
-                                New User <i class="ri-user-add-fill ms-1"></i>
-                            </a>
+                            <% if (backOfficeLimitReached) { %>
+                                <button
+                                    type="button"
+                                    id="backOfficeUpgradeButton"
+                                    class="small-space btn btn-secondary btn-wave"
+                                >
+                                    New User <i class="ri-user-add-fill ms-1"></i>
+                                </button>
+                            <% } else { %>
+                                <a
+                                    href="/new-bo-user"
+                                    class="small-space btn btn-secondary btn-wave"
+                                >
+                                    New User <i class="ri-user-add-fill ms-1"></i>
+                                </a>
+                            <% } %>
                             <!-- <button class="btn btn-outline-primary btn-wave" type="button"
                                 id="dropdownMenuClickableInside" data-bs-toggle="dropdown" data-bs-auto-close="outside"
                                 aria-expanded="false">
@@ -110,7 +161,7 @@
                     <div class="card custom-card">
                         <div class="card-header  justify-content-between">
                             <div class="card-title" style="font-size: large;">
-                                Admin
+                                Back Office Users
                             </div>
                             <!-- <a href="javascript:void(0);" class="fs-12 text-muted fw-medium bg-light rounded p-1" > View All<i class="ti ti-arrow-narrow-right ms-1"></i> </a> -->
                         </div>
@@ -132,9 +183,8 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                   <% if(allUsers.length >0){ %>
-                                    <%  allUsers.forEach(function(superUser){ %>
-                                    <% if(superUser.userType==="Super Admin" && superUser.assignedCompanyID === userInfo.assignedCompanyID){ %>
+                                   <% if (allUsers && allUsers.length > 0) { %>
+                                    <% allUsers.forEach(function(superUser) { %>
                                     <tr>
                                         <th scope="row"><input class="form-check-input" type="checkbox"
                                                 id="checkboxNoLabel1" value="" aria-label="..."></th>
@@ -164,11 +214,13 @@
                                        
 
                                     </tr>
-                                   <%  } %>
-                                   <%  }) %>
-
-                                  <%  }else{ %>
-                                    <p>No Users Added Yet. Which is strange and its a bug contact Dev support</p>
+                                   <% }) %>
+                                  <% } else { %>
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            No Back Office Users found.
+                                        </td>
+                                    </tr>
                                    <% } %>
 
 
@@ -188,6 +240,36 @@
     </div>
     <!-- End::app-content -->
 
+
+    <% if (backOfficeLimitReached) { %>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const upgradeButton =
+                document.getElementById("backOfficeUpgradeButton");
+
+            if (!upgradeButton) return;
+
+            upgradeButton.addEventListener("click", function () {
+                Swal.fire({
+                    icon: "info",
+                    title: "Plan Limit Reached",
+                    text:
+                        "Your current plan allows only " +
+                        <%- JSON.stringify(maxBackOfficeUsers) %> +
+                        " Back Office User account(s). Upgrade your plan to add more.",
+                    showCancelButton: true,
+                    confirmButtonText: "Upgrade Plan",
+                    cancelButtonText: "Cancel"
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.location.href = "/pricing";
+                    }
+                });
+            });
+        });
+    </script>
+    <% } %>
 
     <!-- Footer Start -->
     <%- include("../includes/footer"); -%>

@@ -342,20 +342,3 @@ ul.social li{
 
 
 
-<% if (userSubscription && userSubscription.isActive && userSubscription.features.dashboard) { %>
-  <li class="slide">
-    <a href="/dashboard" class="side-menu__item">Dashboard</a>
-  </li>
-<% } %>
-
-<% if (userSubscription && userSubscription.isActive && userSubscription.features.clients) { %>
-  <li class="slide">
-    <a href="/clients" class="side-menu__item">Clients</a>
-  </li>
-<% } %>
-
-<% if (userSubscription && userSubscription.isActive && userSubscription.features.messenger) { %>
-  <li class="slide">
-    <a href="/messenger" class="side-menu__item">Messenger</a>
-  </li>
-<% } %>

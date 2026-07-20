@@ -8,6 +8,9 @@ var companyInfo = require(__dirname + "/db/companyinfodb.js");
 const adminCreatePassword = require('./msg_send.js');
 const addingGuardstoPostSite = require("./add_gaurd.js");
 const { emailSent } = require("./nodemailer");
+const fs = require("fs");
+const path = require("path");
+const handlebars = require("handlebars");
 
 
 
@@ -17,6 +20,7 @@ const User = myModule.userDB;
 const Company = mongoose.model("Company", companyInfo);
 
 const { getResolvedFeatures, getLimitValue, isUnlimited } = require("./src/utils/subscriptionLimits");
+const { isPlatformAdmin } = require("./src/utils/subscriptionLimits");
 const { redirectToPricingWithUpgradeMessage } = require("./src/utils/upgradeRedirect");
 
 // function addingGuardstoPostSite(guardInfo, companyID){
@@ -328,41 +332,20 @@ app.post("/sign-up", async (req, res) => {
 
 // Client Registration
 app.post("/new-client", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect("/sign-in");
+  }
 
-  if (req.isAuthenticated()) {
-    const companyId = req.user.assignedCompanyID;
+  try {
+    const companyId = req.session.companyID || req.user?.assignedCompanyID;
 
-    // Platform Admin = no limit
-    if (req.user.userType === "Super Admin") {
-      const features = await getResolvedFeatures(companyId);
-      const maxClients = getLimitValue(features, "maxClients");
-
-      if (!isUnlimited(maxClients)) {
-        const currentClients = await User.countDocuments({
-          assignedCompanyID: companyId,
-          userType: "Client",
-        });
-
-        if (currentClients >= maxClients) {
-          return redirectToPricingWithUpgradeMessage(
-            req,
-            res,
-            "You have reached your client limit. Upgrade your plan."
-          );
-        }
-      }
-    }
-
-
-
-
-    await Company.findOne()
-    const features = await getResolvedFeatures(req.session.companyID || req.user?.assignedCompanyID);
+    // Platform Admin is unlimited. Other account types use the company plan.
+    const features = await getResolvedFeatures(companyId);
     const maxClients = getLimitValue(features, "maxClients");
 
-    if (!isUnlimited(maxClients)) {
+    if (!isPlatformAdmin(req.user) && !isUnlimited(maxClients)) {
       const currentClients = await User.countDocuments({
-        assignedCompanyID: req.session.companyID || req.user?.assignedCompanyID,
+        assignedCompanyID: companyId,
         userType: "Client",
       });
 
@@ -371,74 +354,196 @@ app.post("/new-client", async (req, res) => {
           req,
           res,
           "Your current subscription allows only " +
-          maxClients +
-          " client account(s). Please upgrade your subscription to add more."
+            maxClients +
+            " client account(s). Please upgrade your subscription to add more."
         );
       }
     }
 
-
-    const { username, client_name, password, cpassword, phone } = req.body;
-
-    const newClient = new User({
-      username: _.capitalize(username),
-      fullname: _.capitalize(client_name),
-      email: _.capitalize(username), // emails should be lowercase
-      // assignedCompanyID: "Mine",
-      userType: "Client",
+    const {
+      username,
+      client_name,
       phone,
-      assignedCompanyID: req.user.assignedCompanyID,
-      compName: req.user.compName,
-      status: true,
+      address,
+      password,
+      cpassword,
+    } = req.body;
 
+    const email = String(username || "").trim().toLowerCase();
+    const fullName = String(client_name || "").trim();
+    const clientAddress = String(address || "").trim();
+    const temporaryPassword = String(password || "");
+    const confirmPassword = String(cpassword || "");
 
-    });
-
-    try {
-      await User.register(newClient, password);
-      await Company.a // 👈 No auto-login
+    if (!fullName || !email || !phone || !clientAddress || !temporaryPassword) {
       req.session.toast = {
-        status: true,
-        message: 'User created successfully!'
+        status: false,
+        message: "Please complete all required client fields.",
       };
-      res.redirect("clients");
-      // res.render("dashboard/clients", {success:true, userInfo:req.user});
-      // ✅ stays in admin session
-    } catch (err) {
-      console.error("Registration error:", err);
-      res.status(400).send("Error registering client: " + err.message);
-      // Or: res.render("error-page", { message: "Client registration failed" });
+      return res.redirect("/new-cli");
     }
 
+    if (temporaryPassword.length < 8) {
+      req.session.toast = {
+        status: false,
+        message: "The temporary password must contain at least 8 characters.",
+      };
+      return res.redirect("/new-cli");
+    }
 
-  } else {
+    if (temporaryPassword !== confirmPassword) {
+      req.session.toast = {
+        status: false,
+        message: "Password and confirm password do not match.",
+      };
+      return res.redirect("/new-cli");
+    }
 
+    const existingUser = await User.findOne({
+      $or: [{ username: email }, { email }],
+    }).lean();
+
+    if (existingUser) {
+      req.session.toast = {
+        status: false,
+        message: "A user with this email address already exists.",
+      };
+      return res.redirect("/new-cli");
+    }
+
+    const newClient = new User({
+      username: email,
+      fullname: fullName,
+      email,
+      address: clientAddress,
+      userType: "Client",
+      phone: String(phone).trim(),
+      assignedCompanyID: companyId,
+      compName: req.user.compName,
+      status: true,
+    });
+
+    const createdClient = await User.register(newClient, temporaryPassword);
+
+    const baseUrl = (
+      process.env.PUBLIC_BASE_URL ||
+      process.env.APP_BASE_URL ||
+      `${req.protocol}://${req.get("host")}`
+    ).replace(/\/$/, "");
+    const signInUrl = `${baseUrl}/sign-in`;
+    const companyName = req.user.compName || "Watch Team";
+
+    const welcomeHtml = `
+      <div style="margin:0;padding:32px 16px;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#172033;">
+        <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e7ebf1;box-shadow:0 8px 30px rgba(20,33,61,.08);">
+          <div style="padding:28px 32px;background:#111827;color:#ffffff;">
+            <h1 style="margin:0;font-size:24px;line-height:1.3;">Welcome to Watch Team</h1>
+          </div>
+          <div style="padding:32px;">
+            <p style="margin:0 0 18px;font-size:16px;line-height:1.65;">Hello ${fullName},</p>
+            <p style="margin:0 0 18px;font-size:16px;line-height:1.65;">
+              You have been added as a Client for <strong>${companyName}</strong> on Watch Team.
+            </p>
+            <div style="margin:24px 0;padding:20px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;">
+              <p style="margin:0 0 10px;font-size:14px;color:#667085;">Sign-in email</p>
+              <p style="margin:0 0 18px;font-size:16px;font-weight:700;word-break:break-word;">${email}</p>
+              <p style="margin:0 0 10px;font-size:14px;color:#667085;">Temporary password</p>
+              <p style="margin:0;font-size:16px;font-weight:700;word-break:break-word;">${temporaryPassword}</p>
+            </div>
+            <p style="margin:0 0 24px;font-size:15px;line-height:1.65;">
+              For your security, please sign in and change this temporary password from the <strong>Profile</strong> section immediately.
+            </p>
+            <p style="margin:0 0 28px;">
+              <a href="${signInUrl}" style="display:inline-block;padding:13px 22px;background:#e11d74;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;">Sign in to Watch Team</a>
+            </p>
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#667085;word-break:break-all;">
+              If the button does not work, open: ${signInUrl}
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    let emailDelivered = true;
+    try {
+      await emailSent({
+        sendTo: email,
+        title: `Welcome to Watch Team - ${companyName}`,
+        message:
+          `Hello ${fullName}, you have been added as a Client for ${companyName}. ` +
+          `Sign in at ${signInUrl} using ${email} and temporary password: ${temporaryPassword}. ` +
+          `Please change your password from the Profile section immediately after signing in.`,
+        template: welcomeHtml,
+        emailType: "client_welcome",
+      });
+    } catch (emailError) {
+      emailDelivered = false;
+      console.error(
+        `Client ${createdClient._id} was created, but the welcome email failed:`,
+        emailError
+      );
+    }
+
+    req.session.toast = {
+      status: emailDelivered,
+      message: emailDelivered
+        ? "Client created successfully and the welcome email was sent."
+        : "Client created successfully, but the welcome email could not be sent. Please provide the sign-in details manually.",
+    };
+
+    return res.redirect("/clients");
+  } catch (err) {
+    console.error("Client registration error:", err);
+
+    req.session.toast = {
+      status: false,
+      message:
+        err?.name === "UserExistsError"
+          ? "A user with this email address already exists."
+          : "The client could not be created. Please review the details and try again.",
+    };
+
+    return res.redirect("/new-cli");
   }
-
 });
+
 
 // BackOffice User Registration
 app.post("/add-bo-user", async (req, res) => {
 
   if (req.isAuthenticated()) {
-    await Company.findOne()
-    const features = await getResolvedFeatures(req.session.companyID || req.user?.assignedCompanyID);
-    const maxSuperAdmins = getLimitValue(features, "maxSuperAdmins");
+    const companyId =
+      req.session.companyID || req.user?.assignedCompanyID;
 
-    if (!isUnlimited(maxSuperAdmins)) {
-      const currentSuperAdmins = await User.countDocuments({
-        assignedCompanyID: req.session.companyID || req.user?.assignedCompanyID,
-        userType: "Super Admin",
-      });
+    /*
+     * Platform Admin is unlimited.
+     * Back Office Users are currently stored as userType "Super Admin".
+     * The primary company Super Admin is excluded from the additional
+     * Back Office User count.
+     */
+    if (!isPlatformAdmin(req.user)) {
+      const features = await getResolvedFeatures(companyId);
+      const maxBackOfficeUsers = getLimitValue(
+        features,
+        "maxBackOfficeUsers"
+      );
 
-      if (currentSuperAdmins >= maxSuperAdmins) {
-        return redirectToPricingWithUpgradeMessage(
-          req,
-          res,
-          "Your current subscription allows only " +
-          maxSuperAdmins +
-          " Super Admin account(s). Please upgrade your subscription to add more."
-        );
+      if (!isUnlimited(maxBackOfficeUsers)) {
+        const currentBackOfficeUsers = await User.countDocuments({
+          assignedCompanyID: companyId,
+          userType: "Super Admin",
+          _id: { $ne: req.user._id },
+        });
+
+        if (currentBackOfficeUsers >= maxBackOfficeUsers) {
+          return redirectToPricingWithUpgradeMessage(
+            req,
+            res,
+            "Your current subscription allows only " +
+              maxBackOfficeUsers +
+              " Back Office User account(s). Please upgrade your subscription to add more."
+          );
+        }
       }
     }
 
@@ -523,7 +628,7 @@ app.post("/new-guard", async (req, res) => {
       const features = await getResolvedFeatures(companyId);
       const maxSecurityGuards = getLimitValue(features, "maxSecurityGuards");
 
-      if (!isUnlimited(maxSecurityGuards)) {
+      if (!isPlatformAdmin(req.user) && !isUnlimited(maxSecurityGuards)) {
         const currentGuards = await User.countDocuments({
           assignedCompanyID: companyId,
           userType: "AmobileGuard",
@@ -582,41 +687,81 @@ app.post("/new-guard", async (req, res) => {
 
 
 
-// ADMIN Login
-app.post("/sign-in", (req, res) => {
+// WEB LOGIN
+// Finds email addresses case-insensitively, then gives Passport the exact
+// username value stored in MongoDB. This supports both existing accounts
+// saved as "Audu..." and newer accounts saved in lowercase.
+app.post("/sign-in", async (req, res, next) => {
+  try {
+    const enteredEmail = String(req.body.username || "").trim();
+    const enteredPassword = String(req.body.password || "");
 
-  req.body.username = _.capitalize(req.body.username);
-  var userLogin = new User({ username: req.body.username, password: req.body.password });
-  req.login(userLogin, function (err) {
-passport.authenticate("local", (err, user, info) => {
-
-  if (err) {
-    return next(err);
-  }
-
-  if (!user) {
-
-    req.session.resetModal = {
-      title: "Login Failed",
-      message: "Incorrect email address or password."
-    };
-
-    return res.redirect("/sign-in");
-  }
-
-  req.logIn(user, function (err) {
-
-    if (err) {
-      return next(err);
+    if (!enteredEmail || !enteredPassword) {
+      req.session.resetModal = {
+        title: "Login Failed",
+        message: "Please enter your email address and password.",
+      };
+      return res.redirect("/sign-in");
     }
 
-    req.session.lastLog = new Date();
+    // Escape regex characters before performing an exact, case-insensitive lookup.
+    const escapedEmail = enteredEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    return res.redirect("/dashboard");
-  });
+    const existingUser = await User.findOne({
+      $or: [
+        { username: { $regex: `^${escapedEmail}$`, $options: "i" } },
+        { email: { $regex: `^${escapedEmail}$`, $options: "i" } },
+      ],
+    }).select("username email");
 
-})(req, res);
-  })
+    if (!existingUser || !existingUser.username) {
+      req.session.resetModal = {
+        title: "Login Failed",
+        message: "Incorrect email address or password.",
+      };
+      return res.redirect("/sign-in");
+    }
+
+    // Passport Local Mongoose expects the exact username stored in the database.
+    req.body.username = existingUser.username;
+
+    passport.authenticate("local", (err, user) => {
+      if (err) return next(err);
+
+      if (!user) {
+        req.session.resetModal = {
+          title: "Login Failed",
+          message: "Incorrect email address or password.",
+        };
+        return res.redirect("/sign-in");
+      }
+
+      if (["AmobileGuard", "MobileGuard", "Guard", "Guards"].includes(user.userType)) {
+        req.session.resetModal = {
+          title: "Mobile App Login Required",
+          message: "Guards should log on from the mobile app.",
+        };
+        return res.redirect("/sign-in");
+      }
+
+      if (user.status === false || user.isBlocked === true) {
+        req.session.resetModal = {
+          title: "Account Blocked",
+          message: "Your account has been blocked. Please contact an administrator.",
+        };
+        return res.redirect("/sign-in");
+      }
+
+      return req.logIn(user, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        req.session.lastLog = new Date();
+        return res.redirect(user.userType === "Client" ? "/activities" : "/dashboard");
+      });
+    })(req, res, next);
+  } catch (error) {
+    console.error("Sign-in error:", error);
+    return next(error);
+  }
 });
 
 // CREATING GUARD PROFILE Registering
@@ -630,7 +775,7 @@ app.post("/add-guard", async (req, res) => {
       const features = await getResolvedFeatures(companyId);
       const maxSecurityGuards = getLimitValue(features, "maxSecurityGuards");
 
-      if (!isUnlimited(maxSecurityGuards)) {
+      if (!isPlatformAdmin(req.user) && !isUnlimited(maxSecurityGuards)) {
         const currentGuards = await User.countDocuments({
           assignedCompanyID: companyId,
           userType: "AmobileGuard",
@@ -680,7 +825,8 @@ app.post("/add-guard", async (req, res) => {
       const newGuard = new User({
         username: _.capitalize(username),
         fullname: _.capitalize(fname) + " " + _.capitalize(lname),
-        email: String(username).toLowerCase(),
+        // email: String(username).toLowerCase(),
+        email: _.capitalize(username),
         userType: "AmobileGuard",
         phone: phone,
         assignedCompanyID: companyId,
@@ -717,6 +863,201 @@ app.post("/add-guard", async (req, res) => {
     }
   } else {
     return res.send("Only authenticated users can add guards.");
+  }
+});
+
+
+// CREATE GUARD PROFILE AND EMAIL LOGIN DETAILS
+app.post("/add-guard-and-send-details", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.send("Only authenticated users can add guards.");
+  }
+
+  try {
+    const companyId = req.session.companyID || req.user?.assignedCompanyID;
+
+    // Apply the same subscription guard limit used by the normal Add Guard action.
+    const features = await getResolvedFeatures(companyId);
+    const maxSecurityGuards = getLimitValue(features, "maxSecurityGuards");
+
+    if (!isPlatformAdmin(req.user) && !isUnlimited(maxSecurityGuards)) {
+      const currentGuards = await User.countDocuments({
+        assignedCompanyID: companyId,
+        userType: "AmobileGuard",
+      });
+
+      if (currentGuards >= maxSecurityGuards) {
+        return redirectToPricingWithUpgradeMessage(
+          req,
+          res,
+          "Your current subscription allows only " +
+            maxSecurityGuards +
+            " security guard account(s). Please upgrade your subscription to add more."
+        );
+      }
+    }
+
+    const {
+      fname,
+      lname,
+      username,
+      password,
+      cpassword,
+      phone,
+      clientId,
+      siteId,
+    } = req.body;
+
+    const firstName = String(fname || "").trim();
+    const lastName = String(lname || "").trim();
+    // const email = String(username || "").trim().toLowerCase();
+    const email = String(username || "").trim();
+    const mobile = String(phone || "").trim();
+    const temporaryPassword = String(password || "");
+
+    if (!firstName || !lastName || !email || !mobile || !temporaryPassword) {
+      req.session.guardtoast = {
+        status: false,
+        message: "Please complete the guard name, email, phone number and password.",
+      };
+      return res.redirect("/new-guards");
+    }
+
+    if (temporaryPassword !== String(cpassword || "")) {
+      req.session.guardtoast = {
+        status: false,
+        message: "Password and confirm password do not match.",
+      };
+      return res.redirect("/new-guards");
+    }
+
+    if (!clientId || !siteId) {
+      req.session.guardtoast = {
+        status: false,
+        message: "Please select a client and post site before creating the guard.",
+      };
+      return res.redirect("/new-guards");
+    }
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      throw new Error("Company not found.");
+    }
+
+    const selectedClient = await User.findOne({
+      _id: clientId,
+      assignedCompanyID: companyId,
+      userType: "Client",
+    }).select("fullname");
+
+    const selectedPostSite = company.postSite?.find(
+      (site) => String(site._id) === String(siteId)
+    );
+
+    if (!selectedClient) {
+      req.session.guardtoast = {
+        status: false,
+        message: "The selected client could not be found.",
+      };
+      return res.redirect("/new-guards");
+    }
+
+    if (!selectedPostSite) {
+      req.session.guardtoast = {
+        status: false,
+        message: "The selected post site could not be found.",
+      };
+      return res.redirect("/new-guards");
+    }
+
+    const fullName = `${_.capitalize(firstName)} ${_.capitalize(lastName)}`;
+    const clientName = selectedClient.fullname || "Assigned Client";
+    const postSiteName = selectedPostSite.siteName || "Assigned Post Site";
+
+    const newGuard = new User({
+      username: email,
+      fullname: fullName,
+      email,
+      userType: "AmobileGuard",
+      phone: mobile,
+      assignedCompanyID: companyId,
+      compName: company.companyName || req.user.compName,
+      guardClients: [
+        {
+          name: clientName,
+          id: String(clientId),
+        },
+      ],
+      guardPostSite: [
+        {
+          siteName: postSiteName,
+          postSiteID: String(siteId),
+        },
+      ],
+      status: true,
+    });
+
+    const createdGuard = await User.register(newGuard, temporaryPassword);
+    await addingGuardstoPostSite(createdGuard, companyId);
+
+    const playStoreUrl =
+      process.env.GUARD_APP_PLAY_STORE_URL ||
+      "https://play.google.com/store/apps";
+
+    const templatePath = path.join(
+      __dirname,
+      "guard-login-details-email.html"
+    );
+    const templateSource = fs.readFileSync(templatePath, "utf8");
+    const renderTemplate = handlebars.compile(templateSource);
+
+    const emailHtml = renderTemplate({
+      firstName,
+      lastName,
+      fullName,
+      email,
+      phone: mobile,
+      password: temporaryPassword,
+      clientName,
+      postSiteName,
+      companyName: company.companyName || req.user.compName || "WatchTeam",
+      playStoreUrl,
+    });
+
+    try {
+      await emailSent({
+        sendTo: email,
+        title: "Your WatchTeam Guard App Login Details",
+        message:
+          `Hello ${firstName}, your WatchTeam guard account has been created. ` +
+          `Download the Guard App, sign in with ${email}, and change your temporary password after login.`,
+        template: emailHtml,
+        emailType: "Guard Login Details",
+      });
+
+      req.session.guardtoast = {
+        status: true,
+        message: "Guard created successfully and login details were emailed.",
+      };
+    } catch (emailError) {
+      console.error("Guard created but email failed:", emailError);
+      req.session.guardtoast = {
+        status: false,
+        message:
+          "Guard was created, but the login-details email could not be sent. Please verify the mail configuration and resend the details.",
+      };
+    }
+
+    return res.redirect("/guards");
+  } catch (err) {
+    console.error("Guard registration and email error:", err);
+
+    req.session.guardtoast = {
+      status: false,
+      message: "Error registering Guard: " + err.message,
+    };
+
+    return res.redirect("/new-guards");
   }
 });
 

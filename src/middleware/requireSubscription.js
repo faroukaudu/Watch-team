@@ -1,57 +1,48 @@
 const UserSubscription = require("../models/UserSubscription");
-const { hasFeature, getNumericFeature } = require("../utils/subscriptionAccess");
 
 function isPlatformAdmin(req) {
   return req.user && req.user.userType === "Platform Admin";
 }
 
-function redirectToPricingWithNotice(req, res, message) {
-  req.session.subscriptionNotice =
-    message || "You need an active subscription to view this page.";
+function isClient(req) {
+  return req.user && req.user.userType === "Client";
+}
+
+function denySubscription(req, res, message) {
+  req.session.subscriptionNotice = message || "Your company needs an active subscription.";
+  if (isClient(req)) {
+    req.session.toast = { type: "warning", message: "Contact admin. Your company does not have an active subscription." };
+    return res.redirect("/activities");
+  }
   return res.redirect("/pricing");
 }
 
 async function requireActiveSubscription(req, res, next) {
   try {
-    // Platform Admin → always allowed
-    if (isPlatformAdmin(req)) {
-      return next();
-    }
+    if (isPlatformAdmin(req)) return next();
+    if (!req.user) return res.redirect("/sign-in");
+    if (req.user.userType === "AmobileGuard") return next();
 
-    // Guard should not use web, but do not force subscription here
-    if (req.user && req.user.userType === "AmobileGuard") {
-      return next();
-    }
-
-    if (!req.user) {
-      return res.redirect("/sign-in");
-    }
-
-    // Super Admin + Client use the SAME company subscription
-    const companyId = req.user.assignedCompanyID;
-
-    if (!companyId) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "Company subscription could not be found."
-      );
-    }
+    const companyId = String(req.user.assignedCompanyID || "");
+    if (!companyId) return denySubscription(req, res, "Company subscription could not be found.");
 
     const subscription = await UserSubscription.findOne({
-      companyId: String(companyId),
+      companyId,
       isActive: true,
+      subscriptionStatus: { $in: ["active", "trialing"] },
+      $or: [
+        { expiresAt: null },
+        { expiresAt: { $exists: false } },
+        { expiresAt: { $gte: new Date() } }
+      ]
     }).sort({ createdAt: -1 });
 
     if (!subscription) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "Your company needs an active subscription to view this page."
-      );
+      return denySubscription(req, res, "Your company needs an active subscription to view this page.");
     }
 
     req.userSubscription = subscription;
+    res.locals.userSubscription = subscription;
     return next();
   } catch (err) {
     console.error("Subscription middleware error:", err);
@@ -59,57 +50,20 @@ async function requireActiveSubscription(req, res, next) {
   }
 }
 
-function requireFeature(featureName) {
+// All active plans have full operational access.
+function requireFeature() {
   return (req, res, next) => {
-    if (isPlatformAdmin(req)) {
-      return next();
-    }
-
-    if (!req.userSubscription) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "Your company needs an active subscription to view this page."
-      );
-    }
-
-    if (!hasFeature(req.userSubscription, featureName)) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "This feature is not available on your current subscription plan."
-      );
-    }
-
-    return next();
+    if (isPlatformAdmin(req) || req.userSubscription) return next();
+    return denySubscription(req, res);
   };
 }
 
-function requireNumericFeature(featureName, minValue = 1) {
+// Numeric operational feature gates no longer block paid plans.
+// Account-count limits remain enforced where users/guards are created.
+function requireNumericFeature() {
   return (req, res, next) => {
-    if (isPlatformAdmin(req)) {
-      return next();
-    }
-
-    if (!req.userSubscription) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "Your company needs an active subscription to view this page."
-      );
-    }
-
-    const value = getNumericFeature(req.userSubscription, featureName);
-
-    if (value < minValue) {
-      return redirectToPricingWithNotice(
-        req,
-        res,
-        "This feature is not available on your current subscription plan."
-      );
-    }
-
-    return next();
+    if (isPlatformAdmin(req) || req.userSubscription) return next();
+    return denySubscription(req, res);
   };
 }
 

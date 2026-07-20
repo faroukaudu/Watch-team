@@ -135,6 +135,9 @@ const companyInfoSchema = new mongoose.Schema({
   report:[reportSchema],
   guards:[guardSchema],
   companyJoinCode:String,
+  isBlocked:{ type:Boolean, default:false },
+  blockedAt:{ type:Date, default:null },
+  blockedReason:{ type:String, default:"" },
   activity:[notificationSchema],
   
 //   userRole:String,

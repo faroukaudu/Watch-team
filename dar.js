@@ -1,4 +1,5 @@
 const myModule = require("./index.js");
+const { requirePremiumWebFeature } = require("./src/middleware/requirePremiumWebFeature");
 const app = myModule.main;
 
 // Adjust model paths if your names differ
@@ -160,7 +161,7 @@ app.get("/api/dar", async (req, res) => {
 });
 
 // WEB PAGE
-app.get("/dar", async (req, res) => {
+app.get("/dar", requirePremiumWebFeature("DAR"), async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.redirect("/sign-in");
 

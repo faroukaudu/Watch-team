@@ -1,0 +1,348 @@
+<%- include('../includes/header', { user: userInfo }); -%>
+<style>
+  .pm-shell{background:#06111d;min-height:100vh;color:#fff}.pm-hero{background:radial-gradient(circle at top right,#0ea5e933,transparent 35%),linear-gradient(145deg,#10263d,#07131f);border:1px solid #1f3b55;border-radius:28px;overflow:hidden}.pm-glass{background:#0d1c2aaa;border:1px solid #20394d;border-radius:22px;backdrop-filter:blur(12px)}.pm-muted{color:#8ca3b7}.pm-kpi{font-size:2rem;font-weight:900}.pm-zone{transition:.2s}.pm-zone:hover{transform:translateY(-3px);border-color:#22d3ee}.pm-pill{padding:.35rem .7rem;border-radius:99px;font-size:.72rem;font-weight:800}.pm-table{color:#dbeafe}.pm-table td,.pm-table th{border-color:#1f3448!important}.form-control,.form-select{background:#091724!important;color:#fff!important;border-color:#28445c!important}.form-control::placeholder{color:#6f8799}.modal-content{background:#0b1a29;color:#fff;border:1px solid #27445d;border-radius:24px}.pm-record-scroll{max-height:540px;overflow:auto;border-radius:16px}.pm-record-scroll thead th{position:sticky;top:0;z-index:3;background:#0b1a29;box-shadow:0 1px 0 #1f3448}.pm-view-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center}.pm-detail-label{color:#8ca3b7;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.pm-detail-value{color:#fff;font-weight:600;word-break:break-word;white-space:pre-wrap}.pm-detail-card{background:#091724;border:1px solid #20394d;border-radius:16px;padding:14px;height:100%}.pm-pagination .page-link{background:#0b1a29;border-color:#28445c;color:#cfefff}.pm-pagination .page-item.active .page-link{background:#0ea5e9;border-color:#0ea5e9;color:#04111c}.pm-pagination .page-item.disabled .page-link{background:#091724;border-color:#20394d;color:#5f7688}.pm-page-size{max-width:90px;background:#091724!important;color:#fff!important;border-color:#28445c!important}
+</style>
+<div class="main-content app-content pm-shell">
+  <div class="container-fluid py-4">
+    <% if(success){ %><div class="alert alert-success rounded-4"><%= success %></div><% } %>
+    <% if(error){ %><div class="alert alert-danger rounded-4"><%= error %></div><% } %>
+
+    <section class="pm-hero p-4 p-lg-5 mb-4">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <div class="text-info fw-bold text-uppercase mb-2" style="letter-spacing:.18em;font-size:.72rem">Vehicle Options</div>
+          <h1 class="display-6 fw-black mb-3">Parking Manager</h1>
+          <p class="pm-muted mb-0" style="max-width:720px">Control parking zones, record every vehicle entry and exit, monitor occupancy and overstays, and resolve violations from one operational workspace.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end"><button class="btn btn-info rounded-pill px-4 py-3 fw-bold" data-bs-toggle="modal" data-bs-target="#createZoneModal"><i class="ri-add-circle-line me-1"></i>Create Parking Zone</button></div>
+      </div>
+      <% const parked = records.filter(r => r.status === 'Parked').length; const violations = records.filter(r => r.status === 'Open Violation').length; const overstays = records.filter(r => r.isOverstay).length; %>
+      <div class="row g-3 mt-3">
+        <div class="col-6 col-lg-3"><div class="pm-glass p-3"><div class="pm-muted small">Active zones</div><div class="pm-kpi"><%= zones.filter(z=>z.isActive).length %></div></div></div>
+        <div class="col-6 col-lg-3"><div class="pm-glass p-3"><div class="pm-muted small">Vehicles parked</div><div class="pm-kpi"><%= parked %></div></div></div>
+        <div class="col-6 col-lg-3"><div class="pm-glass p-3"><div class="pm-muted small">Open violations</div><div class="pm-kpi"><%= violations %></div></div></div>
+        <div class="col-6 col-lg-3"><div class="pm-glass p-3"><div class="pm-muted small">Overstays</div><div class="pm-kpi"><%= overstays %></div></div></div>
+      </div>
+    </section>
+
+    <div class="d-flex justify-content-between align-items-center mb-3"><h4 class="mb-0">Parking zones</h4><span class="pm-muted"><%= zones.length %> configured</span></div>
+    <div class="row g-3 mb-5">
+      <% if(!zones.length){ %><div class="col-12"><div class="pm-glass text-center p-5"><i class="ri-parking-box-line fs-1 text-info"></i><h5 class="mt-3">No parking zone yet</h5><p class="pm-muted mb-0">Create a zone to publish it to guards on the mobile app.</p></div></div><% } %>
+      <% zones.forEach(function(zone){ const occupied=(zone.records||[]).filter(r=>r.type==='CheckIn'&&r.status==='Parked').length; const pct=Math.min(100,Math.round((occupied/Math.max(1,zone.capacity))*100)); %>
+        <div class="col-md-6 col-xl-4"><div class="pm-glass pm-zone p-4 h-100">
+          <div class="d-flex justify-content-between gap-3"><div><div class="text-info small fw-bold"><%= zone.zoneCode || 'PARKING ZONE' %></div><h5 class="mt-1"><%= zone.zoneName %></h5></div><span class="pm-pill <%= zone.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' %>"><%= zone.isActive?'LIVE':'ARCHIVED' %></span></div>
+          <div class="pm-muted small mb-3"><i class="ri-building-4-line me-1"></i><%= zone.postSiteName || 'Post site' %></div>
+          <div class="d-flex justify-content-between small mb-2"><span>Occupancy</span><strong><%= occupied %> / <%= zone.capacity %></strong></div><div class="progress mb-3" style="height:8px;background:#172d40"><div class="progress-bar bg-info" style="width:<%= pct %>%"></div></div>
+          <div class="row g-2 small mb-3"><div class="col-6"><div class="p-2 rounded-3" style="background:#091724"><span class="pm-muted">Max stay</span><br><strong><%= zone.maxStayMinutes %> min</strong></div></div><div class="col-6"><div class="p-2 rounded-3" style="background:#091724"><span class="pm-muted">Records</span><br><strong><%= (zone.records||[]).length %></strong></div></div></div>
+          <p class="pm-muted small"><%= zone.instructions || 'No special parking instructions.' %></p>
+          <div class="d-flex gap-2"><form method="post" action="/parking-manager/<%= zone._id %>/toggle"><button class="btn btn-sm btn-outline-info rounded-pill"><%= zone.isActive?'Archive':'Restore' %></button></form><form method="post" action="/parking-manager/<%= zone._id %>/delete" onsubmit="return confirm('Delete this parking zone? Zones with history will be archived instead.')"><button class="btn btn-sm btn-outline-danger rounded-pill">Delete</button></form></div>
+        </div></div>
+      <% }) %>
+    </div>
+
+    <div class="pm-glass p-3 p-lg-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><div><h4 class="mb-1">Live parking records</h4><div class="pm-muted small">Entries, exits, duration, overstays and violations.</div></div><input id="pmSearch" class="form-control" style="max-width:280px" placeholder="Search plate, driver or zone"></div>
+      <div class="pm-record-scroll table-responsive">
+        <table class="table pm-table align-middle mb-0" id="pmTable">
+          <thead><tr><th>Vehicle</th><th>Zone</th><th>Type</th><th>Status</th><th>Duration</th><th>Guard</th><th>Action</th></tr></thead>
+          <tbody>
+          <% records.forEach(function(record){ %>
+            <tr data-search="<%= [record.plateNumber,record.driverName,record.zoneName,record.parkingSpace,record.violationType].join(' ').toLowerCase() %>">
+              <td><strong><%= record.plateNumber %></strong><br><span class="pm-muted small"><%= [record.vehicleColor,record.vehicleMake,record.vehicleModel].filter(Boolean).join(' ') || 'Vehicle details not provided' %></span></td>
+              <td><%= record.zoneName %><br><span class="pm-muted small"><%= record.parkingSpace || record.postSiteName || '—' %></span></td>
+              <td><%= record.type === 'Violation' ? record.violationType : 'Vehicle parking' %></td>
+              <td><span class="pm-pill <%= record.isOverstay?'bg-danger-subtle text-danger':record.status==='Parked'?'bg-info-subtle text-info':record.status==='Open Violation'?'bg-warning-subtle text-warning':'bg-success-subtle text-success' %>"><%= record.isOverstay?'OVERSTAY':record.status %></span></td>
+              <td><%= record.liveDurationMinutes %> min<br><span class="pm-muted small"><%= new Date(record.checkedInAt).toLocaleString() %></span></td>
+              <td><%= record.guardName %></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-info rounded-circle pm-view-btn"
+                    title="View full record"
+                    data-bs-toggle="modal" data-bs-target="#recordDetailsModal"
+                    data-plate="<%= record.plateNumber || '' %>"
+                    data-type="<%= record.type || '' %>"
+                    data-status="<%= record.status || '' %>"
+                    data-zone="<%= record.zoneName || '' %>"
+                    data-post-site="<%= record.postSiteName || '' %>"
+                    data-space="<%= record.parkingSpace || '' %>"
+                    data-driver="<%= record.driverName || '' %>"
+                    data-phone="<%= record.driverPhone || '' %>"
+                    data-make="<%= record.vehicleMake || '' %>"
+                    data-model="<%= record.vehicleModel || '' %>"
+                    data-color="<%= record.vehicleColor || '' %>"
+                    data-permit="<%= record.permitNumber || '' %>"
+                    data-purpose="<%= record.purpose || '' %>"
+                    data-violation="<%= record.violationType || '' %>"
+                    data-notes="<%= record.notes || '' %>"
+                    data-guard="<%= record.guardName || '' %>"
+                    data-check-in="<%= record.checkedInAt ? new Date(record.checkedInAt).toISOString() : '' %>"
+                    data-check-out="<%= record.checkedOutAt ? new Date(record.checkedOutAt).toISOString() : '' %>"
+                    data-resolved="<%= record.resolvedAt ? new Date(record.resolvedAt).toISOString() : '' %>"
+                    data-duration="<%= record.liveDurationMinutes || 0 %>"
+                    data-overstay="<%= record.isOverstay ? 'Yes' : 'No' %>">
+                    <i class="ri-eye-line"></i>
+                  </button>
+                  <% if(record.type==='Violation'&&record.status==='Open Violation'){ %>
+                    <form method="post" action="/parking-manager/<%= record.zoneId %>/record/<%= record._id %>/resolve" class="m-0"><button class="btn btn-sm btn-success rounded-pill">Resolve</button></form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="pm-muted small">Rows per page</span>
+          <select id="pmPageSize" class="form-select form-select-sm pm-page-size">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+        <div id="pmPageInfo" class="pm-muted small"></div>
+        <nav aria-label="Live parking records pagination">
+          <ul id="pmPagination" class="pagination pagination-sm pm-pagination mb-0"></ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="recordDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header border-secondary">
+        <div>
+          <div class="text-info small fw-bold">PARKING RECORD DETAILS</div>
+          <h5 class="modal-title" id="detailTitle">Vehicle information</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3" id="recordDetailGrid">
+          <% const detailFields = [
+            ['detailPlate','Plate Number'],['detailType','Record Type'],['detailStatus','Status'],['detailZone','Parking Zone'],
+            ['detailPostSite','Post Site'],['detailSpace','Parking Space / Area'],['detailDriver','Driver / Visitor'],['detailPhone','Phone Number'],
+            ['detailVehicle','Vehicle Details'],['detailPermit','Permit Number'],['detailPurpose','Purpose of Visit'],['detailViolation','Violation Type'],
+            ['detailGuard','Recorded By'],['detailCheckIn','Check-In / Recorded Time'],['detailCheckOut','Check-Out Time'],['detailResolved','Resolved Time'],
+            ['detailDuration','Duration'],['detailOverstay','Overstay']
+          ]; %>
+          <% detailFields.forEach(function(field){ %>
+            <div class="col-md-6 col-xl-4"><div class="pm-detail-card"><div class="pm-detail-label"><%= field[1] %></div><div class="pm-detail-value mt-1" id="<%= field[0] %>">—</div></div></div>
+          <% }) %>
+          <div class="col-12"><div class="pm-detail-card"><div class="pm-detail-label">Guard Notes / Details</div><div class="pm-detail-value mt-1" id="detailNotes">—</div></div></div>
+        </div>
+      </div>
+      <div class="modal-footer border-secondary"><button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Close</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="createZoneModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><form class="modal-content" method="post" action="/parking-manager/create"><div class="modal-header border-secondary"><div><div class="text-info small fw-bold">NEW PARKING OPERATION</div><h5 class="modal-title">Create parking zone</h5></div><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="row g-3">
+  <div class="col-md-6"><label class="form-label">Post Site</label><select class="form-select" name="postSiteId" id="pmPostSite" required><option value="">Select post site</option><% postSites.forEach(function(site){ %><option value="<%= site._id %>" data-name="<%= site.siteName %>"><%= site.siteName %></option><% }) %></select><input type="hidden" name="postSiteName" id="pmPostSiteName"></div>
+  <div class="col-md-6"><label class="form-label">Zone Name</label><input class="form-control" name="zoneName" placeholder="Visitor Parking" required></div>
+  <div class="col-md-4"><label class="form-label">Zone Code</label><input class="form-control" name="zoneCode" placeholder="VP-01"></div>
+  <div class="col-md-4"><label class="form-label">Capacity</label><input class="form-control" type="number" min="1" name="capacity" value="20" required></div>
+  <div class="col-md-4"><label class="form-label">Maximum Stay (minutes)</label><input class="form-control" type="number" min="1" name="maxStayMinutes" value="480" required></div>
+  <div class="col-12"><label class="form-label">Guard Instructions</label><textarea class="form-control" rows="4" name="instructions" placeholder="Verify permits, record every vehicle, and report unauthorized parking..."></textarea></div>
+</div></div><div class="modal-footer border-secondary"><button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-info rounded-pill px-4">Publish to Mobile</button></div></form></div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+ const site=document.getElementById('pmPostSite'); if(site) site.addEventListener('change',()=>{document.getElementById('pmPostSiteName').value=site.options[site.selectedIndex]?.dataset.name||''});
+ const search = document.getElementById('pmSearch');
+ const pageSizeSelect = document.getElementById('pmPageSize');
+ const pagination = document.getElementById('pmPagination');
+ const pageInfo = document.getElementById('pmPageInfo');
+ const allRows = Array.from(document.querySelectorAll('#pmTable tbody tr'));
+ let currentPage = 1;
+
+ function getFilteredRows() {
+   const query = (search?.value || '').trim().toLowerCase();
+   return allRows.filter(row => !query || (row.dataset.search || '').includes(query));
+ }
+
+ function renderParkingRecords() {
+   const filteredRows = getFilteredRows();
+   const pageSize = Number(pageSizeSelect?.value || 10);
+   const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+   currentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+   allRows.forEach(row => row.style.display = 'none');
+   const start = (currentPage - 1) * pageSize;
+   const end = Math.min(start + pageSize, filteredRows.length);
+   filteredRows.slice(start, end).forEach(row => row.style.display = '');
+
+   if (pageInfo) {
+     pageInfo.textContent = filteredRows.length
+       ? `Showing ${start + 1}-${end} of ${filteredRows.length} records`
+       : 'No matching records';
+   }
+
+   if (!pagination) return;
+   pagination.innerHTML = '';
+
+   const addPageItem = (label, page, { disabled = false, active = false } = {}) => {
+     const li = document.createElement('li');
+     li.className = `page-item${disabled ? ' disabled' : ''}${active ? ' active' : ''}`;
+     const button = document.createElement('button');
+     button.type = 'button';
+     button.className = 'page-link';
+     button.textContent = label;
+     button.disabled = disabled;
+     button.addEventListener('click', () => {
+       if (disabled || page === currentPage) return;
+       currentPage = page;
+       renderParkingRecords();
+       document.querySelector('.pm-record-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+     });
+     li.appendChild(button);
+     pagination.appendChild(li);
+   };
+
+   addPageItem('‹', currentPage - 1, { disabled: currentPage === 1 });
+
+   const visiblePages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+   let previousPage = 0;
+   [...visiblePages]
+     .filter(page => page >= 1 && page <= totalPages)
+     .sort((a, b) => a - b)
+     .forEach(page => {
+       if (previousPage && page - previousPage > 1) {
+         const ellipsis = document.createElement('li');
+         ellipsis.className = 'page-item disabled';
+         ellipsis.innerHTML = '<span class="page-link">…</span>';
+         pagination.appendChild(ellipsis);
+       }
+       addPageItem(String(page), page, { active: page === currentPage });
+       previousPage = page;
+     });
+
+   addPageItem('›', currentPage + 1, { disabled: currentPage === totalPages });
+ }
+
+ search?.addEventListener('input', () => {
+   currentPage = 1;
+   renderParkingRecords();
+ });
+ pageSizeSelect?.addEventListener('change', () => {
+   currentPage = 1;
+   renderParkingRecords();
+ });
+ renderParkingRecords();
+ const recordModal=document.getElementById('recordDetailsModal');
+ if(recordModal){
+   const text=(id,value)=>{const el=document.getElementById(id);if(el) el.textContent=value&&String(value).trim()?value:'—'};
+   const dateValue=(value)=>value?new Date(value).toLocaleString():'—';
+   recordModal.addEventListener('show.bs.modal',event=>{
+     const button=event.relatedTarget;
+     if(!button) return;
+     const d=button.dataset;
+     text('detailTitle',`${d.plate||'Vehicle'} · ${d.zone||'Parking record'}`);
+     text('detailPlate',d.plate); text('detailType',d.type==='CheckIn'?'Vehicle Check-In':d.type);
+     text('detailStatus',d.status); text('detailZone',d.zone); text('detailPostSite',d.postSite); text('detailSpace',d.space);
+     text('detailDriver',d.driver); text('detailPhone',d.phone);
+     text('detailVehicle',[d.color,d.make,d.model].filter(Boolean).join(' '));
+     text('detailPermit',d.permit); text('detailPurpose',d.purpose); text('detailViolation',d.violation);
+     text('detailGuard',d.guard); text('detailCheckIn',dateValue(d.checkIn)); text('detailCheckOut',dateValue(d.checkOut));
+     text('detailResolved',dateValue(d.resolved)); text('detailDuration',`${d.duration||0} minutes`); text('detailOverstay',d.overstay);
+     text('detailNotes',d.notes);
+   });
+ }
+</script>
+
+
+  <!-- Footer Start -->
+    <%- include("../includes/footer"); -%>
+        <!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                                aria-label="Search Anything ..." aria-describedby="button-addon2">
+                            <button class="btn btn-primary" type="button" id="button-addon2"><i
+                                    class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Swapping email and phone field -->
+
+
+
+
+        <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+        <!-- Apex Charts JS -->
+        <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Sales Dashboard -->
+        <script src="assets/js/sales-dashboard.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+        <script src="assets/libs/intl-tel-input/build/js/intlTelInput.min.js"></script>
+        <script src="assets/js/form-advanced.js"></script>
+
+        <!-- Google Maps JS -->
+        <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/js/google-maps.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+        <script src="assets/js/all-phone.js"></script>
+
+        </body>
+
+        </html>

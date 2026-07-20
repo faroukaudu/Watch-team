@@ -96,6 +96,78 @@ app.post("/site-tours/create", async (req, res) => {
   }
 });
 
+
+// WEB: UPDATE SITE TOUR
+app.post("/site-tours/:id/update", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const tour = await SiteTour.findOne({
+      _id: req.params.id,
+      companyId: String(req.user.assignedCompanyID),
+    });
+
+    if (!tour) return res.status(404).send("Site tour not found.");
+
+    const checkpointNames = String(req.body.checkpoints || "")
+      .split(/\r?\n/)
+      .map((name) => name.trim())
+      .filter(Boolean);
+
+    if (!checkpointNames.length) {
+      return res.status(400).send("At least one checkpoint is required.");
+    }
+
+    tour.tourName = String(req.body.tourName || "").trim();
+    tour.description = req.body.description || "";
+
+    const oldCheckpoints = tour.checkpoints || [];
+    tour.checkpoints = checkpointNames.map((name, index) => {
+      const old = oldCheckpoints[index];
+      return {
+        _id: old ? old._id : new mongoose.Types.ObjectId(),
+        name,
+        description: old ? old.description : "",
+        qrCodeValue: old ? old.qrCodeValue : "PENDING",
+        nfcTagValue: old ? old.nfcTagValue : "",
+        nfcWritten: old ? old.nfcWritten : false,
+        nfcWrittenAt: old ? old.nfcWrittenAt : null,
+        order: index + 1,
+        isActive: true,
+      };
+    });
+
+    tour.checkpoints.forEach((point) => {
+      if (!point.qrCodeValue || point.qrCodeValue === "PENDING") {
+        point.qrCodeValue = buildQrValue(tour._id, point._id);
+      }
+    });
+
+    await tour.save();
+    return res.redirect("back");
+  } catch (error) {
+    console.error("Update site tour error:", error);
+    return res.redirect("back");
+  }
+});
+
+// WEB: DELETE SITE TOUR
+app.post("/site-tours/:id/delete", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    await SiteTour.findOneAndDelete({
+      _id: req.params.id,
+      companyId: String(req.user.assignedCompanyID),
+    });
+
+    return res.redirect("back");
+  } catch (error) {
+    console.error("Delete site tour error:", error);
+    return res.redirect("back");
+  }
+});
+
 // WEB: Create NFC site tour
 app.post("/site-tours/create-nfc", async (req, res) => {
   try {

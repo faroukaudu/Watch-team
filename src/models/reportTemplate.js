@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
 
+
+function capitalizeEachWord(value = "") {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/(^|[\s_-])([a-z])/g, (match, separator, letter) => {
+      return separator + letter.toUpperCase();
+    });
+}
 //
 // 🔹 Individual Field Definition
 //

@@ -1,7 +1,9 @@
 const myModule = require("./index.js");
+const { requirePremiumWebFeature } = require("./src/middleware/requirePremiumWebFeature");
 const app = myModule.main;
 
 const Passdown = require("./src/models/Passdown");
+const { isClientUser, getClientScope } = require("./src/utils/clientScope");
 
 // MOBILE + WEB: Create Passdown
 app.post("/api/passdowns/create", async (req, res) => {
@@ -157,16 +159,19 @@ app.post("/api/passdowns/close", async (req, res) => {
   }
 });
 
-app.get("/passdowns", async (req, res) => {
+app.get("/passdowns", requirePremiumWebFeature("Passdown"), async (req, res) => {
   try {
     const companyId =
       req.user && req.user.assignedCompanyID
         ? String(req.user.assignedCompanyID)
         : "";
 
-    const passdowns = await Passdown.find({
-      companyId: companyId,
-    })
+    const query = { companyId: companyId };
+    if (isClientUser(req.user)) {
+      const { assignedPostSiteIds } = await getClientScope(req.user);
+      query.postSiteId = { $in: assignedPostSiteIds };
+    }
+    const passdowns = await Passdown.find(query)
       .sort({ createdAt: -1 })
       .lean();
 

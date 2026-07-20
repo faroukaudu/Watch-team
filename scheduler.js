@@ -7,6 +7,7 @@ const TimeOffRequest = require("./src/models/TimeOffRequest");
 const app = myModule.main;
 const User = myModule.userDB;
 const Company = mongoose.model("Company");
+const { isClientUser, getClientScope } = require("./src/utils/clientScope");
 
 function normalizeArray(value) {
     if (!value) return [];
@@ -22,16 +23,19 @@ app.get("/shift-template", async (req, res) => {
         const Company = mongoose.model("Company");
         const company = await Company.findById(companyId);
 
-        const postSites = company && company.postSite ? company.postSite : [];
+        let postSites = company && company.postSite ? company.postSite : [];
+        let guardQuery = { assignedCompanyID: companyId, userType: "AmobileGuard" };
+        let templateQuery = { companyId: String(companyId) };
 
-        const guards = await User.find({
-            assignedCompanyID: companyId,
-            userType: "AmobileGuard"
-        }).sort({ fullname: 1 });
+        if (isClientUser(req.user)) {
+            const { assignedPostSiteId, assignedPostSiteIds } = await getClientScope(req.user);
+            postSites = postSites.filter((site) => String(site._id) === assignedPostSiteId);
+            guardQuery.guardPostSite = { $elemMatch: { postSiteID: { $in: assignedPostSiteIds } } };
+            templateQuery.postSiteId = assignedPostSiteId;
+        }
 
-        const shiftTemplates = await ShiftTemplate.find({
-            companyId: String(companyId)
-        }).sort({ createdAt: -1 });
+        const guards = await User.find(guardQuery).sort({ fullname: 1 });
+        const shiftTemplates = await ShiftTemplate.find(templateQuery).sort({ createdAt: -1 });
 
         res.render("dashboard/shift-template", {
             userInfo: req.user,
@@ -68,6 +72,19 @@ app.post("/create-shift-template", async (req, res) => {
                 guardEmail
             };
         });
+
+        if (isClientUser(req.user)) {
+            const { assignedPostSiteId, allowedGuardIds } = await getClientScope(req.user);
+            if (!assignedPostSiteId || String(postSiteId) !== assignedPostSiteId) {
+                req.session.accessNotice = "You can create shifts only for your assigned post site.";
+                return res.redirect("/shift-template");
+            }
+            const invalidGuard = guards.some((guard) => !allowedGuardIds.includes(String(guard.guardId)));
+            if (invalidGuard) {
+                req.session.accessNotice = "You can select only guards assigned to your post site.";
+                return res.redirect("/shift-template");
+            }
+        }
 
         const shiftTemplate = new ShiftTemplate({
             companyId: String(req.user.assignedCompanyID),
@@ -109,6 +126,12 @@ app.get("/api/post-site-guards/:postSiteId", async (req, res) => {
     try {
         const companyId = req.user.assignedCompanyID;
         const postSiteId = req.params.postSiteId;
+        if (isClientUser(req.user)) {
+            const { assignedPostSiteId, assignedPostSiteIds } = await getClientScope(req.user);
+            if (String(postSiteId) !== assignedPostSiteId) {
+                return res.status(403).json({ ok: false, message: "You may view guards only for your assigned post site." });
+            }
+        }
 
         const guards = await User.find({
             assignedCompanyID: companyId,

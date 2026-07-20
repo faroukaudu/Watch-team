@@ -1,0 +1,131 @@
+<%- include("../includes/header", {user:userInfo}); -%>
+<style>
+  .history-hero { position:relative; overflow:hidden; border:1px solid rgba(58,142,196,.18); border-radius:16px; padding:20px; background:radial-gradient(circle at 90% 0,rgba(13,110,253,.15),transparent 34%),linear-gradient(145deg,#0a2033,#071726); }
+  .history-hero::after { content:""; position:absolute; inset:0; opacity:.15; background-image:linear-gradient(rgba(69,151,204,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(69,151,204,.12) 1px,transparent 1px); background-size:24px 24px; pointer-events:none; }
+  .history-hero > * { position:relative; z-index:1; }
+  .history-title { color:#f4f9fd; font-size:20px; font-weight:750; margin:0; }
+  .history-copy { color:#8298aa; font-size:11px; margin:6px 0 0; }
+  .history-filter-card,.history-data-card { border:1px solid rgba(58,142,196,.15); border-radius:14px; overflow:hidden; background:linear-gradient(145deg,rgba(9,29,46,.98),rgba(7,20,34,.98)); }
+  .history-filter-card { padding:15px; }
+  .history-filter-card label { color:#8298aa; font-size:9px; font-weight:750; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .history-filter-card .form-select,.history-filter-card .form-control { color:#dceaf4; background:#0a1d2e; border-color:rgba(83,144,184,.20); min-height:38px; font-size:11px; }
+  .history-filter-card .form-control::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.7; }
+  .history-table-wrap { overflow-x:auto; }
+  .history-table { min-width:900px; margin:0; color:#dce8f1; }
+  .history-table thead th { padding:12px 14px; border:0; background:rgba(255,255,255,.025); color:#7890a4; font-size:9px; letter-spacing:.09em; text-transform:uppercase; }
+  .history-table tbody td { padding:13px 14px; border-color:rgba(255,255,255,.055); font-size:11px; vertical-align:middle; }
+  .history-user { display:flex; align-items:center; gap:9px; }
+  .history-avatar { width:31px;height:31px;display:grid;place-items:center;border-radius:9px;color:#73bbff;background:rgba(51,140,255,.11);border:1px solid rgba(51,140,255,.20); }
+  .history-name { color:#eef7fd;font-weight:700; }.history-role { color:#71899d;font-size:9px;margin-top:2px; }
+  .history-status { display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:9px;font-weight:800;text-transform:uppercase; }
+  .history-status.online { color:#6ee7b7;background:rgba(32,219,142,.09);border:1px solid rgba(32,219,142,.18); }.history-status.offline { color:#94a3b8;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.15); }
+  .history-event { color:#83c7ff; font-family:ui-monospace,monospace; font-size:9px; }
+  .history-location { max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#a8bac8; }
+  .history-empty { padding:34px !important;text-align:center;color:#70879a; }
+  .history-pagination { display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-top:1px solid rgba(255,255,255,.06);color:#8298aa;font-size:10px; }
+</style>
+<div class="main-content app-content">
+  <div class="container-fluid">
+    <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div><h1 class="page-title fw-medium fs-18 mb-2">Tracking History</h1><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a href="/live-tracking">GPS Tracker</a></li><li class="breadcrumb-item active">Tracking History</li></ol></div>
+      <a href="/live-tracking" class="btn btn-primary btn-sm"><i class="ri-map-pin-line me-1"></i> Live Tracking</a>
+    </div>
+
+    <div class="history-hero mb-3">
+      <h2 class="history-title">Location Activity Archive</h2>
+      <p class="history-copy">Review guard check-ins, location snapshots, checkouts and web dashboard tracking sessions—even when no administrator was viewing the live map.</p>
+    </div>
+
+    <div class="history-filter-card mb-3">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-2"><label for="historySource">Source</label><select id="historySource" class="form-select"><option value="">All Sources</option><option value="guard">Guard App</option><option value="web">Web Dashboard</option></select></div>
+        <div class="col-md-2"><label for="historyStatus">Status</label><select id="historyStatus" class="form-select"><option value="">All Statuses</option><option value="online">Online</option><option value="offline">Offline</option></select></div>
+        <div class="col-md-3"><label for="historyFrom">From</label><input type="date" id="historyFrom" class="form-control"></div>
+        <div class="col-md-3"><label for="historyTo">To</label><input type="date" id="historyTo" class="form-control"></div>
+        <div class="col-md-2 d-grid"><button id="applyHistoryFilters" class="btn btn-primary"><i class="ri-filter-3-line me-1"></i> Apply</button></div>
+      </div>
+    </div>
+
+    <div class="history-data-card mb-4">
+      <div class="history-table-wrap"><table class="table history-table"><thead><tr><th>User</th><th>Source</th><th>Event</th><th>Status</th><th>Location</th><th>Time</th></tr></thead><tbody id="historyRows"><tr><td colspan="6" class="history-empty">Loading tracking history...</td></tr></tbody></table></div>
+      <div class="history-pagination"><span id="historySummary">Loading...</span><div class="d-flex gap-2"><button id="historyPrev" class="btn btn-sm btn-outline-primary" disabled>Previous</button><button id="historyNext" class="btn btn-sm btn-outline-primary" disabled>Next</button></div></div>
+    </div>
+  </div>
+</div>
+<script>
+  let historyPage=1; let historyPages=1;
+  const escapeHistory=(value)=>String(value??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[c]);
+  const formatHistoryTime=(value)=>{const d=new Date(value);return Number.isNaN(d.getTime())?"—":d.toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"});};
+  function renderHistory(rows){const body=document.getElementById("historyRows");if(!rows.length){body.innerHTML='<tr><td colspan="6" class="history-empty">No records match these filters.</td></tr>';return;}body.innerHTML=rows.map(row=>{const status=row.status==="online"?"online":"offline";const source=row.source==="guard"?"Guard App":"Web Dashboard";const icon=row.source==="guard"?"ri-shield-user-line":"ri-computer-line";const location=row.locationLabel||((row.latitude!=null&&row.longitude!=null)?`${Number(row.latitude).toFixed(6)}, ${Number(row.longitude).toFixed(6)}`:"Location unavailable");return `<tr><td><div class="history-user"><span class="history-avatar"><i class="${icon}"></i></span><div><div class="history-name">${escapeHistory(row.userName||"User")}</div><div class="history-role">${escapeHistory(row.userType||"User")}</div></div></div></td><td>${source}</td><td><span class="history-event">${escapeHistory(row.eventType||"location")}</span></td><td><span class="history-status ${status}">${status}</span></td><td><div class="history-location" title="${escapeHistory(location)}">${escapeHistory(location)}</div></td><td>${formatHistoryTime(row.recordedAt)}</td></tr>`;}).join("");}
+  async function loadHistory(page=1){historyPage=page;const params=new URLSearchParams({page:String(page),limit:"50"});const source=document.getElementById("historySource").value,status=document.getElementById("historyStatus").value,from=document.getElementById("historyFrom").value,to=document.getElementById("historyTo").value;if(source)params.set("source",source);if(status)params.set("status",status);if(from)params.set("from",from);if(to)params.set("to",to);const response=await fetch(`/api/tracking/history?${params}`);const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||"Unable to load history");historyPages=Math.max(data.pages||1,1);renderHistory(data.rows||[]);document.getElementById("historySummary").textContent=`Page ${data.page} of ${historyPages} • ${data.total} records`;document.getElementById("historyPrev").disabled=data.page<=1;document.getElementById("historyNext").disabled=data.page>=historyPages;}
+  document.getElementById("applyHistoryFilters").addEventListener("click",()=>loadHistory(1));document.getElementById("historyPrev").addEventListener("click",()=>loadHistory(Math.max(historyPage-1,1)));document.getElementById("historyNext").addEventListener("click",()=>loadHistory(Math.min(historyPage+1,historyPages)));loadHistory().catch(error=>{document.getElementById("historyRows").innerHTML=`<tr><td colspan="6" class="history-empty">${escapeHistory(error.message)}</td></tr>`;});
+</script>
+<%- include("../includes/footer"); -%>
+
+  <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+        <!-- Apex Charts JS -->
+        <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Sales Dashboard -->
+        <script src="assets/js/sales-dashboard.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+        <!-- Google Maps JS -->
+        <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/js/google-maps.js"></script>
+        <script src="../assets/libs/glightbox/js/glightbox.min.js"></script>
+        <script src="assets/js/gallery.js"></script>
+        <!-- Plyr JS -->
+        <!-- <script src="assets/libs/plyr/plyr.min.js"></script> -->
+
+        <!-- Internal Plyr JS -->
+        <!-- <script src="assets/js/media-player.js"></script> -->
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+</body></html>

@@ -1,55 +1,46 @@
+const nodemailer = require("nodemailer");
 
-const nodemailer = require('nodemailer');
-
-async function emailSent({sendTo:to, title:subject, message:msg, template:html, emailType:emailType}){
-  console.log(to);
-  console.log(subject);
-  console.log(msg);
+/**
+ * Send an application email and resolve only after the SMTP provider
+ * confirms that the message was accepted. Existing callers can continue
+ * using the same argument structure.
+ */
+async function emailSent({
+  sendTo: to,
+  title: subject,
+  message: text,
+  template: html,
+}) {
   const transporter = nodemailer.createTransport({
-    host:"localhost",
+    host: process.env.EMAIL_HOST,
+    service: process.env.SERVER_SERVICE,
     tls: {
-    rejectUnauthorized: true,
-    servername:"gmail.com"
-  },
-    service: "gmail",
-    
+      rejectUnauthorized: true,
+      servername: process.env.SERVER_NAME,
+    },
     auth: {
-      user: "surerealintegratedserviceltd@gmail.com",
-      pass: "vvheoqjyhbksmffr"
-    }
+      user:
+        process.env.WATCHTEAM_EMAIL_USER ||
+        process.env.SERVER_EMAIL,
+      pass: process.env.WATCHTEAM_EMAIL_PASSWORD || process.env.SERVER_PASSWORD,
+    },
   });
 
-  transporter.verify(function(error, success) {
-   if (error) {
-        console.log(error);
-   } else {
-        console.log('Server is ready');
-   }
-});
-
-
-
-  const mail2Send = {
-    from:"Watch Team Security <noreply.watchteam@gmail.com>",
-    replyTo: 'noreply.watchteam@gmail.com',
-    to: to,
-    subject:subject,
-    text:msg,
-    //text:"Click this link to reset your password.."+ " " +"https://localhost:2000/pwdtoken/"+msg,
-    // text:"Click this link to reset your password.."+ " " +"https://stingray-app-lgdmb.ondigitalocean.app/pwdtoken/",
-    html:html 
-  };
-
-  transporter.sendMail(mail2Send, function(err, info){
-    if(err){
-      console.log(err);
-    }else{
-      console.log("send "+ info);
-    }
-    //console.log("send "+ info);c
+  const info = await transporter.sendMail({
+    from:
+      process.env.WATCHTEAM_EMAIL_FROM ||
+      "Watch Team Security <noreply.secure-watch-team@gmail.com>",
+    replyTo:
+      process.env.WATCHTEAM_EMAIL_REPLY_TO ||
+      "noreply.secure-watch-team@gmail.com",
+    to,
+    subject,
+    text,
+    html,
   });
 
-
+  console.log("Email accepted by SMTP provider:", info.messageId);
+  return info;
 }
-//emailSent("fagzy99@gmail.com", "Online", "Check me wella");
- module.exports = {emailSent};
+
+module.exports = { emailSent };

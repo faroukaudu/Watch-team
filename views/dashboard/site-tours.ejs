@@ -1,4 +1,4 @@
-<%- include('../partials/header') %>
+<%- include("../includes/header", { user: userInfo }); -%>
 
 <div class="container-fluid py-4">
 
@@ -115,7 +115,7 @@
   </div>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include("../includes/footer"); -%>
 <!-- Scroll To Top -->
 <div class="scrollToTop">
     <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>

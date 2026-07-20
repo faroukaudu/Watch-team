@@ -1,0 +1,474 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<style>
+  :root { --vp-ink:#07121f; --vp-blue:#2b7fff; --vp-cyan:#20d9ff; --vp-green:#39e58c; --vp-muted:#7890a8; }
+  .vp-shell { min-height:100vh; padding:26px; background:
+    radial-gradient(circle at 10% 0%, rgba(43,127,255,.17), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(32,217,255,.12), transparent 28%), #07121f; color:#eaf5ff; }
+  .vp-hero,.vp-card { border:1px solid rgba(112,194,255,.15); background:rgba(12,29,47,.82); backdrop-filter:blur(18px); box-shadow:0 24px 60px rgba(0,0,0,.25); }
+  .vp-hero { border-radius:26px; padding:28px; position:relative; overflow:hidden; }
+  .vp-hero:after { content:""; position:absolute; width:280px; height:280px; border:1px solid rgba(32,217,255,.17); border-radius:50%; right:-70px; top:-120px; box-shadow:0 0 70px rgba(32,217,255,.08); }
+  .vp-kicker { color:var(--vp-cyan); letter-spacing:.18em; text-transform:uppercase; font-weight:700; font-size:.72rem; }
+  .vp-title { font-size:clamp(1.8rem,4vw,3.2rem); font-weight:800; letter-spacing:-.04em; }
+  .vp-muted { color:#92a9bd !important; }
+  .vp-pill { display:inline-flex; align-items:center; gap:8px; border:1px solid rgba(57,229,140,.24); background:rgba(57,229,140,.08); color:#8cf4bd; border-radius:999px; padding:8px 13px; }
+  .vp-card { border-radius:22px; overflow:hidden; }
+  .vp-card .card-header,.vp-card .card-body { background:transparent; color:inherit; border-color:rgba(255,255,255,.07); }
+  .vp-stat { padding:18px; border-radius:18px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.07); height:100%; }
+  .vp-stat strong { font-size:1.55rem; display:block; }
+  .vp-grid-card { height:100%; padding:20px; border-radius:20px; background:linear-gradient(145deg,rgba(25,54,82,.8),rgba(10,25,41,.88)); border:1px solid rgba(86,180,255,.14); transition:.25s ease; }
+  .vp-grid-card:hover { transform:translateY(-4px); border-color:rgba(32,217,255,.42); }
+  .vp-icon { width:48px; height:48px; display:grid; place-items:center; border-radius:15px; background:linear-gradient(135deg,var(--vp-blue),var(--vp-cyan)); color:white; font-size:1.35rem; box-shadow:0 10px 30px rgba(43,127,255,.28); }
+  .vp-progress { height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .vp-progress > span { display:block; height:100%; background:linear-gradient(90deg,var(--vp-blue),var(--vp-cyan)); }
+  .vp-table { color:#dceeff; }
+  .vp-table th { color:#7f9ab2; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; border-color:rgba(255,255,255,.08); }
+  .vp-table td { border-color:rgba(255,255,255,.06); vertical-align:middle; }
+  .vp-badge { border-radius:999px; padding:7px 11px; font-weight:700; font-size:.72rem; }
+  .vp-active { background:rgba(57,229,140,.12); color:#67efaa; }
+  .vp-completed { background:rgba(43,127,255,.13); color:#78adff; }
+  .vp-paused { background:rgba(255,184,77,.12); color:#ffc56f; }
+  .vp-modal .modal-content { background:#0d1d2d; color:#eaf5ff; border:1px solid rgba(112,194,255,.2); border-radius:24px; }
+  .vp-modal .form-control,.vp-modal .form-select { background:#0a1724; color:#eaf5ff; border-color:rgba(255,255,255,.12); }
+  .vp-modal .form-control:focus,.vp-modal .form-select:focus { border-color:var(--vp-cyan); box-shadow:0 0 0 .2rem rgba(32,217,255,.1); }
+  .vp-record-scroll { max-height:540px; overflow:auto; }
+  .vp-record-scroll thead th { position:sticky; top:0; z-index:3; background:#0d1d2d; }
+  .vp-eye-btn { width:38px; height:38px; display:inline-grid; place-items:center; border-radius:12px; border:1px solid rgba(32,217,255,.25); background:rgba(32,217,255,.08); color:#74eaff; transition:.2s ease; }
+  .vp-eye-btn:hover { color:white; background:rgba(32,217,255,.2); transform:translateY(-1px); }
+  .vp-search { min-width:260px; background:#0a1724; color:#eaf5ff; border:1px solid rgba(255,255,255,.12); border-radius:14px; }
+  .vp-search:focus { background:#0a1724; color:#fff; border-color:var(--vp-cyan); box-shadow:0 0 0 .2rem rgba(32,217,255,.1); }
+  .vp-pagination .page-link { background:#0a1724; border-color:rgba(255,255,255,.1); color:#9eb8cf; }
+  .vp-pagination .page-item.active .page-link { background:linear-gradient(135deg,var(--vp-blue),var(--vp-cyan)); border-color:transparent; color:white; }
+  .vp-pagination .page-item.disabled .page-link { opacity:.45; }
+  .vp-detail-box { padding:14px; border-radius:16px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.07); height:100%; }
+  .vp-detail-box small { display:block; color:#7890a8; text-transform:uppercase; letter-spacing:.08em; font-size:.68rem; margin-bottom:5px; }
+  .vp-detail-box strong,.vp-detail-box span { color:#eaf5ff; word-break:break-word; }
+</style>
+
+<div class="main-content app-content">
+  <div class="vp-shell">
+    <section class="vp-hero mb-4">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8 position-relative" style="z-index:2">
+          <div class="vp-kicker mb-2">Vehicle Operations / Patrol Control</div>
+          <h1 class="vp-title mb-3">Vehicle Patrol Command</h1>
+          <p class="vp-muted fs-16 mb-4" style="max-width:760px">Create clear patrol assignments, set an expected duration and a manual activity target, then review every guard session without collecting GPS information.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="vp-pill"><i class="ri-timer-flash-line"></i> Duration tracking</span>
+            <span class="vp-pill"><i class="ri-add-circle-line"></i> Manual patrol counter</span>
+            <span class="vp-pill"><i class="ri-shield-check-line"></i> Guard accountability</span>
+          </div>
+        </div>
+        <div class="col-lg-4 text-lg-end position-relative" style="z-index:2">
+          <button class="btn btn-primary btn-lg rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createPatrolModal">
+            <i class="ri-add-line me-1"></i> Create Patrol Option
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <% if (success) { %><div class="alert alert-success border-0 rounded-4"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert alert-danger border-0 rounded-4"><%= error %></div><% } %>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-3"><div class="vp-stat"><small class="vp-muted">Patrol Options</small><strong><%= patrols.length %></strong><span class="vp-muted">Configured workflows</span></div></div>
+      <div class="col-md-3"><div class="vp-stat"><small class="vp-muted">Active Now</small><strong><%= sessions.filter(s => s.status === 'Active').length %></strong><span class="vp-muted">Running sessions</span></div></div>
+      <div class="col-md-3"><div class="vp-stat"><small class="vp-muted">Completed</small><strong><%= sessions.filter(s => s.status === 'Completed').length %></strong><span class="vp-muted">Recorded patrols</span></div></div>
+      <div class="col-md-3"><div class="vp-stat"><small class="vp-muted">No GPS</small><strong>100%</strong><span class="vp-muted">Duration + counter only</span></div></div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <div><div class="vp-kicker">Configured options</div><h4 class="mb-0">Patrol Workflows</h4></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <% if (!patrols.length) { %>
+        <div class="col-12"><div class="vp-card p-5 text-center"><div class="vp-icon mx-auto mb-3"><i class="ri-roadster-line"></i></div><h4>No vehicle patrol options yet</h4><p class="vp-muted">Create the first patrol option to make it available in the guard mobile app.</p></div></div>
+      <% } %>
+      <% patrols.forEach(function(patrol) { %>
+        <div class="col-xl-4 col-md-6">
+          <div class="vp-grid-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="vp-icon"><i class="ri-roadster-line"></i></div>
+              <span class="vp-badge <%= patrol.isActive ? 'vp-active' : 'vp-paused' %>"><%= patrol.isActive ? 'AVAILABLE' : 'ARCHIVED' %></span>
+            </div>
+            <h4 class="mb-1"><%= patrol.patrolName %></h4>
+            <div class="vp-muted mb-3"><i class="ri-building-4-line me-1"></i><%= patrol.postSiteName || 'Post site' %> · <%= patrol.vehicleLabel %></div>
+            <p class="vp-muted" style="min-height:48px"><%= patrol.instructions || 'Follow the assigned vehicle patrol procedure and record each completed activity using the counter.' %></p>
+            <div class="row g-2 mb-3">
+              <div class="col-6"><div class="vp-stat p-3"><small class="vp-muted">Target</small><strong class="fs-5"><%= patrol.targetCount %></strong><small><%= patrol.counterLabel %></small></div></div>
+              <div class="col-6"><div class="vp-stat p-3"><small class="vp-muted">Expected</small><strong class="fs-5"><%= patrol.expectedDurationMinutes %>m</strong><small>Duration</small></div></div>
+            </div>
+            <div class="d-flex gap-2">
+              <form method="POST" action="/vehicle-patrol/<%= patrol._id %>/toggle" class="flex-grow-1"><button class="btn btn-outline-info w-100"><%= patrol.isActive ? 'Archive' : 'Restore' %></button></form>
+              <form method="POST" action="/vehicle-patrol/<%= patrol._id %>/delete" onsubmit="return confirm('Delete this patrol option? Existing session history will be preserved by archiving it.')"><button class="btn btn-outline-danger"><i class="ri-delete-bin-line"></i></button></form>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="vp-card">
+      <div class="card-header p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <div class="vp-kicker">Operational history</div>
+            <h4 class="mb-0">Recent Patrol Sessions</h4>
+          </div>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <input type="search" id="vpSessionSearch" class="form-control vp-search" placeholder="Search guard, patrol, site or status...">
+            <span class="vp-muted" id="vpRecordTotal"><%= sessions.length %> records</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive vp-record-scroll">
+          <table class="table vp-table mb-0" id="vpSessionTable">
+            <thead>
+              <tr>
+                <th class="ps-4">Guard / Patrol</th>
+                <th>Post Site</th>
+                <th>Status</th>
+                <th>Counter</th>
+                <th>Duration</th>
+                <th>Started</th>
+                <th class="text-center pe-4">View</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!sessions.length) { %>
+                <tr id="vpEmptyServerRow"><td colspan="7" class="text-center py-5 vp-muted">Completed and active mobile patrols will appear here.</td></tr>
+              <% } %>
+              <% sessions.forEach(function(session) { %>
+                <tr class="vp-session-row">
+                  <td class="ps-4">
+                    <strong><%= session.guardName || 'Guard' %></strong>
+                    <div class="vp-muted small"><%= session.patrolName || 'Vehicle Patrol' %> · <%= session.vehicleLabel || 'Vehicle not specified' %></div>
+                  </td>
+                  <td><%= session.postSiteName || '—' %></td>
+                  <td><span class="vp-badge <%= session.status === 'Completed' ? 'vp-completed' : session.status === 'Paused' ? 'vp-paused' : 'vp-active' %>"><%= session.status || 'Unknown' %></span></td>
+                  <td>
+                    <strong><%= session.counter || 0 %>/<%= session.targetCount || 0 %></strong>
+                    <div class="vp-progress mt-2" style="width:100px"><span style="width:<%= Math.min(100, Math.round(((session.counter || 0) / Math.max(1, (session.targetCount || 0))) * 100)) %>%"></span></div>
+                  </td>
+                  <td data-duration="<%= session.liveDurationSeconds || 0 %>" data-live="<%= session.status === 'Active' %>"><%= Math.floor((session.liveDurationSeconds || 0)/3600).toString().padStart(2,'0') %>:<%= Math.floor(((session.liveDurationSeconds || 0)%3600)/60).toString().padStart(2,'0') %>:<%= ((session.liveDurationSeconds || 0)%60).toString().padStart(2,'0') %></td>
+                  <td><%= session.startedAt ? new Date(session.startedAt).toLocaleString() : '—' %></td>
+                  <td class="text-center pe-4">
+                    <button
+                      type="button"
+                      class="vp-eye-btn vp-view-session"
+                      title="View patrol details"
+                      data-bs-toggle="modal"
+                      data-bs-target="#viewPatrolModal"
+                      data-guard="<%= session.guardName || 'Guard' %>"
+                      data-patrol="<%= session.patrolName || 'Vehicle Patrol' %>"
+                      data-vehicle="<%= session.vehicleLabel || '—' %>"
+                      data-site="<%= session.postSiteName || '—' %>"
+                      data-status="<%= session.status || 'Unknown' %>"
+                      data-counter="<%= session.counter || 0 %>"
+                      data-target="<%= session.targetCount || 0 %>"
+                      data-counter-label="<%= session.counterLabel || 'Patrol activities' %>"
+                      data-duration="<%= session.liveDurationSeconds || 0 %>"
+                      data-started="<%= session.startedAt ? new Date(session.startedAt).toLocaleString() : '—' %>"
+                      data-completed="<%= session.completedAt ? new Date(session.completedAt).toLocaleString() : '—' %>"
+                      data-paused="<%= session.pausedAt ? new Date(session.pausedAt).toLocaleString() : '—' %>"
+                      data-notes="<%= session.notes || 'No notes entered by the guard.' %>"
+                    ><i class="ri-eye-line"></i></button>
+                  </td>
+                </tr>
+              <% }) %>
+              <tr id="vpNoResultsRow" style="display:none"><td colspan="7" class="text-center py-5 vp-muted">No patrol sessions match your search.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 border-top" style="border-color:rgba(255,255,255,.07)!important">
+          <div class="d-flex align-items-center gap-2">
+            <label for="vpRowsPerPage" class="vp-muted small mb-0">Rows per page</label>
+            <select id="vpRowsPerPage" class="form-select form-select-sm" style="width:82px;background:#0a1724;color:#eaf5ff;border-color:rgba(255,255,255,.12)">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="vp-muted small" id="vpPageSummary">Showing 0 records</div>
+          <nav aria-label="Vehicle patrol records pagination">
+            <ul class="pagination pagination-sm mb-0 vp-pagination" id="vpPagination"></ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade vp-modal" id="viewPatrolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header border-0 p-4">
+        <div>
+          <div class="vp-kicker">Guard submission</div>
+          <h4 class="modal-title">Vehicle Patrol Details</h4>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body px-4 pb-4">
+        <div class="row g-3">
+          <div class="col-md-6"><div class="vp-detail-box"><small>Guard</small><strong id="vpdGuard">—</strong></div></div>
+          <div class="col-md-6"><div class="vp-detail-box"><small>Patrol</small><strong id="vpdPatrol">—</strong></div></div>
+          <div class="col-md-6"><div class="vp-detail-box"><small>Vehicle / Unit</small><span id="vpdVehicle">—</span></div></div>
+          <div class="col-md-6"><div class="vp-detail-box"><small>Post Site</small><span id="vpdSite">—</span></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Status</small><strong id="vpdStatus">—</strong></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Counter Result</small><strong id="vpdCounter">—</strong><div class="vp-muted small mt-1" id="vpdCounterLabel"></div></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Duration</small><strong id="vpdDuration">—</strong></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Started</small><span id="vpdStarted">—</span></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Paused</small><span id="vpdPaused">—</span></div></div>
+          <div class="col-md-4"><div class="vp-detail-box"><small>Completed</small><span id="vpdCompleted">—</span></div></div>
+          <div class="col-12"><div class="vp-detail-box"><small>Guard Notes</small><span id="vpdNotes" style="white-space:pre-wrap">—</span></div></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4">
+        <button type="button" class="btn btn-outline-light px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade vp-modal" id="createPatrolModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <form method="POST" action="/vehicle-patrol/create" class="modal-content">
+      <div class="modal-header border-0 p-4"><div><div class="vp-kicker">New mobile workflow</div><h4 class="modal-title">Create Vehicle Patrol</h4></div><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body px-4">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Post Site</label><select class="form-select" name="postSiteId" id="vpPostSite" required><option value="">Select post site</option><% postSites.forEach(function(site){ %><option value="<%= site._id %>" data-name="<%= site.siteName %>"><%= site.siteName %></option><% }) %></select><input type="hidden" name="postSiteName" id="vpPostSiteName"></div>
+          <div class="col-md-6"><label class="form-label">Patrol Name</label><input class="form-control" name="patrolName" placeholder="Night Vehicle Patrol" required></div>
+          <div class="col-md-6"><label class="form-label">Vehicle Label</label><input class="form-control" name="vehicleLabel" placeholder="Patrol Unit 01"></div>
+          <div class="col-md-3"><label class="form-label">Target Count</label><input class="form-control" type="number" min="1" name="targetCount" value="4" required></div>
+          <div class="col-md-3"><label class="form-label">Expected Minutes</label><input class="form-control" type="number" min="1" name="expectedDurationMinutes" value="30" required></div>
+          <div class="col-12"><label class="form-label">Counter Label</label><input class="form-control" name="counterLabel" value="Patrol rounds" placeholder="Patrol rounds, zones checked, vehicles inspected..."></div>
+          <div class="col-12"><label class="form-label">Guard Instructions</label><textarea class="form-control" rows="5" name="instructions" placeholder="Explain what the guard should inspect, count and report during this patrol."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4"><button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary px-4">Publish to Mobile</button></div>
+    </form>
+  </div>
+</div>
+
+  <!-- Footer Start -->
+    <!-- <%- include("../includes/footer"); -%> -->
+        <!-- Footer End -->
+        <div class="modal fade" id="header-responsive-search" tabindex="-1" aria-labelledby="header-responsive-search"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control border-end-0" placeholder="Search Anything ..."
+                                aria-label="Search Anything ..." aria-describedby="button-addon2">
+                            <button class="btn btn-primary" type="button" id="button-addon2"><i
+                                    class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Swapping email and phone field -->
+
+<script>
+  document.getElementById('vpPostSite')?.addEventListener('change', function(){
+    document.getElementById('vpPostSiteName').value = this.options[this.selectedIndex]?.dataset?.name || '';
+  });
+
+  function vpFormatDuration(totalSeconds) {
+    const seconds = Math.max(0, Number(totalSeconds || 0));
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
+
+  setInterval(() => document.querySelectorAll('[data-live="true"]').forEach(cell => {
+    const seconds = Number(cell.dataset.duration || 0) + 1;
+    cell.dataset.duration = seconds;
+    cell.textContent = vpFormatDuration(seconds);
+  }), 1000);
+
+  document.querySelectorAll('.vp-view-session').forEach(button => {
+    button.addEventListener('click', function () {
+      const d = this.dataset;
+      document.getElementById('vpdGuard').textContent = d.guard || '—';
+      document.getElementById('vpdPatrol').textContent = d.patrol || '—';
+      document.getElementById('vpdVehicle').textContent = d.vehicle || '—';
+      document.getElementById('vpdSite').textContent = d.site || '—';
+      document.getElementById('vpdStatus').textContent = d.status || '—';
+      document.getElementById('vpdCounter').textContent = `${d.counter || 0} / ${d.target || 0}`;
+      document.getElementById('vpdCounterLabel').textContent = d.counterLabel || 'Patrol activities';
+      document.getElementById('vpdDuration').textContent = vpFormatDuration(d.duration);
+      document.getElementById('vpdStarted').textContent = d.started || '—';
+      document.getElementById('vpdPaused').textContent = d.paused || '—';
+      document.getElementById('vpdCompleted').textContent = d.completed || '—';
+      document.getElementById('vpdNotes').textContent = d.notes || 'No notes entered by the guard.';
+    });
+  });
+
+  (() => {
+    const rows = Array.from(document.querySelectorAll('.vp-session-row'));
+    const searchInput = document.getElementById('vpSessionSearch');
+    const rowsPerPageSelect = document.getElementById('vpRowsPerPage');
+    const pagination = document.getElementById('vpPagination');
+    const summary = document.getElementById('vpPageSummary');
+    const totalLabel = document.getElementById('vpRecordTotal');
+    const noResultsRow = document.getElementById('vpNoResultsRow');
+    const serverEmptyRow = document.getElementById('vpEmptyServerRow');
+
+    let currentPage = 1;
+    let rowsPerPage = Number(rowsPerPageSelect?.value || 10);
+
+    function filteredRows() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      if (!query) return rows;
+      return rows.filter(row => row.textContent.toLowerCase().includes(query));
+    }
+
+    function pageButton(label, page, options = {}) {
+      const li = document.createElement('li');
+      li.className = `page-item${options.active ? ' active' : ''}${options.disabled ? ' disabled' : ''}`;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'page-link';
+      button.innerHTML = label;
+      button.disabled = Boolean(options.disabled);
+      button.addEventListener('click', () => {
+        if (options.disabled) return;
+        currentPage = page;
+        render();
+      });
+      li.appendChild(button);
+      return li;
+    }
+
+    function renderPagination(totalPages) {
+      pagination.innerHTML = '';
+      pagination.appendChild(pageButton('<i class="ri-arrow-left-s-line"></i>', currentPage - 1, { disabled: currentPage === 1 }));
+
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, start + 4);
+      start = Math.max(1, end - 4);
+
+      for (let page = start; page <= end; page += 1) {
+        pagination.appendChild(pageButton(String(page), page, { active: page === currentPage }));
+      }
+
+      pagination.appendChild(pageButton('<i class="ri-arrow-right-s-line"></i>', currentPage + 1, { disabled: currentPage === totalPages }));
+    }
+
+    function render() {
+      const matches = filteredRows();
+      const total = matches.length;
+      const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+      currentPage = Math.min(currentPage, totalPages);
+
+      rows.forEach(row => { row.style.display = 'none'; });
+      if (serverEmptyRow) serverEmptyRow.style.display = rows.length ? 'none' : '';
+      if (noResultsRow) noResultsRow.style.display = rows.length && !total ? '' : 'none';
+
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const pageRows = matches.slice(startIndex, startIndex + rowsPerPage);
+      pageRows.forEach(row => { row.style.display = ''; });
+
+      if (totalLabel) totalLabel.textContent = `${total} record${total === 1 ? '' : 's'}`;
+      if (summary) {
+        summary.textContent = total
+          ? `Showing ${startIndex + 1}–${Math.min(startIndex + rowsPerPage, total)} of ${total} records`
+          : 'Showing 0 records';
+      }
+      renderPagination(totalPages);
+    }
+
+    searchInput?.addEventListener('input', () => { currentPage = 1; render(); });
+    rowsPerPageSelect?.addEventListener('change', () => {
+      rowsPerPage = Number(rowsPerPageSelect.value || 10);
+      currentPage = 1;
+      render();
+    });
+
+    render();
+  })();
+</script>
+
+
+        <!-- Scroll To Top -->
+        <div class="scrollToTop">
+            <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+        </div>
+        <div id="responsive-overlay"></div>
+        <!-- Scroll To Top -->
+
+        <!-- Popper JS -->
+        <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Defaultmenu JS -->
+        <script src="assets/js/defaultmenu.min.js"></script>
+
+        <!-- Node Waves JS-->
+        <script src="assets/libs/node-waves/waves.min.js"></script>
+
+        <!-- Sticky JS -->
+        <script src="assets/js/sticky.js"></script>
+
+        <!-- Simplebar JS -->
+        <script src="assets/libs/simplebar/simplebar.min.js"></script>
+        <script src="assets/js/simplebar.js"></script>
+
+        <!-- Auto Complete JS -->
+        <script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+        <!-- Color Picker JS -->
+        <script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+        <!-- Date & Time Picker JS -->
+        <script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+        <!-- Apex Charts JS -->
+        <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+        <!-- Sales Dashboard -->
+        <script src="assets/js/sales-dashboard.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+
+
+        <!-- Custom-Switcher JS -->
+        <script src="assets/js/custom-switcher.min.js"></script>
+
+        <!-- Google Maps API -->
+        <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+        <script src="assets/libs/intl-tel-input/build/js/intlTelInput.min.js"></script>
+        <script src="assets/js/form-advanced.js"></script>
+
+        <!-- Google Maps JS -->
+        <script src="assets/libs/gmaps/gmaps.min.js"></script>
+        <script src="assets/js/google-maps.js"></script>
+        <script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Custom JS -->
+        <script src="assets/js/custom.js"></script>
+        <!-- <script src="assets/js/all-phone.js"></script> -->
+
+
+
+<!-- Bootstrap is required for the Create Patrol modal -->
+
+
+
+
+
+

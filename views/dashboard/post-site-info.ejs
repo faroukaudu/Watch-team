@@ -15,6 +15,12 @@
             </ol>
           </nav>
         </div>
+
+        <button type="button" class="btn btn-danger btn-wave" id="deletePostSiteButton">
+          <i class="ri-delete-bin-6-line me-1"></i> Delete Post Site
+        </button>
+
+        <form id="deletePostSiteForm" action="/delete-post-site/<%= companyInfo?._id || '' %>" method="POST" class="d-none"></form>
       </div>
 
       <!-- Hero -->
@@ -1019,8 +1025,14 @@
 
                                 <button class="btn btn-sm btn-primary"
                                   onclick='openChecklistEdit(<%- JSON.stringify(item) %>)'>
-                                  Edit
+                                  <i class="ri-edit-line"></i> Edit
                                 </button>
+
+                                <form action="/delete-checklist/<%= item._id %>" method="POST" class="d-inline delete-record-form" data-record-name="checklist">
+                                  <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="ri-delete-bin-line"></i> Delete
+                                  </button>
+                                </form>
                               </td>
                             </tr>
 
@@ -1126,12 +1138,13 @@
                               </td>
 
                               <td class="text-end">
-                                <button class="btn btn-sm btn-light">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                  onclick='openTaskEdit(<%- JSON.stringify(task) %>)'>
                                   <i class="ri-edit-line"></i>
                                 </button>
 
                                 <form action="/delete-post-site-task/<%= task._id %>" method="POST" class="d-inline">
-                                  <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?')">
+                                  <button class="btn btn-sm btn-danger delete-record-button">
                                     <i class="ri-delete-bin-line"></i>
                                   </button>
                                 </form>
@@ -1386,7 +1399,9 @@
             '<td>' + safeText(createdDate, "N/A") + '</td>' +
             '<td class="text-end">' +
             '<button type="button" class="btn btn-sm btn-light me-1" title="View QR Codes" onclick="viewTourQr(' + index + ')"><i class="ri-eye-line"></i></button>' +
-            '<button type="button" class="btn btn-sm btn-outline-primary" title="View Progress" onclick="viewTourProgress(' + index + ')"><i class="ri-list-check-2"></i></button>' +
+            '<button type="button" class="btn btn-sm btn-outline-primary me-1" title="View Progress" onclick="viewTourProgress(' + index + ')"><i class="ri-list-check-2"></i></button>' +
+            '<button type="button" class="btn btn-sm btn-primary me-1" title="Edit Tour" onclick="openTourEdit(' + index + ')"><i class="ri-edit-line"></i></button>' +
+            '<button type="button" class="btn btn-sm btn-danger" title="Delete Tour" onclick="deleteTour(' + index + ')"><i class="ri-delete-bin-line"></i></button>' +
             '</td>';
 
           tbody.appendChild(row);
@@ -1394,6 +1409,24 @@
       } catch (error) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-danger">Unable to load site tours.</td></tr>';
       }
+    }
+
+    function openTourEdit(index) {
+      const tour = window.loadedSiteTours[index];
+      if (!tour) return;
+      document.getElementById("editTourForm").action = `/site-tours/${tour._id}/update`;
+      document.getElementById("editTourName").value = tour.tourName || "";
+      document.getElementById("editTourDescription").value = tour.description || "";
+      document.getElementById("editTourCheckpoints").value = (tour.checkpoints || []).map(p => p.name || "").join("\n");
+      new bootstrap.Modal(document.getElementById("editTourModal")).show();
+    }
+
+    async function deleteTour(index) {
+      const tour = window.loadedSiteTours[index];
+      if (!tour) return;
+      const result = await Swal.fire({title:"Delete Site Tour?",text:"This will delete this tour and its checkpoint progress.",icon:"warning",showCancelButton:true,confirmButtonColor:"#dc3545",confirmButtonText:"Yes, delete it"});
+      if (!result.isConfirmed) return;
+      const form = document.createElement("form"); form.method="POST"; form.action=`/site-tours/${tour._id}/delete`; document.body.appendChild(form); form.submit();
     }
 
     function viewTourQr(index) {
@@ -2232,6 +2265,42 @@ const scheduleRecipients =
   </div>
 
 
+
+  <!-- Edit Checklist Modal -->
+  <div class="modal fade" id="editChecklistModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <form action="/update-checklist" method="POST" class="modal-content" id="editChecklistForm">
+        <div class="modal-header"><h5 class="modal-title">Edit Checklist</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input type="hidden" name="checklistId" id="editChecklistId">
+          <div class="mb-3"><label class="form-label">Checklist Name</label><input type="text" name="name" id="editChecklistName" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" id="editChecklistDescription" class="form-control" rows="3"></textarea></div>
+          <div class="mb-3"><label class="form-label">Assigned Guards</label><select name="assignedGuards" id="editChecklistGuards" class="form-control" multiple>
+            <% assignedGuards.forEach(function(guard){ %><option value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>"><%= guard.fullname || guard.name || guard.email %></option><% }) %>
+          </select></div>
+          <div class="d-flex justify-content-between mb-2"><label class="form-label">Checklist Items</label><button type="button" class="btn btn-sm btn-success" onclick="addEditChecklistItem()"><i class="ri-add-line"></i> Add</button></div>
+          <div id="editChecklistItems"></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Site Tour Modal -->
+  <div class="modal fade" id="editTourModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <form method="POST" class="modal-content" id="editTourForm">
+        <div class="modal-header"><h5 class="modal-title">Edit Site Tour</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Tour Name</label><input type="text" name="tourName" id="editTourName" class="form-control" required></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" id="editTourDescription" class="form-control" rows="3"></textarea></div>
+          <div class="mb-3"><label class="form-label">Checkpoints</label><textarea name="checkpoints" id="editTourCheckpoints" class="form-control" rows="7" required></textarea><small class="text-muted">One checkpoint per line.</small></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal fade" id="checklistProgressModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -2310,8 +2379,26 @@ const scheduleRecipients =
       new bootstrap.Modal(document.getElementById("checklistProgressModal")).show();
     }
 
+    function addEditChecklistItem(value = "") {
+      const wrapper = document.getElementById("editChecklistItems");
+      const row = document.createElement("div");
+      row.className = "input-group mb-2";
+      row.innerHTML = `<input type="text" name="checklistItems" class="form-control" required value="${safeText(value, "")}"><button type="button" class="btn btn-danger" onclick="this.parentElement.remove()"><i class="ri-delete-bin-line"></i></button>`;
+      wrapper.appendChild(row);
+    }
+
     function openChecklistEdit(item) {
-      alert("Edit modal is next. Checklist selected: " + item.name);
+      document.getElementById("editChecklistId").value = item._id || "";
+      document.getElementById("editChecklistName").value = item.name || "";
+      document.getElementById("editChecklistDescription").value = item.description || "";
+      const guards = document.getElementById("editChecklistGuards");
+      const selectedIds = (item.assignedGuards || []).map(g => String(g.guardId));
+      Array.from(guards.options).forEach(option => { option.selected = selectedIds.includes(option.value.split("&")[0]); });
+      const items = document.getElementById("editChecklistItems");
+      items.innerHTML = "";
+      (item.items || []).forEach(i => addEditChecklistItem(i.text || ""));
+      if (!(item.items || []).length) addEditChecklistItem();
+      new bootstrap.Modal(document.getElementById("editChecklistModal")).show();
     }
   </script>
 
@@ -2509,8 +2596,71 @@ const scheduleRecipients =
     </div>
   </div>
 
+
+  <!-- Edit Task Modal -->
+  <div class="modal fade" id="editTaskModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <form method="POST" class="modal-content" id="editTaskForm">
+        <div class="modal-header"><h5 class="modal-title">Edit Task</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="row gy-3">
+            <div class="col-md-6"><label class="form-label">Task Name</label><input type="text" name="taskName" id="editTaskName" class="form-control" required></div>
+            <div class="col-md-3"><label class="form-label">Max Duration</label><input type="text" name="maxDuration" id="editTaskDuration" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Status</label><select name="status" id="editTaskStatus" class="form-control"><option>Active</option><option>Completed</option><option>Inactive</option></select></div>
+            <div class="col-12"><label class="form-label">Description</label><textarea name="taskDescription" id="editTaskDescription" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Type</label><select name="taskType" id="editTaskType" class="form-control"><option value="One-Off">One-Off</option><option value="Recurring">Recurring</option></select></div>
+            <div class="col-md-6"><label class="form-label">Assigned Guards</label><select name="assignedGuards" id="editTaskGuards" class="form-control" multiple><% assignedGuards.forEach(function(guard){ %><option value="<%= guard._id || guard.id %>&<%= guard.fullname || guard.name || 'Guard' %>&<%= guard.email || '' %>"><%= guard.fullname || guard.name || guard.email %></option><% }) %></select></div>
+            <div class="col-md-6"><label class="form-label">One-Off Start</label><input type="datetime-local" name="oneOffStartDateTime" id="editTaskStart" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">One-Off Due</label><input type="datetime-local" name="oneOffDueDateTime" id="editTaskDue" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Recurring Start Time</label><input type="time" name="recurringStartTime" id="editRecurringStartTime" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Starting From</label><input type="date" name="recurringStartingFrom" id="editRecurringStartingFrom" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Repeat Type</label><select name="repeatType" id="editRepeatType" class="form-control"><option value="Daily">Daily</option><option value="Weekly">Weekly</option></select></div>
+            <input type="hidden" name="recurringMode" value="Specific Time"><input type="hidden" name="repeatEvery" value="1"><input type="hidden" name="repeatEndType" value="Never"><input type="hidden" name="repeatEndAfter" value="0">
+            <div class="col-12"><label class="form-label">Sub Tasks</label><div id="editTaskSubTasks"></div><button type="button" class="btn btn-sm btn-outline-primary" onclick="addEditTaskSubTask()"><i class="ri-add-line"></i> Add Sub Task</button></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- Tasks Script -->
   <script>
+    function toLocalInput(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      const offset = date.getTimezoneOffset();
+      return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
+    }
+
+    function addEditTaskSubTask(value = "") {
+      const wrapper = document.getElementById("editTaskSubTasks");
+      const row = document.createElement("div");
+      row.className = "input-group mb-2";
+      row.innerHTML = `<input type="text" name="subTasks" class="form-control" value="${safeText(value, "")}"><button type="button" class="btn btn-danger" onclick="this.parentElement.remove()"><i class="ri-delete-bin-line"></i></button>`;
+      wrapper.appendChild(row);
+    }
+
+    function openTaskEdit(task) {
+      document.getElementById("editTaskForm").action = `/update-post-site-task/${task._id}`;
+      document.getElementById("editTaskName").value = task.taskName || "";
+      document.getElementById("editTaskDescription").value = task.taskDescription || "";
+      document.getElementById("editTaskDuration").value = task.maxDuration || "";
+      document.getElementById("editTaskStatus").value = task.status || "Active";
+      document.getElementById("editTaskType").value = task.taskType || "One-Off";
+      document.getElementById("editTaskStart").value = toLocalInput(task.oneOff && task.oneOff.startDateTime);
+      document.getElementById("editTaskDue").value = toLocalInput(task.oneOff && task.oneOff.dueDateTime);
+      document.getElementById("editRecurringStartTime").value = task.recurring && task.recurring.startTime || "";
+      document.getElementById("editRecurringStartingFrom").value = task.recurring && task.recurring.startingFrom ? String(task.recurring.startingFrom).slice(0,10) : "";
+      document.getElementById("editRepeatType").value = task.recurring && task.recurring.repeatType || "Daily";
+      const selectedIds = (task.assignedGuards || []).map(g => String(g.guardId));
+      Array.from(document.getElementById("editTaskGuards").options).forEach(option => { option.selected = selectedIds.includes(option.value.split("&")[0]); });
+      const wrapper = document.getElementById("editTaskSubTasks"); wrapper.innerHTML = "";
+      (task.subTasks || []).forEach(s => addEditTaskSubTask(s.title || ""));
+      if (!(task.subTasks || []).length) addEditTaskSubTask();
+      new bootstrap.Modal(document.getElementById("editTaskModal")).show();
+    }
+
     function addSubTaskInput() {
       const wrapper = document.getElementById("subTaskWrapper");
 
@@ -2562,6 +2712,34 @@ const scheduleRecipients =
   </script>
 
 
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const deletePostSiteButton = document.getElementById("deletePostSiteButton");
+      if (deletePostSiteButton) {
+        deletePostSiteButton.addEventListener("click", async function () {
+          const result = await Swal.fire({
+            title: "Are you sure?",
+            html: "<strong>Deleting this post site would delete email reports, notes, tasks, visitors, site tours and checklists on this post site.</strong><br><br>Historical Reports and Activities will remain in the database, and assigned guards will be unassigned.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "Yes, delete post site",
+            cancelButtonText: "Cancel"
+          });
+          if (result.isConfirmed) document.getElementById("deletePostSiteForm").submit();
+        });
+      }
+
+      document.querySelectorAll(".delete-record-form, form:has(.delete-record-button)").forEach(function (form) {
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const result = await Swal.fire({title:"Delete this record?",text:"This action cannot be undone.",icon:"warning",showCancelButton:true,confirmButtonColor:"#dc3545",confirmButtonText:"Delete"});
+          if (result.isConfirmed) form.submit();
+        });
+      });
+    });
+  </script>
 
   <%- include("../includes/footer"); -%>
     <!-- Scroll To Top -->

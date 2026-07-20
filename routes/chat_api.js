@@ -6,23 +6,21 @@ const messageSchema = require("../db/messagedb.js");
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 const Chat = mongoose.models.Chat || chatSchemaOrModel;
 const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
-const { isClientUser, getClientScope } = require("../src/utils/clientScope");
-// const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
 
-// builds a unique key for a direct chat inside a company
+const ALLOWED_CHAT_USER_TYPES = ["Super Admin", "Client", "AmobileGuard"];
+
 function buildDirectKey(companyId, userA, userB) {
   const ids = [String(userA), String(userB)].sort();
   return `${String(companyId)}:${ids[0]}:${ids[1]}`;
 }
 
-// optional guard (passport)
 async function ensureAuth(req, res, next) {
   try {
     if (req.isAuthenticated && req.isAuthenticated()) {
       return next();
     }
 
-    const mobileUserId = (req.headers["x-user-id"] || "").toString().trim();
+    const mobileUserId = String(req.headers["x-user-id"] || "").trim();
     if (!mobileUserId) {
       return res.status(401).json({ ok: false, error: "Not logged in" });
     }
@@ -49,15 +47,21 @@ async function ensureAuth(req, res, next) {
 }
 
 function registerChatRoutes(app) {
-  // Create/Get direct chat
   app.post("/api/chats/direct", ensureAuth, async (req, res) => {
     try {
       const userId = req.user?._id;
       const otherUserId = req.body?.otherUserId;
 
-      if (!userId) return res.status(401).json({ ok: false, error: "Not logged in" });
+      if (!userId) {
+        return res.status(401).json({ ok: false, error: "Not logged in" });
+      }
+
       if (!mongoose.isValidObjectId(otherUserId)) {
         return res.status(400).json({ ok: false, error: "Invalid otherUserId" });
+      }
+
+      if (String(userId) === String(otherUserId)) {
+        return res.status(400).json({ ok: false, error: "You cannot open a direct chat with yourself" });
       }
 
       const companyId = String(req.user.assignedCompanyID || "");
@@ -65,14 +69,19 @@ function registerChatRoutes(app) {
         return res.status(400).json({ ok: false, error: "User has no assignedCompanyID" });
       }
 
-      if (isClientUser(req.user)) {
-        const otherUser = await User.findById(otherUserId).select("userType guardPostSite");
-        const { assignedPostSiteId } = await getClientScope(req.user);
-        const sameSiteGuard = otherUser && otherUser.userType === "AmobileGuard" && Array.isArray(otherUser.guardPostSite) && otherUser.guardPostSite.some((p) => String(p.postSiteID) === String(assignedPostSiteId || ""));
-        const superAdmin = otherUser && otherUser.userType === "Super Admin";
-        if (!sameSiteGuard && !superAdmin) {
-          return res.status(403).json({ ok: false, error: "Unauthorized chat target" });
-        }
+      const otherUser = await User.findById(otherUserId)
+        .select("assignedCompanyID userType status Acc_status");
+
+      if (!otherUser) {
+        return res.status(404).json({ ok: false, error: "Chat user not found" });
+      }
+
+      if (String(otherUser.assignedCompanyID || "") !== companyId) {
+        return res.status(403).json({ ok: false, error: "You can only chat with users in your company" });
+      }
+
+      if (!ALLOWED_CHAT_USER_TYPES.includes(otherUser.userType)) {
+        return res.status(403).json({ ok: false, error: "This user type is not available in Messenger" });
       }
 
       const directKey = buildDirectKey(companyId, userId, otherUserId);
@@ -88,13 +97,12 @@ function registerChatRoutes(app) {
       }
 
       return res.json({ ok: true, chatId: String(chat._id) });
-    } catch (e) {
-      console.error("POST /api/chats/direct error:", e);
+    } catch (err) {
+      console.error("POST /api/chats/direct error:", err);
       return res.status(500).json({ ok: false, error: "Server error" });
     }
   });
 
-  // Get messages
   app.get("/api/messages", ensureAuth, async (req, res) => {
     try {
       const { chatId, limit = 30 } = req.query;
@@ -113,15 +121,12 @@ function registerChatRoutes(app) {
         return res.status(404).json({ ok: false, error: "Chat not found" });
       }
 
-      if (isClientUser(req.user)) {
-        const { assignedPostSiteId } = await getClientScope(req.user);
-        const otherIds = (chat.participants || []).map(String).filter((id) => id !== String(req.user._id));
-        const otherUser = otherIds.length ? await User.findById(otherIds[0]).select("userType guardPostSite") : null;
-        const sameSiteGuard = otherUser && otherUser.userType === "AmobileGuard" && Array.isArray(otherUser.guardPostSite) && otherUser.guardPostSite.some((p) => String(p.postSiteID) === String(assignedPostSiteId || ""));
-        const superAdmin = otherUser && otherUser.userType === "Super Admin";
-        if (!sameSiteGuard && !superAdmin) {
-          return res.status(403).json({ ok: false, error: "Unauthorized" });
-        }
+      const isParticipant = (chat.participants || []).some(
+        (participantId) => String(participantId) === String(req.user._id)
+      );
+
+      if (!isParticipant) {
+        return res.status(403).json({ ok: false, error: "You are not a participant in this chat" });
       }
 
       const msgs = await Message.find({ companyId, chatId })
@@ -135,9 +140,5 @@ function registerChatRoutes(app) {
     }
   });
 }
-
-
-
-
 
 module.exports = { registerChatRoutes };

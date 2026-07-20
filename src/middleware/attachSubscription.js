@@ -8,13 +8,36 @@ async function attachSubscription(req, res, next) {
       return next();
     }
 
-    const sub = await UserSubscription.findOne({
-      userId: req.user._id,
-      companyId: String(req.user.assignedCompanyID || ""),
-    }).lean();
+    // Platform Admin does not require a company subscription.
+    if (req.user.userType === "Platform Admin") {
+      req.userSubscription = null;
+      res.locals.userSubscription = null;
+      return next();
+    }
 
-    req.userSubscription = sub;
-    res.locals.userSubscription = sub;
+    const companyId = String(req.user.assignedCompanyID || "").trim();
+
+    if (!companyId) {
+      req.userSubscription = null;
+      res.locals.userSubscription = null;
+      return next();
+    }
+
+    const subscription = await UserSubscription.findOne({
+      companyId,
+      isActive: true,
+      subscriptionStatus: { $in: ["active", "trialing"] },
+      $or: [
+        { expiresAt: null },
+        { expiresAt: { $exists: false } },
+        { expiresAt: { $gte: new Date() } },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    req.userSubscription = subscription || null;
+    res.locals.userSubscription = subscription || null;
     return next();
   } catch (err) {
     console.error("attachSubscription error:", err);

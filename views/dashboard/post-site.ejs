@@ -44,10 +44,10 @@
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <div class="d-flex gap-2">
                                 <div class="position-relative">
-                                    <a href="/new-post-site" id="newPostSiteBtn" class="btn btn-secondary btn-wave"
+                                    <% if (userInfo.userType !== "Client") { %><a href="/new-post-site" id="newPostSiteBtn" class="btn btn-secondary btn-wave"
                                         data-postsite-limit-reached="<%= postSiteLimitReached ? 'true' : 'false' %>">
                                         New Post Site
-                                    </a>
+                                    </a><% } %>
 
                                     <% if (userInfo.userType==="Super Admin" && maxPostSites !==-1) { %>
                                         <div class="mt-2">

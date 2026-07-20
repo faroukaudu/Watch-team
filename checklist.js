@@ -134,6 +134,24 @@ app.post("/update-checklist", async (req, res) => {
   }
 });
 
+
+// WEB: DELETE CHECKLIST
+app.post("/delete-checklist/:id", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    await Checklist.findOneAndDelete({
+      _id: req.params.id,
+      companyId: String(req.user.assignedCompanyID),
+    });
+
+    return res.redirect("back");
+  } catch (err) {
+    console.error("Delete checklist error:", err);
+    return res.redirect("back");
+  }
+});
+
 // WEB + MOBILE: GET CHECKLISTS BY POST SITE
 app.get("/api/checklists", async (req, res) => {
   try {

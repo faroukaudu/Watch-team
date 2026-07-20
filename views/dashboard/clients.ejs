@@ -40,11 +40,10 @@
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <div class="d-flex gap-2">
                                 <div class="position-relative">
-                                    <a href="/new-cli" id="newClientBtn" class="small-space btn btn-secondary btn-wave"
+                                    <% if (userInfo.userType !== "Client") { %><a href="/new-cli" id="newClientBtn" class="small-space btn btn-secondary btn-wave"
                                         type="button"
                                         data-client-limit-reached="<%= clientLimitReached ? 'true' : 'false' %>">
-                                        New Client <i class="ri-user-add-fill ms-1"></i>
-                                    </a>
+                                        New Client <i class="ri-user-add-fill ms-1"></i></a><% } %>
 
                                     <% if (userInfo.userType==="Super Admin" && maxClients !==-1) { %>
                                         <div class="mt-2">

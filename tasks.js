@@ -97,6 +97,59 @@ app.post("/create-post-site-task", async (req, res) => {
   }
 });
 
+
+// WEB: UPDATE POST SITE TASK
+app.post("/update-post-site-task/:id", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const task = await PostSiteTask.findOne({
+      _id: req.params.id,
+      companyId: String(req.user.assignedCompanyID),
+    });
+
+    if (!task) return res.status(404).send("Task not found.");
+
+    const guardsInput = normalizeArray(req.body.assignedGuards);
+    const scheduledDays = normalizeArray(req.body.scheduledDays);
+    const subTaskInput = normalizeArray(req.body.subTasks);
+
+    task.taskName = req.body.taskName || "";
+    task.taskDescription = req.body.taskDescription || "";
+    task.maxDuration = req.body.maxDuration || "";
+    task.taskType = req.body.taskType === "Recurring" ? "Recurring" : "One-Off";
+    task.status = req.body.status || task.status || "Active";
+    task.assignedGuards = guardsInput.map((g) => {
+      const [guardId, guardName, guardEmail] = String(g).split("&");
+      return { guardId, guardName, guardEmail };
+    });
+    task.oneOff = {
+      startDateTime: task.taskType === "One-Off" && req.body.oneOffStartDateTime
+        ? new Date(req.body.oneOffStartDateTime) : null,
+      dueDateTime: task.taskType === "One-Off" && req.body.oneOffDueDateTime
+        ? new Date(req.body.oneOffDueDateTime) : null,
+    };
+    task.recurring = {
+      continuous: req.body.recurringContinuous === "on",
+      scheduledDays,
+      mode: req.body.recurringMode || "Specific Time",
+      startTime: req.body.recurringStartTime || "",
+      startingFrom: req.body.recurringStartingFrom ? new Date(req.body.recurringStartingFrom) : null,
+      repeatType: req.body.repeatType || "",
+      repeatEvery: Number(req.body.repeatEvery || 1),
+      repeatEndType: req.body.repeatEndType || "",
+      repeatEndAfter: Number(req.body.repeatEndAfter || 0),
+    };
+    task.subTasks = subTaskInput.filter(Boolean).map((title) => ({ title: String(title).trim() }));
+
+    await task.save();
+    return res.redirect("back");
+  } catch (err) {
+    console.error("Update post site task error:", err);
+    return res.redirect("back");
+  }
+});
+
 // WEB: DELETE POST SITE TASK
 app.post("/delete-post-site-task/:id", async (req, res) => {
   try {

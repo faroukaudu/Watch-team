@@ -1,4 +1,5 @@
 const myModule = require("./index.js");
+const { requirePremiumWebFeature } = require("./src/middleware/requirePremiumWebFeature");
 const mongoose = require("mongoose");
 const Note = require("./src/models/note.js");
 const Dispatch = require("./src/models/Dispatch");
@@ -6,6 +7,7 @@ const Dispatch = require("./src/models/Dispatch");
 
 const app = myModule.main;
 const User = myModule.userDB;
+const { isClientUser, getClientScope } = require("./src/utils/clientScope");
 
 // CREATE DISPATCH
 app.post("/api/dispatch/create", async (req, res) => {
@@ -119,7 +121,7 @@ app.post("/api/dispatch/update/:id", async (req, res) => {
   }
 });
 
-app.get("/dispatch", async (req, res) => {
+app.get("/dispatch", requirePremiumWebFeature("Dispatch"), async (req, res) => {
   try {
     if (!req.user) {
       return res.redirect("/sign-in");
@@ -127,8 +129,12 @@ app.get("/dispatch", async (req, res) => {
 
     const companyId = req.user.assignedCompanyID;
 
-    const dispatchList = await Dispatch.find({ companyId })
-      .sort({ createdAt: -1 });
+    const dispatchQuery = { companyId: String(companyId) };
+    if (isClientUser(req.user)) {
+      const { assignedPostSiteIds } = await getClientScope(req.user);
+      dispatchQuery.postSiteId = { $in: assignedPostSiteIds };
+    }
+    const dispatchList = await Dispatch.find(dispatchQuery).sort({ createdAt: -1 });
 
     res.render("dashboard/dispatch", {
       userInfo: req.user,
@@ -142,7 +148,7 @@ app.get("/dispatch", async (req, res) => {
   }
 });
 
-app.get("/new-dispatch", async (req, res) => {
+app.get("/new-dispatch", requirePremiumWebFeature("Dispatch"), async (req, res) => {
   try {
     if (!req.user) {
       return res.redirect("/sign-in");
@@ -153,17 +159,17 @@ app.get("/new-dispatch", async (req, res) => {
     const Company = mongoose.model("Company");
     const company = await Company.findById(companyId);
 
-    const clients = await User.find({
-      assignedCompanyID: companyId,
-      userType: "Client"
-    });
-
-    const guards = await User.find({
-      assignedCompanyID: companyId,
-      userType: "AmobileGuard"
-    });
-
-    const postSites = company && company.postSite ? company.postSite : [];
+    let clientQuery = { assignedCompanyID: companyId, userType: "Client" };
+    let guardQuery = { assignedCompanyID: companyId, userType: "AmobileGuard" };
+    let postSites = company && company.postSite ? company.postSite : [];
+    if (isClientUser(req.user)) {
+      const { assignedPostSiteIds, allowedClientIds } = await getClientScope(req.user);
+      clientQuery._id = { $in: allowedClientIds };
+      guardQuery.guardPostSite = { $elemMatch: { postSiteID: { $in: assignedPostSiteIds } } };
+      postSites = postSites.filter((site) => assignedPostSiteIds.includes(String(site._id)));
+    }
+    const clients = await User.find(clientQuery);
+    const guards = await User.find(guardQuery);
 
     res.render("dashboard/new-dispatch", {
       userInfo: req.user,
@@ -180,7 +186,7 @@ app.get("/new-dispatch", async (req, res) => {
   }
 });
 
-app.get("/edit-dispatch/:id", async (req, res) => {
+app.get("/edit-dispatch/:id", requirePremiumWebFeature("Dispatch"), async (req, res) => {
   try {
     if (!req.user) {
       return res.redirect("/sign-in");

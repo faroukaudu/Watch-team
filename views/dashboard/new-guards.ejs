@@ -112,7 +112,7 @@
                                     data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
                                     aria-selected="true">Invite via SMS or Email</button>
                             </li>
-                            <li class="nav-item" role="presentation">
+                            <!-- <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
                                     data-bs-target="#pills-profile" type="button" role="tab"
                                     aria-controls="pills-profile" aria-selected="false">Join By Code</button>
@@ -121,7 +121,7 @@
                                 <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
                                     data-bs-target="#pills-contact" type="button" role="tab"
                                     aria-controls="pills-contact" aria-selected="false">Invite By Link</button>
-                            </li>
+                            </li> -->
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill"
                                     data-bs-target="#pills-disabled" type="button" role="tab"
@@ -159,9 +159,9 @@
                                                 <div class="form-floating">
                                                     <select class="form-select via-select" id="floatingSelect" name="invite"
                                                         aria-label="Floating label select example">
-                                                        <option value="sms" selected>SMS (whatsApp)</option>
+                                                        <option value="sms" disabled>SMS (whatsApp)</option>
                                                         <!-- <option value="1">SMS</option> -->
-                                                        <option value="email">Email</option>
+                                                        <option value="email" selected >Email</option>
                                                         <!-- <option value="3">Three</option> -->
                                                     </select>
                                                     <label for="floatingSelect">Invite By</label>
@@ -233,9 +233,9 @@
 
                             </div>
                             <!-- JOIN BY CODE -->
-                            <div class="tab-pane text-muted" id="pills-profile" role="tabpanel"
+                            <!-- <div class="tab-pane text-muted" id="pills-profile" role="tabpanel"
                                 aria-labelledby="pills-profile-tab" tabindex="0">
-                                <!-- <b>Lorem Ipsum is simplyzaza dummy</b>  -->
+                                
                                 <p style="text-align: center;"> Share the unique company code along with the app
                                     download link. The guard can use the code to join the company.</p>
                                 <div class=" ">
@@ -263,10 +263,10 @@
                                     <button type="button" class="btn btn-primary-light btn-wave w-100 mt-4 pb">Add New
                                         Guard</button>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- JOIN BY CODE END -->
                             <!-- INVITE BY LINK -->
-                            <div class="tab-pane text-muted" id="pills-contact" role="tabpanel"
+                            <!-- <div class="tab-pane text-muted" id="pills-contact" role="tabpanel"
                                 aria-labelledby="pills-contact-tab" tabindex="0">
                                 <p style="text-align: center;"> Share the unique company code along with the app
                                     download link. The guard can use the code to join the company.</p>
@@ -275,8 +275,7 @@
                                         <div class="share-code scroll-link ">
                                             https://watchTeam.com/guards-registration/Efcc/tokencode</div>
                                         <div class="my-icons">
-                                            <!-- <a href="#code-refresh"><i class="ri-restart-line" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-primary"
-                                    data-bs-placement="top" title="Refresh"></i></a> -->
+                                          
                                             <a href="#code-refresh"><i class="ri-file-copy-fill"
                                                     data-bs-toggle="tooltip" data-bs-custom-class="tooltip-secondary"
                                                     data-bs-placement="top" title="Copy"></i></a>
@@ -296,7 +295,7 @@
                                     <button type="button" class="btn btn-primary-light btn-wave w-100 mt-4 pb">Add New
                                         Guard</button>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- CREATE A GUARD PROFILE -->
                             <div class="tab-pane text-muted" id="pills-disabled" role="tabpanel"
                                 aria-labelledby="pills-disabled-tab" tabindex="0">
@@ -384,8 +383,12 @@
                                                 Guard</button>
                                         </div>
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                            <button type="button" class="btn btn-teal-light btn-wave w-100">Add New
-                                                Guard & Send Details</button>
+                                            <button type="submit"
+                                                formaction="/add-guard-and-send-details"
+                                                formmethod="post"
+                                                class="btn btn-teal-light btn-wave w-100">
+                                                Add New Guard &amp; Send Details
+                                            </button>
                                         </div>
                                     </form>
                                     <script>

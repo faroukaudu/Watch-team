@@ -10,22 +10,30 @@
         </span>
     </div>
 </footer>
-<% if (typeof userInfo !== "undefined" && userInfo && userInfo.userType === "Client") { %>
-<script id="client-menu-guard">
+
+
+<% if (typeof accessModal !== "undefined" && accessModal) { %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
 document.addEventListener("DOMContentLoaded", function () {
-  const allowed = new Set(["/chat","/time-log","/report","/report-template-manager","/live-tracking","/analytics/shedule","/activities","/my-report"]);
-  document.querySelectorAll(".side-menu__item[href]").forEach((link) => {
-    const href = link.getAttribute("href");
-    if (!href || href === "javascript:void(0);") return;
-    if (href.startsWith("#")) return;
-    if (!allowed.has(href)) {
-      const li = link.closest("li");
-      if (li) li.style.display = "none";
-    }
-  });
-  document.querySelectorAll(".slide-menu").forEach((menu) => {
-    if (!menu.querySelector("a.side-menu__item[href]:not([style*='display: none'])")) {
-      menu.style.display = "none";
+  const accessModal = <%- JSON.stringify(accessModal) %>;
+  const options = {
+    icon: accessModal.type === "upgrade" ? "info" : "warning",
+    title: accessModal.title || "Access Restricted",
+    text: accessModal.message || "You do not have permission to view this page.",
+    confirmButtonText: accessModal.confirmText || "Okay",
+    allowOutsideClick: false,
+    allowEscapeKey: false
+  };
+
+  if (accessModal.cancelText) {
+    options.showCancelButton = true;
+    options.cancelButtonText = accessModal.cancelText;
+  }
+
+  Swal.fire(options).then(function (result) {
+    if (result.isConfirmed && accessModal.confirmUrl) {
+      window.location.href = accessModal.confirmUrl;
     }
   });
 });

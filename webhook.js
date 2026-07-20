@@ -10,6 +10,10 @@ const { ObjectId } = require("mongodb");
 const MobileReport = require("./src/models/report.js");
 // const UserSubscription = require("./src/models/UserSubscription");
 const { PLAN_CONFIG } = require("./src/config/subscriptionPlans");
+const UserSubscription = require("./src/models/UserSubscription");
+const { emailSent } = require("./nodemailer");
+const Stripe = require("stripe");
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const UserSubscriptionEvent = require("./src/models/UserSubscriptionEvent");
 
 const app = myModule.main;
@@ -17,6 +21,30 @@ const User = myModule.userDB;
 const Company = mongoose.model("Company", companyInfo);
 
 
+
+async function notifyPlatformAdmins(subscription, paymentReference) {
+  if (!subscription) return;
+  const recipients = await User.find({ userType: "Platform Admin", isBlocked: { $ne: true } })
+    .select("email username").lean();
+  const emails = recipients.map((u) => u.email || u.username).filter(Boolean);
+  const fallback = process.env.SUPER_ADMIN_NOTIFICATION_EMAIL;
+  if (fallback) emails.push(fallback);
+  const uniqueEmails = [...new Set(emails)];
+  if (!uniqueEmails.length) return;
+
+  await emailSent({
+    sendTo: uniqueEmails.join(","),
+    title: `Successful ${subscription.planName || "Watch Team"} subscription payment`,
+    message: `A subscription payment was successful for ${subscription.username || subscription.email || subscription.companyId}.`,
+    template: `<h3>Subscription Payment Successful</h3>
+      <p><strong>Company ID:</strong> ${subscription.companyId || "-"}</p>
+      <p><strong>Account:</strong> ${subscription.username || subscription.email || "-"}</p>
+      <p><strong>Plan:</strong> ${subscription.planName || "-"} (${subscription.billingCycle || "-"})</p>
+      <p><strong>Gateway:</strong> ${subscription.gateway || "-"}</p>
+      <p><strong>Amount:</strong> ${subscription.amount || 0} ${subscription.currency || "USD"}</p>
+      <p><strong>Payment reference:</strong> ${paymentReference || "-"}</p>`
+  });
+}
 
 // STRIPE WEBHOOK
 app.post("/webhooks/stripe", require("express").raw({ type: "application/json" }), async (req, res) => {
@@ -124,6 +152,26 @@ app.post("/webhooks/stripe", require("express").raw({ type: "application/json" }
       );
     }
 
+    if (event.type === "invoice.paid") {
+      const invoice = dataObject;
+      const stripeSubscriptionId = typeof invoice.subscription === "string"
+        ? invoice.subscription
+        : invoice.subscription?.id || "";
+      const subscription = await UserSubscription.findOneAndUpdate(
+        { stripeSubscriptionId },
+        {
+          $set: {
+            isActive: true,
+            subscriptionStatus: "active",
+            lastSuccessfulPaymentAt: new Date(),
+          },
+          $inc: { renewalCount: 1 },
+        },
+        { new: true }
+      );
+      await notifyPlatformAdmins(subscription, invoice.id || invoice.payment_intent || "");
+    }
+
     if (event.type === "customer.subscription.deleted") {
       const stripeSub = dataObject;
 
@@ -178,6 +226,16 @@ app.post("/webhooks/paypal", express.json(), async (req, res) => {
           },
         }
       );
+    }
+
+    if (eventType === "PAYMENT.SALE.COMPLETED") {
+      const paypalSubscriptionId = resource.billing_agreement_id || resource.supplementary_data?.related_ids?.billing_agreement_id || "";
+      const subscription = await UserSubscription.findOneAndUpdate(
+        { paypalSubscriptionId },
+        { $set: { isActive: true, subscriptionStatus: "active", lastSuccessfulPaymentAt: new Date() }, $inc: { renewalCount: 1 } },
+        { new: true }
+      );
+      await notifyPlatformAdmins(subscription, resource.id || "");
     }
 
     if (

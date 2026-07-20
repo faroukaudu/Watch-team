@@ -50,16 +50,642 @@
       100% { transform: translateX(-50%) scale(7.2); opacity: 0; }
     }
 
-    /* the default leaflet marker png */
-    .lf-pin{
+    /* Guard/police map marker: circular badge with a tapered location pointer. */
+    .guard-police-pin {
       position: absolute;
-      left: 0;
-      top: 0;
-      width: 25px;
-      height: 41px;
+      left: -5px;
+      top: -8px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ff8a00;
+      color: #fff;
+      border: 3px solid #fff;
+      box-shadow: 0 7px 16px rgba(0,0,0,.35);
       pointer-events: none;
-      user-select: none;
+      overflow: visible;
+      z-index: 2;
     }
+
+    /* White outer edge of the tapered pointer. */
+    .guard-police-pin::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -21px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 24px solid #fff;
+      z-index: -2;
+    }
+
+    /* Orange centre of the tapered pointer. */
+    .guard-police-pin::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -17px;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 20px solid #ff8a00;
+      z-index: -1;
+    }
+
+    .guard-police-pin i {
+      position: relative;
+      z-index: 3;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+.map-shell { position: relative; }
+
+    .map-legend {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 999;
+      background: rgba(8, 30, 44, 0.88);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .legend-dot.me {
+      background: #0d6efd;
+      box-shadow: 0 0 0 4px rgba(13,110,253,.22);
+    }
+
+    .legend-dot.guard {
+      background: #ff8a00;
+      box-shadow: 0 0 0 4px rgba(255,138,0,.20);
+    }
+
+    .current-user-marker {
+      position: relative;
+      width: 52px;
+      height: 62px;
+    }
+
+    .current-user-pulse {
+      position: absolute;
+      left: 16px;
+      top: 24px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(13,110,253,.28);
+      animation: userPulse 1.6s ease-out infinite;
+    }
+
+    @keyframes userPulse {
+      from { transform: scale(.8); opacity: 1; }
+      to { transform: scale(3.4); opacity: 0; }
+    }
+
+    .current-user-pin {
+      position: absolute;
+      left: 11px;
+      top: 6px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: #0d6efd;
+      border: 3px solid #fff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+    }
+
+    .current-user-pin i {
+      position: absolute;
+      inset: 5px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      transform: rotate(45deg);
+      font-size: 14px;
+    }
+
+    .marker-label {
+      position: absolute;
+      left: 50%;
+      top: -22px;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: #0d4a6b;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 5px 14px rgba(0,0,0,.25);
+    }
+
+    .guard-label {
+      position: absolute;
+      left: 50%;
+      top: -28px;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: #8f4e00;
+      color: #fff;
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,.24);
+    }
+    /* ===== COMPACT FUTURISTIC SECURITY STAT CARDS ===== */
+    .security-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .security-stat-card {
+      --stat-rgb: 38, 132, 255;
+      position: relative;
+      min-width: 0;
+      min-height: 126px;
+      margin-bottom: 0;
+      overflow: hidden;
+      isolation: isolate;
+      border: 1px solid rgba(var(--stat-rgb), .28);
+      border-radius: 13px;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(var(--stat-rgb), .14), transparent 34%),
+        linear-gradient(145deg, rgba(10, 29, 48, .97), rgba(7, 20, 35, .98));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .035),
+        0 10px 24px rgba(0, 0, 0, .16);
+      transition:
+        transform .24s ease,
+        border-color .24s ease,
+        box-shadow .24s ease;
+    }
+
+    .security-stat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(var(--stat-rgb), .10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--stat-rgb), .10) 1px, transparent 1px);
+      background-size: 18px 18px;
+      mask-image: linear-gradient(to bottom, #000, transparent 82%);
+      pointer-events: none;
+    }
+
+    .security-stat-card::after {
+      content: "";
+      position: absolute;
+      left: -35%;
+      right: -35%;
+      top: -48%;
+      height: 38%;
+      z-index: -1;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(var(--stat-rgb), .14),
+        transparent
+      );
+      transform: rotate(-8deg);
+      animation: securityScan 5.5s linear infinite;
+      pointer-events: none;
+    }
+
+    .security-stat-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(var(--stat-rgb), .54);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .05),
+        0 14px 30px rgba(0, 0, 0, .22),
+        0 0 22px rgba(var(--stat-rgb), .08);
+    }
+
+    @keyframes securityScan {
+      0%   { top: -55%; opacity: 0; }
+      12%  { opacity: .8; }
+      80%  { opacity: .35; }
+      100% { top: 125%; opacity: 0; }
+    }
+
+    .security-stat-card.stat-clients { --stat-rgb: 51, 140, 255; }
+    .security-stat-card.stat-sites { --stat-rgb: 166, 92, 255; }
+    .security-stat-card.stat-guards { --stat-rgb: 32, 219, 142; }
+    .security-stat-card.stat-office { --stat-rgb: 246, 91, 171; }
+    .security-stat-card.stat-checkins { --stat-rgb: 255, 173, 51; }
+    .security-stat-card.stat-clockins { --stat-rgb: 0, 210, 229; }
+
+    .security-stat-card .card-body {
+      position: relative;
+      z-index: 2;
+      min-height: 126px;
+      padding: 12px 12px 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .security-stat-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .security-stat-icon-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      display: grid;
+      place-items: center;
+    }
+
+    .security-stat-icon-wrap::before,
+    .security-stat-icon-wrap::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(var(--stat-rgb), .42);
+      animation: statRadarPulse 2.6s ease-out infinite;
+    }
+
+    .security-stat-icon-wrap::before {
+      inset: 4px;
+    }
+
+    .security-stat-icon-wrap::after {
+      inset: -1px;
+      animation-delay: 1.3s;
+    }
+
+    @keyframes statRadarPulse {
+      0% { transform: scale(.72); opacity: .9; }
+      100% { transform: scale(1.42); opacity: 0; }
+    }
+
+    .security-stat-icon {
+      position: relative;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(var(--stat-rgb), .40);
+      border-radius: 10px;
+      color: rgb(var(--stat-rgb));
+      background:
+        linear-gradient(145deg, rgba(var(--stat-rgb), .22), rgba(var(--stat-rgb), .06));
+      box-shadow:
+        inset 0 0 13px rgba(var(--stat-rgb), .10),
+        0 0 14px rgba(var(--stat-rgb), .07);
+      font-size: 17px;
+    }
+
+    .security-stat-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+      color: rgba(222, 235, 247, .66);
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+    }
+
+    .security-stat-live-dot {
+      position: relative;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgb(var(--stat-rgb));
+      box-shadow: 0 0 8px rgba(var(--stat-rgb), .85);
+    }
+
+    .security-stat-live-dot::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border: 1px solid rgba(var(--stat-rgb), .55);
+      border-radius: 50%;
+      animation: liveDotPulse 1.8s ease-out infinite;
+    }
+
+    @keyframes liveDotPulse {
+      from { transform: scale(.65); opacity: 1; }
+      to { transform: scale(1.8); opacity: 0; }
+    }
+
+    .security-stat-label {
+      margin: 0 0 3px;
+      max-width: 82px;
+      color: rgba(205, 220, 235, .72);
+      font-size: 9px;
+      line-height: 1.18;
+      font-weight: 600;
+      letter-spacing: .015em;
+      text-align: right;
+    }
+
+    .security-stat-value {
+      margin: 0;
+      color: #f7fbff;
+      font-size: clamp(22px, 1.8vw, 29px);
+      line-height: 1;
+      font-weight: 750;
+      letter-spacing: -.04em;
+      text-shadow: 0 0 15px rgba(var(--stat-rgb), .18);
+      text-align: right;
+    }
+
+    .security-stat-footer {
+      margin-top: auto;
+      padding-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      border-top: 1px solid rgba(var(--stat-rgb), .14);
+    }
+
+    .security-stat-caption {
+      overflow: hidden;
+      color: #eef7ff;
+      font-size: 9px;
+      font-weight: 650;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .security-stat-code {
+      color: rgba(var(--stat-rgb), .84);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    .security-stat-corner {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 30px;
+      height: 30px;
+      border-right: 2px solid rgba(var(--stat-rgb), .40);
+      border-bottom: 2px solid rgba(var(--stat-rgb), .40);
+      border-bottom-right-radius: 12px;
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    /*
+     * Keep all six cards on one horizontal line on tablets and phones.
+     * Users can swipe sideways without affecting the rest of the dashboard.
+     */
+    @media (max-width: 991.98px) {
+      .security-stat-grid {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 2px 10px;
+        scroll-snap-type: x proximity;
+        overscroll-behavior-inline: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+
+      .security-stat-grid .security-stat-card {
+        flex: 0 0 150px;
+        width: 150px;
+        scroll-snap-align: start;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .security-stat-grid .security-stat-card {
+        flex-basis: 142px;
+        width: 142px;
+      }
+
+      .security-stat-card .card-body {
+        padding: 11px 10px 9px;
+      }
+    }
+
+    /* ===== SAFE MAP STACKING FIX ===== */
+    /*
+     * Keep Leaflet inside its own stacking context. This prevents the map
+     * from covering the mobile header or menu without overriding the
+     * positioning supplied by the website theme.
+     */
+    .map-shell {
+      position: relative;
+      z-index: 0;
+      isolation: isolate;
+      overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 14px;
+    }
+
+    #liveMap,
+    .leaflet-container {
+      position: relative;
+      z-index: 0 !important;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .map-shell .leaflet-top,
+    .map-shell .leaflet-bottom {
+      z-index: 10 !important;
+    }
+
+    /*
+     * Set only z-index for theme elements. Their original fixed/sticky
+     * positioning must remain untouched.
+     */
+    .app-header,
+    .main-header {
+      z-index: 1050 !important;
+    }
+
+    .app-sidebar,
+    .main-sidebar,
+    .offcanvas {
+      z-index: 1100 !important;
+    }
+
+    .offcanvas-backdrop,
+    #responsive-overlay {
+      z-index: 1090 !important;
+    }
+
+    .modal-backdrop {
+      z-index: 1190 !important;
+    }
+
+    .modal {
+      z-index: 1200 !important;
+    }
+
+    @media (max-width: 991.98px) {
+      /*
+       * Remove any desktop sidebar spacing that remains on small screens.
+       * This fixes the blank strip beside the dashboard.
+       */
+      .main-content.app-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-inline-start: 0 !important;
+        margin-inline-end: 0 !important;
+        overflow-x: hidden;
+      }
+
+      .main-content.app-content > .container-fluid {
+        width: 100%;
+        max-width: 100%;
+        padding-inline: 10px !important;
+        margin-inline: 0 !important;
+      }
+
+      /*
+       * The theme already reserves space for its mobile header. Remove
+       * only the additional page-header margin that produced the top gap.
+       */
+      .page-header-breadcrumb {
+        margin-top: 0 !important;
+        padding-top: 6px;
+      }
+
+      #liveMap {
+        height: 320px;
+      }
+
+      .leaflet-control-layers,
+      .leaflet-control-zoom {
+        z-index: 10 !important;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .main-content.app-content > .container-fluid {
+        padding-inline: 8px !important;
+      }
+
+      .page-header-breadcrumb {
+        padding-top: 4px;
+      }
+
+      #liveMap {
+        height: 285px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .security-stat-card::after,
+      .security-stat-icon-wrap::before,
+      .security-stat-icon-wrap::after,
+      .security-stat-live-dot::after {
+        animation: none !important;
+      }
+
+      .security-stat-card {
+        transition: none;
+      }
+    }
+
+  
+    /* ===== REPORTS SEMI-DONUT ===== */
+    .reports-chart-card .card-body {
+      min-height: 198px;
+      overflow: visible;
+    }
+
+    #orders-summary {
+      width: 100%;
+      min-height: 198px;
+      margin-top: 0;
+      margin-bottom: -34px;
+      overflow: visible;
+    }
+
+    #orders-summary .apexcharts-canvas,
+    #orders-summary .apexcharts-svg {
+      overflow: visible !important;
+    }
+
+    .reports-chart-card .card-footer {
+      padding-top: 8px;
+    }
+
+    .reports-chart-card .apexcharts-canvas {
+      margin-inline: auto;
+    }
+
+    .reports-chart-card .apexcharts-pie-series path {
+      transition:
+        transform .28s ease,
+        filter .28s ease,
+        opacity .28s ease;
+      transform-origin: center;
+      cursor: pointer;
+    }
+
+    .reports-chart-card .apexcharts-pie-series path:hover {
+      filter:
+        drop-shadow(0 0 8px rgba(255,255,255,.22))
+        drop-shadow(0 0 14px rgba(13,110,253,.22));
+      opacity: 1;
+    }
+
+    @media (max-width: 575.98px) {
+      .reports-chart-card .card-body {
+        min-height: 178px;
+      }
+
+      #orders-summary {
+        min-height: 178px;
+        margin-top: 0;
+        margin-bottom: -28px;
+      }
+    }
+
   </style>
 
         <!-- Start::app-content -->
@@ -103,185 +729,196 @@
                 <!-- Start:: row-1 -->
                 <div class="row">
                     <div class="col-xxl-9">
-                        <div class="row">
+                        <%
+                            let dashboardCheckInCount = 0;
+                            let dashboardClockInCount = 0;
+
+                            if (companyInfo && Array.isArray(companyInfo.activity)) {
+                                companyInfo.activity.forEach(function(activity) {
+                                    if (activity.type === "Check In") dashboardCheckInCount++;
+                                    if (activity.type === "Clock In") dashboardClockInCount++;
+                                });
+                            }
+                        %>
+
+                        <div class="security-stat-grid">
                             <!-- Clients -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-lg bg-primary bg-opacity-25">
-                                                <span class="avatar avatar-md bg-primary svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="84" cy="108" r="52" opacity="0.2"/><path d="M10.23,200a88,88,0,0,1,147.54,0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M172,160a87.93,87.93,0,0,1,73.77,40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="84" cy="108" r="52" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M152.69,59.7A52,52,0,1,1,172,160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
-                                                </span>
+                            <div class="card custom-card security-stat-card stat-clients">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-team-line"></i>
+                                                </div>
                                             </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Clients 
-                                                </p><br>
-                                                <h4 class="mb-4 fw-semibold"><%=activeClient%></h4>
-                                            </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Live
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div  class="mb-0 fs-12 text-muted">
-                                                
-                                               
-                                            </div>
-                                            Active Clients
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-primary">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Clients</p>
+                                            <h3 class="security-stat-value"><%= activeClient %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Active Clients</span>
+                                        <span class="security-stat-code">CL-01</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
-                            <!-- Post Stiles -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-lg bg-secondary bg-opacity-25">
-                                                <span class="avatar avatar-md bg-secondary svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M40,192a16,16,0,0,0,16,16H216a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H56A16,16,0,0,1,40,64Z" opacity="0.2"/><path d="M40,64V192a16,16,0,0,0,16,16H216a8,8,0,0,0,8-8V88a8,8,0,0,0-8-8H56A16,16,0,0,1,40,64h0A16,16,0,0,1,56,48H192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="180" cy="140" r="12"/></svg>
-                                                </span>
+
+                            <!-- Post Sites -->
+                            <div class="card custom-card security-stat-card stat-sites">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-building-4-line"></i>
+                                                </div>
                                             </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Post Sites
-                                                </p><br>
-                                                <h4 class="mb-4 fw-semibold"><%= compPostSite%></h4>
-                                            </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Online
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="mb-0 fs-12 text-muted">
-                                                
-                                            </div>
-                                            Active Post Sites
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-secondary">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Post Sites</p>
+                                            <h3 class="security-stat-value"><%= compPostSite %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Active Post Sites</span>
+                                        <span class="security-stat-code">PS-02</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
+
                             <!-- Security Guards -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-rounded bg-success bg-opacity-25">
-                                                <span class="avatar avatar-md bg-success svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M88,216a24,24,0,0,0,24-24c0-10-8-16-8-16H216s8,6,8,16a24,24,0,0,1-24,24Z" opacity="0.2"/><path d="M200,176V64a24,24,0,0,0-24-24H40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="104" y1="104" x2="168" y2="104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="104" y1="136" x2="168" y2="136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M24,80s-8-6-8-16a24,24,0,0,1,48,0V192a24,24,0,0,0,48,0c0-10-8-16-8-16H216s8,6,8,16a24,24,0,0,1-24,24H88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
-                                                </span>
+                            <div class="card custom-card security-stat-card stat-guards">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-shield-user-line"></i>
+                                                </div>
                                             </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Security Guards
-                                                </p>
-                                                <h4 class="mb-4 fw-semibold"><%=guardCount%></h4>
-                                            </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Secured
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="mb-0 fs-12 text-muted">
-                                                
-                                            </div>
-                                            Active Guards
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-success">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Security Guards</p>
+                                            <h3 class="security-stat-value"><%= guardCount %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Active Guards</span>
+                                        <span class="security-stat-code">SG-03</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
-                            <!-- Back Office Team -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-lg bg-pink bg-opacity-25">
-                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
-                                                </span>
+
+                            <!-- Back Office -->
+                            <div class="card custom-card security-stat-card stat-office">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-user-settings-line"></i>
+                                                </div>
                                             </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Back Office Team
-                                                </p>
-                                                <h4 class="mb-4 fw-semibold"><%=backOUser%></h4>
-                                            </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Synced
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="mb-0 fs-12 text-muted">
-                                                
-                                            </div>
-                                            Active User
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Back Office Team</p>
+                                            <h3 class="security-stat-value"><%= backOUser %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Active Users</span>
+                                        <span class="security-stat-code">BO-04</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
-                            <!-- Check INs -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-lg bg-info bg-opacity-25">
-                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
-                                                </span>
-                                            </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Checked<br>Ins
-                                                </p>
-                                                <% var count = 0; 
-                                                
-                                                    
-                                                 companyInfo.activity.forEach(function(activs){
-                                                     if(activs.type == "Check In"){
-                                                         count ++;
-                                                     }
 
-                                                 })
-                                                %>
-                                                 
-
-                                                <h4 class="mb-4 fw-semibold"><%= count%></h4>
+                            <!-- Checked Ins -->
+                            <div class="card custom-card security-stat-card stat-checkins">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-login-circle-line"></i>
+                                                </div>
                                             </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Today
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="mb-0 fs-12 text-muted">
-                                                
-                                            </div>
-                                            Today
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Checked Ins</p>
+                                            <h3 class="security-stat-value"><%= dashboardCheckInCount %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Guard Check-ins</span>
+                                        <span class="security-stat-code">CI-05</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
-                            
-                            <!-- Clocked ins -->
-                            <div class="col-xl-2">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-start justify-content-between">
-                                            <div class="avatar avatar-lg bg-info bg-opacity-25">
-                                                <span class="avatar avatar-md bg-pink svg-white text-fixed-white">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M128,128h24a40,40,0,0,1,0,80H128Z" opacity="0.2"/><path d="M128,48H112a40,40,0,0,0,0,80h16Z" opacity="0.2"/><line x1="128" y1="24" x2="128" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="208" x2="128" y2="232" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,88a40,40,0,0,0-40-40H112a40,40,0,0,0,0,80h40a40,40,0,0,1,0,80H104a40,40,0,0,1-40-40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
-                                                </span>
-                                            </div>
-                                            <div class="text-end">
-                                                <p class="mb-2 fs-12 fw-medium text-muted">Clocked<br>Ins
-                                                </p>
-                                                <% var count = 0; 
-                                                
-                                                    
-                                                 companyInfo.activity.forEach(function(activs){
-                                                     if(activs.type == "Clock In"){
-                                                         count ++;
-                                                     }
 
-                                                 })
-                                                %>
-                                                <h4 class="mb-4 fw-semibold"><%= count%></h4>
+                            <!-- Clocked Ins -->
+                            <div class="card custom-card security-stat-card stat-clockins">
+                                <div class="card-body">
+                                    <div class="security-stat-top">
+                                        <div>
+                                            <div class="security-stat-icon-wrap">
+                                                <div class="security-stat-icon">
+                                                    <i class="ri-time-line"></i>
+                                                </div>
                                             </div>
+                                            <span class="security-stat-live">
+                                                <span class="security-stat-live-dot"></span>
+                                                Today
+                                            </span>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="mb-0 fs-12 text-muted">
-                                               
-                                            </div>
-                                            Today
-                                            <!-- <a href="javascript:void(0)"> <span class="float-end fs-12 fw-medium text-pink">View All <i class="ti ti-arrow-narrow-right"></i></span></a> -->
+
+                                        <div>
+                                            <p class="security-stat-label">Clocked Ins</p>
+                                            <h3 class="security-stat-value"><%= dashboardClockInCount %></h3>
                                         </div>
                                     </div>
+
+                                    <div class="security-stat-footer">
+                                        <span class="security-stat-caption">Staff Clock-ins</span>
+                                        <span class="security-stat-code">TI-06</span>
+                                    </div>
+                                    <span class="security-stat-corner"></span>
                                 </div>
                             </div>
                         </div>
@@ -294,8 +931,24 @@
                                <div class="card-title">Live Tracker</div>
                            </div>
                            <div class="card-body">
-                                <div id="liveMap"></div>
-                                <div class="status-badge">Status: <span id="statusText">waiting…</span></div>
+                                <div class="map-shell">
+                                    <div id="liveMap"></div>
+
+                                    <div class="map-legend">
+                                        <div class="legend-row">
+                                            <span class="legend-dot me"></span>
+                                            <span>Your current location</span>
+                                        </div>
+                                        <div class="legend-row">
+                                            <span class="legend-dot guard"></span>
+                                            <span>Checked-in guard</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="status-badge">
+                                        Status: <span id="statusText">waiting…</span>
+                                    </div>
+                                </div>
                             </div>
                        </div>
                    </div>
@@ -304,7 +957,7 @@
                </div>
                     <!-- MAP END -->
                     <!-- Latest Activity -->
-                    <div class="col-xxl-3">
+                    <div class="col-xl-8">
                         <div class="card custom-card">
                             <div class="card-header  justify-content-between">
                                 <div class="card-title">
@@ -314,7 +967,21 @@
                             </div>
                             
                             <div class="card-body">
-                                <ul class="list-unstyled crm-top-leads mb-0 list-group scrollable-list">
+                                <ul class="list-unstyled crm-top-leads mb-3 list-group scrollable-list">
+
+                                  <% if(companyInfo.activity.length == 0 ){ %>
+                                    <div
+                                          style="
+                                              height: 330px;
+                                              display: flex;
+                                              justify-content: center;
+                                              align-items: center;
+                                              text-align: center;
+                                          "
+                                      >
+                                          <p style="margin:0; font-size: 20px;">No Activity Recorded Yet!</p>
+                                      </div>
+                                  <% } %>
 
                                     <% companyInfo.activity.slice().reverse().forEach(function(activs){ %>
                                         
@@ -355,6 +1022,91 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-xl-4">
+                        <div class="card custom-card reports-chart-card">
+                            <div class="card-header">
+                                <div class="card-title mb-0 pb-0">
+                                    Reports
+                                </div>
+                            </div>
+
+                            <div class="card-body pb-0 p-0 mb-0">
+                                <div id="orders-summary"></div>
+                            </div>
+
+                            <div class="card-footer mt-0">
+                                <div class="row gy-3">
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-center gap-2 py-1">
+                                            <div class="d-flex align-items-center justify-content-between flex-fill">
+                                                <i class="ri-checkbox-blank-circle-fill align-middle me-2 d-inline-block"
+                                                   style="color:#20c997;"></i>
+                                                <span class="d-block flex-fill">Incidents</span>
+                                                <span class="d-block fw-semibold h6 mb-0">
+                                                    <span class="me-2 fs-13 d-inline-flex align-items-center"
+                                                          style="color:#20c997;">
+                                                        <%= reportStats.incident.percentage.toFixed(1) %>%
+                                                    </span>
+                                                    <%= reportStats.incident.count %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-center gap-2 py-1">
+                                            <div class="d-flex align-items-center justify-content-between flex-fill">
+                                                <i class="ri-checkbox-blank-circle-fill align-middle me-2 d-inline-block"
+                                                   style="color:#8b5e3c;"></i>
+                                                <span class="d-block flex-fill">General</span>
+                                                <span class="d-block fw-semibold h6 mb-0">
+                                                    <span class="me-2 fs-13 d-inline-flex align-items-center"
+                                                          style="color:#8b5e3c;">
+                                                        <%= reportStats.general.percentage.toFixed(1) %>%
+                                                    </span>
+                                                    <%= reportStats.general.count %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-center gap-2 py-1">
+                                            <div class="d-flex align-items-center justify-content-between flex-fill">
+                                                <i class="ri-checkbox-blank-circle-fill align-middle me-2 d-inline-block"
+                                                   style="color:#ff2d2d;"></i>
+                                                <span class="d-block flex-fill">Code Red</span>
+                                                <span class="d-block fw-semibold h6 mb-0">
+                                                    <span class="me-2 fs-13 d-inline-flex align-items-center"
+                                                          style="color:#ff2d2d;">
+                                                        <%= reportStats.codeRed.percentage.toFixed(1) %>%
+                                                    </span>
+                                                    <%= reportStats.codeRed.count %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-12">
+                                        <div class="d-flex align-items-center gap-2 py-1">
+                                            <div class="d-flex align-items-center justify-content-between flex-fill">
+                                                <i class="ri-checkbox-blank-circle-fill align-middle me-2 d-inline-block"
+                                                   style="color:#0d6efd;"></i>
+                                                <span class="d-block flex-fill">Others</span>
+                                                <span class="d-block fw-semibold h6 mb-0">
+                                                    <span class="me-2 fs-13 d-inline-flex align-items-center"
+                                                          style="color:#0d6efd;">
+                                                        <%= reportStats.others.percentage.toFixed(1) %>%
+                                                    </span>
+                                                    <%= reportStats.others.count %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                      <!-- Latest Activity end -->
                     
                   
@@ -366,144 +1118,489 @@
         </div>
         <!-- End::app-content -->
                  <script>
-    const companyId   = "<%= userInfo.assignedCompanyID %>";
-    const pageGuardId = "<%= guardId || '' %>"; // one guard id (recommended)
+    const companyId = <%- JSON.stringify(String(userInfo.assignedCompanyID || "")) %>;
+    const currentUserName = <%- JSON.stringify(userInfo.fullname || userInfo.username || "Current User") %>;
+    const rawUserType = <%- JSON.stringify(userInfo.userType || "User") %>;
 
+    function displayUserType(value) {
+      const normalized = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[_-]+/g, " ");
+
+      if (normalized === "super admin") return "Super Admin";
+      if (normalized === "platform admin") return "Platform Admin";
+      if (normalized === "client" || normalized === "clients") return "Client";
+      return value || "User";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      })[char]);
+    }
+
+    const currentUserType = displayUserType(rawUserType);
     const statusText = document.getElementById("statusText");
-    const setStatus = (t) => statusText.textContent = t;
+    const setStatus = (text) => {
+      if (statusText) statusText.textContent = text;
+    };
 
-    // URLs for Leaflet's default marker images
-    const LEAFLET_PIN_URL =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
-    const LEAFLET_PIN_URL_2X =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png";
-    const LEAFLET_SHADOW_URL =
-      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png";
-
-    // ===== map =====
-    const map = L.map("liveMap").setView([9.0765, 7.3986], 16);
+    const map = L.map("liveMap", {
+      zoomControl: true
+    }).setView([9.0765, 7.3986], 14);
 
     const satellite = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { maxZoom: 19, attribution: "Tiles © Esri" }
+      {
+        maxZoom: 19,
+        attribution: "Tiles © Esri"
+      }
     ).addTo(map);
 
     const dark = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }
+      {
+        maxZoom: 20,
+        attribution: "&copy; OpenStreetMap &copy; CARTO"
+      }
     );
 
-    L.control.layers({ "Satellite": satellite, "Dark": dark }).addTo(map);
-    setTimeout(() => map.invalidateSize(), 200);
+    L.control.layers({
+      Satellite: satellite,
+      Dark: dark
+    }).addTo(map);
 
-    // ===== marker store =====
-    const markers = new Map();
+    setTimeout(() => map.invalidateSize(), 250);
 
-    // ===== cache last location (ONLY used after guard becomes online) =====
-    function saveLastLoc(guardId, payload) {
-      try { localStorage.setItem("lastLoc:" + guardId, JSON.stringify(payload)); } catch {}
-    }
-    function loadLastLoc(guardId) {
-      try {
-        const s = localStorage.getItem("lastLoc:" + guardId);
-        return s ? JSON.parse(s) : null;
-      } catch { return null; }
-    }
+    const guardMarkers = new Map();
 
-    // ✅ Create a DivIcon that visually uses Leaflet's default pin + pulse
-    function createDefaultPinWithPulse() {
-      // Use srcset so retina devices look crisp
-      const html = `
-        <div class="lf-wrap">
-          <div class="lf-pulse"></div>
-          <img class="lf-pin"
-               src="${LEAFLET_PIN_URL}"
-               srcset="${LEAFLET_PIN_URL_2X} 2x"
-               alt="pin" />
+    let currentUserMarker = null;
+    let currentAccuracyCircle = null;
+    let currentUserWatchId = null;
+    let hasCenteredOnUser = false;
+    let lastAcceptedUserLocation = null;
+
+    const CURRENT_USER_ICON = L.divIcon({
+      className: "",
+      html: `
+        <div class="current-user-marker">
+          <span class="marker-label">${escapeHtml(currentUserType)}</span>
+          <span class="current-user-pulse"></span>
+          <span class="current-user-pin">
+            <i class="ri-user-location-fill"></i>
+          </span>
         </div>
-      `;
+      `,
+      iconSize: [52, 62],
+      iconAnchor: [26, 56],
+      popupAnchor: [0, -54]
+    });
+
+    function guardIcon(label) {
+      const safeLabel = escapeHtml(label || "Guard");
 
       return L.divIcon({
         className: "",
-        html,
+        html: `
+          <div class="lf-wrap">
+            <span class="guard-label">${safeLabel}</span>
+            <div
+              class="lf-pulse"
+              style="
+                background: rgba(255,138,0,.34);
+                box-shadow: 0 0 0 8px rgba(255,138,0,.18);
+              "
+            ></div>
+            <!-- CHANGE THE POLICE/GUARD ICON CLASS ON THE NEXT LINE. -->
+            <span class="guard-police-pin" aria-hidden="true">
+              <i class="ri-shield-user-fill"></i>
+            </span>
+          </div>
+        `,
         iconSize: [25, 41],
-        iconAnchor: [12, 41],   // tip of the pin
-        popupAnchor: [0, -36],
+        iconAnchor: [12, 41],
+        popupAnchor: [0, -36]
       });
     }
 
-    const DEFAULT_PIN_ICON = createDefaultPinWithPulse();
+    function updateDashboardStatus() {
+      const count = guardMarkers.size;
+      const guardText = `${count} checked-in guard${count === 1 ? "" : "s"}`;
 
-    // ✅ Create/update marker using our default-pin-with-pulse icon
-    function upsertMarkerFromPayload(p, { pan = false } = {}) {
-      const lat = Number(p.lat);
-      const lng = Number(p.lng);
-      if (Number.isNaN(lat) || Number.isNaN(lng)) return;
-
-      const guardId = String(p.guardId);
-      const guardName = (p.guardName && String(p.guardName).trim())
-        ? String(p.guardName).trim()
-        : guardId;
-
-      const latlng = [lat, lng];
-
-      if (!markers.has(guardId)) {
-        const marker = L.marker(latlng, { icon: DEFAULT_PIN_ICON }).addTo(map);
-        marker.bindPopup(`Guard: ${guardName}`);        // <-- popup text here
-        markers.set(guardId, marker);
+      if (currentUserMarker) {
+        setStatus(`showing your location and ${guardText}`);
       } else {
-        const m = markers.get(guardId);
-        m.setLatLng(latlng);
-        m.setPopupContent(`👮‍♂️: ${guardName}`);       // <-- popup update here
+        setStatus(`showing ${guardText}`);
       }
-
-      if (pan) map.setView(latlng, 18);
     }
 
-    setStatus("waiting for guard to check in…");
+    function updateCurrentUserLocation(position) {
+      const latitude = Number(position.coords.latitude);
+      const longitude = Number(position.coords.longitude);
+      const accuracy = Number(position.coords.accuracy || 0);
 
-    // ===== socket =====
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return;
+      }
+
+      const latlng = L.latLng(latitude, longitude);
+
+      /*
+       * Laptop location values often change slightly while stationary.
+       * Ignore movements below two metres so the pointer stays stable.
+       */
+      if (lastAcceptedUserLocation) {
+        const movedMetres = lastAcceptedUserLocation.distanceTo(latlng);
+
+        if (movedMetres < 2) {
+          if (currentAccuracyCircle) {
+            currentAccuracyCircle.setRadius(Math.max(accuracy, 8));
+          }
+          return;
+        }
+      }
+
+      lastAcceptedUserLocation = latlng;
+
+      /*
+       * Create this marker once. Later readings only move the existing
+       * marker, so it never disappears and gets recreated.
+       */
+      if (!currentUserMarker) {
+        currentUserMarker = L.marker(latlng, {
+          icon: CURRENT_USER_ICON,
+          zIndexOffset: 2000,
+          title: `${currentUserName} - ${currentUserType}`,
+          keyboard: true,
+          riseOnHover: true
+        }).addTo(map);
+
+        currentUserMarker.bindPopup(`
+          <div style="min-width:180px">
+            <strong>${escapeHtml(currentUserName)}</strong><br>
+            <span>${escapeHtml(currentUserType)}</span><br>
+            <small>Your current browser location</small>
+          </div>
+        `);
+      } else {
+        currentUserMarker.setLatLng(latlng);
+      }
+
+      if (!currentAccuracyCircle) {
+        currentAccuracyCircle = L.circle(latlng, {
+          radius: Math.max(accuracy, 8),
+          weight: 1,
+          opacity: .7,
+          fillOpacity: .08,
+          interactive: false
+        }).addTo(map);
+      } else {
+        currentAccuracyCircle.setLatLng(latlng);
+        currentAccuracyCircle.setRadius(Math.max(accuracy, 8));
+      }
+
+      /*
+       * Immediately move the dashboard map to the user's position after
+       * permission is accepted. Do this only once so later updates do not
+       * interrupt the user while viewing guards.
+       */
+      if (!hasCenteredOnUser) {
+        map.flyTo(latlng, 17, {
+          animate: true,
+          duration: 1.1
+        });
+
+        hasCenteredOnUser = true;
+      }
+
+      updateDashboardStatus();
+    }
+
+    function handleLocationError(error) {
+      const messages = {
+        1: "Location permission denied. Allow location access in your browser.",
+        2: "Your current location is unavailable.",
+        3: "Location request timed out."
+      };
+
+      const message =
+        messages[error.code] || "Could not load your current location.";
+
+      /*
+       * Keep the last known pointer visible when a temporary update fails.
+       */
+      if (currentUserMarker) {
+        setStatus(`${message} Showing your last known location.`);
+        return;
+      }
+
+      setStatus(message);
+    }
+
+    function beginContinuousLocationUpdates() {
+      if (currentUserWatchId !== null) {
+        return;
+      }
+
+      currentUserWatchId = navigator.geolocation.watchPosition(
+        updateCurrentUserLocation,
+        handleLocationError,
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 5000
+        }
+      );
+    }
+
+    function startCurrentUserTracking() {
+      if (!navigator.geolocation) {
+        setStatus("This browser does not support location services.");
+        return;
+      }
+
+      setStatus("requesting your current location...");
+
+      /*
+       * Request one fresh location first. This triggers the browser
+       * permission prompt. As soon as permission is accepted, the map
+       * loads and centers on the user's current location.
+       */
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          updateCurrentUserLocation(position);
+          beginContinuousLocationUpdates();
+        },
+        (error) => {
+          handleLocationError(error);
+
+          if (error.code !== 1) {
+            beginContinuousLocationUpdates();
+          }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function getGuardId(payload) {
+      return String(
+        payload.guardId ||
+        payload.guardID ||
+        payload.userId ||
+        payload._id ||
+        ""
+      );
+    }
+
+    function saveLastGuardLocation(guardId, payload) {
+      try {
+        localStorage.setItem(
+          `lastLoc:${guardId}`,
+          JSON.stringify(payload)
+        );
+      } catch (_) {}
+    }
+
+    function loadLastGuardLocation(guardId) {
+      try {
+        const stored = localStorage.getItem(`lastLoc:${guardId}`);
+        return stored ? JSON.parse(stored) : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function upsertGuardMarker(payload, { pan = false } = {}) {
+      const guardId = getGuardId(payload);
+      const latitude = Number(payload.lat ?? payload.latitude);
+      const longitude = Number(
+        payload.lng ?? payload.long ?? payload.longitude
+      );
+
+      if (
+        !guardId ||
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude)
+      ) {
+        return;
+      }
+
+      const guardName =
+        payload.guardName ||
+        payload.fullname ||
+        payload.name ||
+        `Guard ${guardId.slice(-4)}`;
+
+      const latlng = [latitude, longitude];
+
+      if (!guardMarkers.has(guardId)) {
+        const marker = L.marker(latlng, {
+          icon: guardIcon(guardName),
+          zIndexOffset: 1000,
+          title: guardName,
+          keyboard: true,
+          riseOnHover: true
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <strong>${escapeHtml(guardName)}</strong><br>
+          <span>Checked-in Guard</span>
+        `);
+
+        guardMarkers.set(guardId, marker);
+      } else {
+        const marker = guardMarkers.get(guardId);
+
+        marker.setLatLng(latlng);
+        marker.setIcon(guardIcon(guardName));
+        marker.setPopupContent(`
+          <strong>${escapeHtml(guardName)}</strong><br>
+          <span>Checked-in Guard</span>
+        `);
+      }
+
+      saveLastGuardLocation(guardId, payload);
+
+      if (pan && !hasCenteredOnUser) {
+        map.flyTo(latlng, 17, {
+          animate: true,
+          duration: 1.1
+        });
+      }
+
+      updateDashboardStatus();
+    }
+
+    function removeGuardMarker(guardId) {
+      const id = String(guardId || "");
+      const marker = guardMarkers.get(id);
+
+      if (marker) {
+        map.removeLayer(marker);
+        guardMarkers.delete(id);
+      }
+
+      updateDashboardStatus();
+    }
+
+    /*
+     * Restore all currently checked-in guard markers from MongoDB whenever
+     * the dashboard is opened or refreshed. Socket.IO then continues with
+     * real-time movement and checkout updates.
+     */
+    async function loadDashboardGuardLocations() {
+      try {
+        const response = await fetch("/api/tracking/current", {
+          headers: { Accept: "application/json" },
+          cache: "no-store"
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.ok) return;
+
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        const onlineGuardIds = new Set();
+
+        rows.forEach((row) => {
+          if (row.source !== "guard" || row.status !== "online") return;
+
+          const guardId = getGuardId(row);
+          const latitude = Number(row.latitude ?? row.lat);
+          const longitude = Number(row.longitude ?? row.lng ?? row.long);
+
+          if (
+            !guardId ||
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+          ) {
+            return;
+          }
+
+          onlineGuardIds.add(guardId);
+
+          upsertGuardMarker({
+            ...row,
+            guardId,
+            guardName:
+              row.userName ||
+              row.guardName ||
+              row.fullname ||
+              row.name ||
+              "Guard",
+            lat: latitude,
+            lng: longitude
+          });
+        });
+
+        for (const guardId of Array.from(guardMarkers.keys())) {
+          if (!onlineGuardIds.has(String(guardId))) {
+            removeGuardMarker(guardId);
+          }
+        }
+
+        updateDashboardStatus();
+      } catch (error) {
+        console.error("Dashboard guard location restore failed:", error);
+      }
+    }
+
     const socket = io();
 
     socket.on("connect", () => {
-      const joinPayload = { companyId };
-      if (pageGuardId) joinPayload.guardId = pageGuardId;
-      socket.emit("join", joinPayload);
-      setStatus("connected (waiting…)");
+      socket.emit("join", { companyId });
+      setStatus("connected - loading locations...");
+      loadDashboardGuardLocations();
     });
 
-    socket.on("guard:location", (p) => {
-      if (pageGuardId && String(p.guardId) !== String(pageGuardId)) return;
-
-      upsertMarkerFromPayload(p, { pan: false });
-      saveLastLoc(String(p.guardId), p);
-      setStatus("online (tracking)");
+    socket.on("guard:location", (payload) => {
+      upsertGuardMarker(payload);
     });
 
-    socket.on("guard:online", ({ guardId }) => {
-      const gid = String(guardId);
-      if (pageGuardId && gid !== String(pageGuardId)) return;
+    socket.on("guard:online", ({ guardId, guardName }) => {
+      const id = String(guardId || "");
+      const cached = id ? loadLastGuardLocation(id) : null;
 
-      const cached = loadLastLoc(gid);
       if (cached) {
-        upsertMarkerFromPayload(cached, { pan: true });
-        setStatus("online (restored last loc)");
+        upsertGuardMarker(
+          {
+            ...cached,
+            guardId: id,
+            guardName: guardName || cached.guardName
+          },
+          { pan: false }
+        );
       } else {
-        setStatus("online (waiting for GPS)");
+        setStatus(
+          `${guardName || "A guard"} checked in - waiting for GPS...`
+        );
       }
     });
 
     socket.on("guard:offline", ({ guardId }) => {
-      const gid = String(guardId);
-      if (pageGuardId && gid !== String(pageGuardId)) return;
-
-      const m = markers.get(gid);
-      if (m) {
-        map.removeLayer(m);
-        markers.delete(gid);
-      }
-      setStatus("offline (checked out)");
+      removeGuardMarker(guardId);
     });
+
+    socket.on("disconnect", () => {
+      setStatus("live connection interrupted - reconnecting...");
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (currentUserWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(currentUserWatchId);
+      }
+    });
+
+    startCurrentUserTracking();
+    loadDashboardGuardLocations();
   </script>
 
 
@@ -567,8 +1664,228 @@
     <!-- Apex Charts JS -->
     <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
 
-    <!-- Sales Dashboard --> 
-    <script src="assets/js/sales-dashboard.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const reportStats = <%- JSON.stringify(reportStats) %>;
+            const chartElement = document.querySelector("#orders-summary");
+
+            if (!chartElement || typeof ApexCharts === "undefined") {
+                return;
+            }
+
+            const reportSeries = [
+                Number(reportStats.incident?.count || 0),
+                Number(reportStats.general?.count || 0),
+                Number(reportStats.codeRed?.count || 0),
+                Number(reportStats.others?.count || 0)
+            ];
+
+            const chartOptions = {
+                series: reportSeries,
+                labels: ["Incidents", "General", "Code Red", "Others"],
+
+                chart: {
+                    type: "donut",
+                    height: 250,
+                    sparkline: {
+                        enabled: true
+                    },
+                    animations: {
+                        enabled: true,
+                        easing: "easeinout",
+                        speed: 900,
+                        animateGradually: {
+                            enabled: true,
+                            delay: 110
+                        },
+                        dynamicAnimation: {
+                            enabled: true,
+                            speed: 450
+                        }
+                    },
+                    events: {
+                        dataPointMouseEnter: function (event, chartContext, config) {
+                            const paths = chartElement.querySelectorAll(
+                                ".apexcharts-pie-series path"
+                            );
+
+                            paths.forEach((path, index) => {
+                                if (index === config.dataPointIndex) {
+                                    path.style.transform = "scale(1.055)";
+                                    path.style.filter =
+                                        "drop-shadow(0 0 10px rgba(255,255,255,.30)) " +
+                                        "drop-shadow(0 0 18px rgba(13,110,253,.28))";
+                                    path.style.opacity = "1";
+                                } else {
+                                    path.style.opacity = ".55";
+                                }
+                            });
+                        },
+
+                        dataPointMouseLeave: function () {
+                            const paths = chartElement.querySelectorAll(
+                                ".apexcharts-pie-series path"
+                            );
+
+                            paths.forEach((path) => {
+                                path.style.transform = "scale(1)";
+                                path.style.filter = "";
+                                path.style.opacity = "1";
+                            });
+                        }
+                    }
+                },
+
+                colors: [
+                    "#20c997",
+                    "#8b5e3c",
+                    "#ff2d2d",
+                    "#0d6efd"
+                ],
+
+                stroke: {
+                    width: 4,
+                    colors: ["var(--custom-white)"],
+                    lineCap: "round"
+                },
+
+                dataLabels: {
+                    enabled: false
+                },
+
+                legend: {
+                    show: false
+                },
+
+                tooltip: {
+                    enabled: true,
+                    followCursor: true,
+                    custom: function ({ series, seriesIndex, w }) {
+                        const count = Number(series[seriesIndex] || 0);
+                        const total = reportSeries.reduce(
+                            (sum, current) => sum + Number(current || 0),
+                            0
+                        );
+                        const percentage = total
+                            ? ((count / total) * 100).toFixed(1)
+                            : "0.0";
+                        const label = w.globals.labels[seriesIndex];
+
+                        return `
+                            <div style="
+                                min-width:145px;
+                                padding:10px 12px;
+                                border-radius:10px;
+                                background:rgba(7,20,35,.96);
+                                color:#fff;
+                                box-shadow:0 12px 30px rgba(0,0,0,.35);
+                                border:1px solid rgba(255,255,255,.10);
+                            ">
+                                <div style="
+                                    font-size:11px;
+                                    opacity:.72;
+                                    margin-bottom:3px;
+                                ">
+                                    ${label}
+                                </div>
+                                <div style="
+                                    font-size:22px;
+                                    line-height:1;
+                                    font-weight:750;
+                                ">
+                                    ${count.toLocaleString()}
+                                </div>
+                                <div style="
+                                    margin-top:4px;
+                                    font-size:11px;
+                                    opacity:.72;
+                                ">
+                                    ${percentage}% of all reports
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+
+                states: {
+                    normal: {
+                        filter: {
+                            type: "none"
+                        }
+                    },
+                    hover: {
+                        filter: {
+                            type: "lighten",
+                            value: 0.08
+                        }
+                    },
+                    active: {
+                        filter: {
+                            type: "darken",
+                            value: 0.08
+                        }
+                    }
+                },
+
+                plotOptions: {
+                    pie: {
+                        startAngle: -90,
+                        endAngle: 90,
+                        offsetY: 18,
+                        expandOnClick: false,
+                        customScale: 0.94,
+                        donut: {
+                            size: "66%",
+                            labels: {
+                                show: false
+                            }
+                        }
+                    }
+                },
+
+                grid: {
+                    padding: {
+                        top: 20,
+                        right: 10,
+                        bottom: -34,
+                        left: 10
+                    }
+                },
+
+                noData: {
+                    text: "No reports available"
+                },
+
+                responsive: [
+                    {
+                        breakpoint: 575,
+                        options: {
+                            chart: {
+                                height: 225
+                            },
+                            plotOptions: {
+                                pie: {
+                                    customScale: 0.9,
+                                    offsetY: 16
+                                }
+                            },
+                            grid: {
+                                padding: {
+                                    top: 18,
+                                    right: 8,
+                                    bottom: -30,
+                                    left: 8
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+
+            new ApexCharts(chartElement, chartOptions).render();
+        });
+    </script>
+
 
     <!-- Custom JS -->
     <script src="assets/js/custom.js"></script>

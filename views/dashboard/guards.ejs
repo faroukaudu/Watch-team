@@ -42,10 +42,10 @@
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <div class="d-flex gap-2">
                                 <div class="position-relative">
-                                    <a href="/new-guards" id="newGuardBtn" class="btn btn-secondary btn-wave"
+                                    <% if (userInfo.userType !== "Client") { %><a href="/new-guards" id="newGuardBtn" class="btn btn-secondary btn-wave"
                                         data-guard-limit-reached="<%= guardLimitReached ? 'true' : 'false' %>">
                                         New Guard
-                                    </a>
+                                    </a><% } %>
 
                                     <% if (userInfo.userType==="Super Admin" ) { %>
                                         <% if (maxSecurityGuards===-1) { %>

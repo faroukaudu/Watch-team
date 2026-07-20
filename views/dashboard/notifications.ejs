@@ -1,0 +1,97 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+<div class="main-content app-content">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between my-4 flex-wrap gap-2">
+      <div><h1 class="page-title fw-semibold fs-20 mb-1">Notifications</h1><p class="text-muted mb-0">Your latest Watch Team updates.</p></div>
+      <button id="markAllNotificationsRead" class="btn btn-outline-primary btn-sm">Mark all as read</button>
+    </div>
+    <div class="card custom-card">
+      <div class="card-body p-0">
+        <% if (notifications && notifications.length) { %>
+          <div class="list-group list-group-flush">
+          <% notifications.forEach(function(n) { %>
+            <a href="/notifications/<%= n._id %>/open" class="list-group-item list-group-item-action p-3 <%= n.isRead ? '' : 'bg-primary-transparent' %>">
+              <div class="d-flex gap-3 align-items-start">
+                <span class="avatar avatar-md rounded-circle <%= n.type === 'new_message' ? 'bg-info-transparent' : n.type === 'report_submitted' ? 'bg-primary-transparent' : n.type === 'subscription' ? 'bg-warning-transparent' : 'bg-success-transparent' %>">
+                  <i class="<%= n.type === 'new_message' ? 'ri-chat-3-line' : n.type === 'report_submitted' ? 'ri-file-list-3-line' : n.type === 'subscription' ? 'ri-bank-card-line' : 'ri-user-location-line' %> fs-18"></i>
+                </span>
+                <div class="flex-fill"><div class="d-flex justify-content-between gap-2"><strong><%= n.title %></strong><small class="text-muted"><%= timeAgo(n.createdAt) %></small></div><p class="mb-0 text-muted"><%= n.message %></p></div>
+                <% if (!n.isRead) { %><span class="badge bg-pink rounded-pill">New</span><% } %>
+              </div>
+            </a>
+          <% }) %>
+          </div>
+        <% } else { %><div class="text-center py-5 text-muted"><i class="ri-notification-off-line fs-36"></i><p class="mt-2 mb-0">No notifications yet.</p></div><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('markAllNotificationsRead')?.addEventListener('click', async function(){
+ await fetch('/api/notifications/mark-all-read',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); location.reload();
+});
+</script>
+<%- include("../includes/footer"); -%>
+
+<!-- Scroll To Top -->
+<div class="scrollToTop">
+    <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
+</div>
+<div id="responsive-overlay"></div>
+<!-- Scroll To Top -->
+
+<!-- Popper JS -->
+<script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Defaultmenu JS -->
+<script src="assets/js/defaultmenu.min.js"></script>
+
+<!-- Node Waves JS-->
+<script src="assets/libs/node-waves/waves.min.js"></script>
+
+<!-- Sticky JS -->
+<script src="assets/js/sticky.js"></script>
+
+<!-- Simplebar JS -->
+<script src="assets/libs/simplebar/simplebar.min.js"></script>
+<script src="assets/js/simplebar.js"></script>
+
+<!-- Auto Complete JS -->
+<script src="assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+
+<!-- Color Picker JS -->
+<script src="assets/libs/@simonwep/pickr/pickr.es5.min.js"></script>
+
+<!-- Date & Time Picker JS -->
+<script src="assets/libs/flatpickr/flatpickr.min.js"></script>
+
+
+    <!-- Apex Charts JS -->
+    <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Sales Dashboard --> 
+    <script src="assets/js/sales-dashboard.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+
+    
+<!-- Custom-Switcher JS -->
+<script src="assets/js/custom-switcher.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.google.com/maps/api/js?key=AIzaSyCW16SmpzDNLsrP-npQii6_8vBu_EJvEjA"></script>
+
+    <!-- Google Maps JS -->
+    <script src="assets/libs/gmaps/gmaps.min.js"></script>
+    <script src="assets/js/google-maps.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/custom.js"></script>
+    
+</body>
+
+</html> 

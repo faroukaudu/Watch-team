@@ -1,0 +1,412 @@
+<%- include("../includes/header", { user: userInfo }); -%>
+
+<style>
+  :root {
+    --profile-primary: #0d4a6b;
+    --profile-primary-light: #1f6f96;
+    --profile-accent: #26c6da;
+    --profile-surface: rgba(13, 74, 107, 0.10);
+  }
+
+  .profile-page {
+    padding-bottom: 2rem;
+  }
+
+  .profile-hero {
+    position: relative;
+    overflow: hidden;
+    border: 0;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #092f46 0%, var(--profile-primary) 55%, #197a92 100%);
+    box-shadow: 0 18px 45px rgba(4, 35, 52, 0.22);
+  }
+
+  .profile-hero::before,
+  .profile-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .profile-hero::before {
+    width: 260px;
+    height: 260px;
+    right: -90px;
+    top: -125px;
+  }
+
+  .profile-hero::after {
+    width: 170px;
+    height: 170px;
+    right: 130px;
+    bottom: -125px;
+  }
+
+  .profile-hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+  }
+
+  .profile-avatar {
+    width: 92px;
+    height: 92px;
+    flex: 0 0 92px;
+    display: grid;
+    place-items: center;
+    border-radius: 24px;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: rgba(255, 255, 255, 0.17);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 12px 30px rgba(0,0,0,.18);
+    backdrop-filter: blur(10px);
+  }
+
+  .profile-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .42rem .75rem;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.2);
+    font-size: .78rem;
+    font-weight: 600;
+  }
+
+  .profile-card {
+    height: 100%;
+    border: 1px solid var(--default-border);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(16, 52, 70, 0.06);
+    overflow: hidden;
+  }
+
+  .profile-card .card-header {
+    padding: 1.25rem 1.35rem;
+    border-bottom: 1px solid var(--default-border);
+    background: transparent;
+  }
+
+  .section-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--profile-primary), var(--profile-primary-light));
+    box-shadow: 0 8px 18px rgba(13, 74, 107, .22);
+  }
+
+  .profile-label {
+    margin-bottom: .5rem;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--default-text-color);
+  }
+
+  .profile-input-wrap {
+    position: relative;
+  }
+
+  .profile-input-wrap > i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  .profile-input {
+    min-height: 48px;
+    padding-left: 42px;
+    border-radius: 12px;
+    border-color: var(--default-border);
+    background-color: var(--form-control-bg);
+  }
+
+  .profile-input:focus {
+    border-color: var(--profile-primary-light);
+    box-shadow: 0 0 0 .2rem rgba(13, 74, 107, .12);
+  }
+
+  .profile-input[readonly] {
+    opacity: .78;
+    cursor: not-allowed;
+    background: var(--profile-surface);
+  }
+
+  .readonly-note {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .45rem;
+    color: var(--text-muted);
+    font-size: .72rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    border: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .password-toggle:hover {
+    color: var(--profile-primary-light);
+    background: var(--profile-surface);
+  }
+
+  .password-field {
+    padding-right: 48px;
+  }
+
+  .password-rules {
+    padding: .85rem 1rem;
+    border-radius: 12px;
+    color: var(--text-muted);
+    background: var(--profile-surface);
+    font-size: .78rem;
+    line-height: 1.55;
+  }
+
+  .btn-profile {
+    min-height: 45px;
+    border: 0;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--profile-primary), var(--profile-primary-light));
+    box-shadow: 0 8px 20px rgba(13, 74, 107, .2);
+  }
+
+  .btn-profile:hover,
+  .btn-profile:focus {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(13, 74, 107, .28);
+  }
+
+  @media (max-width: 575.98px) {
+    .profile-hero-content { padding: 1.35rem; }
+    .profile-avatar { width: 74px; height: 74px; flex-basis: 74px; border-radius: 20px; font-size: 1.55rem; }
+  }
+</style>
+
+<div class="main-content app-content">
+  <div class="container-fluid profile-page">
+    <div class="d-flex align-items-center justify-content-between my-3 page-header-breadcrumb flex-wrap gap-2">
+      <div>
+        <h1 class="page-title fw-semibold fs-18 mb-0">My Profile</h1>
+        <p class="text-muted mb-0 fs-13">Manage your personal details and account security.</p>
+      </div>
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+      </ol>
+    </div>
+
+    <div class="card profile-hero mb-4">
+      <div class="profile-hero-content">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div class="profile-avatar">
+            <%= String(userInfo.fullname || userInfo.username || 'WT').split(' ').filter(Boolean).slice(0, 2).map(word => word.charAt(0)).join('').toUpperCase() %>
+          </div>
+          <div class="text-white">
+            <h2 class="fw-bold mb-1 text-white"><%= userInfo.fullname || 'WatchTeam User' %></h2>
+            <p class="mb-3 text-white-50"><%= userInfo.email || userInfo.username %></p>
+            <span class="profile-role-badge">
+              <i class="ri-shield-user-line"></i>
+              <%= userInfo.userType || 'User' %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (toast && toast.message) { %>
+      <div class="alert alert-<%= toast.type === 'success' ? 'success' : 'danger' %> alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="<%= toast.type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line' %> fs-20 me-2"></i>
+        <div><%= toast.message %></div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
+    <div class="row g-4">
+      <div class="col-xl-6">
+        <div class="card profile-card">
+          <div class="card-header d-flex align-items-center gap-3">
+            <div class="section-icon"><i class="ri-user-settings-line fs-20"></i></div>
+            <div>
+              <h5 class="mb-1 fw-semibold">Personal Information</h5>
+              <p class="text-muted fs-12 mb-0">Your account identity and contact information.</p>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <form method="POST" action="/profile" novalidate>
+              <div class="mb-3">
+                <label class="profile-label" for="fullname">Full Name</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-user-3-line"></i>
+                  <input class="form-control profile-input" id="fullname" type="text" value="<%= userInfo.fullname || '' %>" readonly>
+                </div>
+                <div class="readonly-note"><i class="ri-lock-line"></i> Name cannot be edited from this page.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="profile-label" for="email">Email Address</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-mail-line"></i>
+                  <input class="form-control profile-input" id="email" type="email" value="<%= userInfo.email || userInfo.username || '' %>" readonly>
+                </div>
+                <div class="readonly-note"><i class="ri-lock-line"></i> Email is tied to your login account.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="profile-label" for="userType">User Type</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-shield-user-line"></i>
+                  <input class="form-control profile-input" id="userType" type="text" value="<%= userInfo.userType || '' %>" readonly>
+                </div>
+                <div class="readonly-note"><i class="ri-lock-line"></i> User type is managed by an administrator.</div>
+              </div>
+
+              <div class="mb-4">
+                <label class="profile-label" for="phone">Phone Number</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-phone-line"></i>
+                  <input class="form-control profile-input" id="phone" name="phone" type="tel" maxlength="24" autocomplete="tel" placeholder="Enter your phone number" value="<%= userInfo.phone || '' %>">
+                </div>
+              </div>
+
+              <button class="btn btn-profile w-100 fw-semibold" type="submit">
+                <i class="ri-save-3-line me-1"></i> Save Profile Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-6">
+        <div class="card profile-card">
+          <div class="card-header d-flex align-items-center gap-3">
+            <div class="section-icon"><i class="ri-lock-password-line fs-20"></i></div>
+            <div>
+              <h5 class="mb-1 fw-semibold">Change Password</h5>
+              <p class="text-muted fs-12 mb-0">Use a strong password that you do not reuse elsewhere.</p>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <form method="POST" action="/profile/change-password" id="changePasswordForm" novalidate>
+              <div class="mb-3">
+                <label class="profile-label" for="oldPassword">Current Password</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-key-2-line"></i>
+                  <input class="form-control profile-input password-field" id="oldPassword" name="oldPassword" type="password" autocomplete="current-password" required>
+                  <button class="password-toggle" type="button" data-password-toggle="oldPassword" aria-label="Show current password"><i class="ri-eye-line"></i></button>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="profile-label" for="newPassword">New Password</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-lock-line"></i>
+                  <input class="form-control profile-input password-field" id="newPassword" name="newPassword" type="password" minlength="8" autocomplete="new-password" required>
+                  <button class="password-toggle" type="button" data-password-toggle="newPassword" aria-label="Show new password"><i class="ri-eye-line"></i></button>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="profile-label" for="confirmPassword">Confirm New Password</label>
+                <div class="profile-input-wrap">
+                  <i class="ri-lock-check-line"></i>
+                  <input class="form-control profile-input password-field" id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
+                  <button class="password-toggle" type="button" data-password-toggle="confirmPassword" aria-label="Show confirmation password"><i class="ri-eye-line"></i></button>
+                </div>
+                <div id="passwordMatchMessage" class="fs-12 mt-2"></div>
+              </div>
+
+              <div class="password-rules mb-4">
+                <div class="fw-semibold text-default mb-1"><i class="ri-information-line me-1"></i>Password requirements</div>
+                At least 8 characters, including one uppercase letter, one lowercase letter, and one number.
+              </div>
+
+              <button class="btn btn-profile w-100 fw-semibold" type="submit">
+                <i class="ri-shield-keyhole-line me-1"></i> Update Password
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../includes/footer", { userInfo: userInfo }); -%>
+
+<script src="/assets/libs/@popperjs/core/umd/popper.min.js"></script>
+<script src="/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/defaultmenu.min.js"></script>
+<script src="/assets/libs/node-waves/waves.min.js"></script>
+<script src="/assets/js/sticky.js"></script>
+<script src="/assets/libs/simplebar/simplebar.min.js"></script>
+<script src="/assets/js/simplebar.js"></script>
+<script src="/assets/js/custom-switcher.min.js"></script>
+<script src="/assets/js/custom.js"></script>
+
+<script>
+  document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const input = document.getElementById(button.dataset.passwordToggle);
+      const icon = button.querySelector('i');
+      const showPassword = input.type === 'password';
+      input.type = showPassword ? 'text' : 'password';
+      icon.className = showPassword ? 'ri-eye-off-line' : 'ri-eye-line';
+    });
+  });
+
+  const newPassword = document.getElementById('newPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
+  const matchMessage = document.getElementById('passwordMatchMessage');
+  const passwordForm = document.getElementById('changePasswordForm');
+
+  function showPasswordMatch() {
+    if (!confirmPassword.value) {
+      matchMessage.textContent = '';
+      return true;
+    }
+
+    const matches = newPassword.value === confirmPassword.value;
+    matchMessage.className = matches ? 'fs-12 mt-2 text-success' : 'fs-12 mt-2 text-danger';
+    matchMessage.innerHTML = matches
+      ? '<i class="ri-checkbox-circle-line me-1"></i>Passwords match.'
+      : '<i class="ri-close-circle-line me-1"></i>Passwords do not match.';
+    return matches;
+  }
+
+  newPassword.addEventListener('input', showPasswordMatch);
+  confirmPassword.addEventListener('input', showPasswordMatch);
+  passwordForm.addEventListener('submit', function (event) {
+    if (!showPasswordMatch()) {
+      event.preventDefault();
+      confirmPassword.focus();
+    }
+  });
+</script>
+
+</body>
+</html>

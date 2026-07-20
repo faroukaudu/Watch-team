@@ -59,17 +59,37 @@
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                         <label for="input-text" class="form-label"></label>
-                                        <input type="tel" class="form-control" id="input-text" name="username" placeholder="Email Address" required>
+                                        <input type="email" class="form-control" id="client-email" name="username" placeholder="Email Address" autocomplete="email" required>
                                     </div>
                                     
                                     
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                         <label for="phone" class="form-label "></label>
-                                        <input type="text" class="form-control w-100" id="phone" name="phone" type="tel" required>
+                                        <input type="tel" class="form-control w-100" id="phone" name="phone" placeholder="Phone Number" autocomplete="tel" required>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                         <label for="input-text" class="form-label"></label>
-                                        <input type="password" class="form-control" id="input-text" name="password" placeholder="Client Address" required>
+                                        <input type="text" class="form-control" id="client-address" name="address" placeholder="Client Address" autocomplete="street-address" required>
+                                    </div>
+
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                        <label for="client-password" class="form-label">Temporary Password</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="client-password" name="password"
+                                                placeholder="Enter temporary password" minlength="8" autocomplete="new-password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggle-client-password"
+                                                aria-label="Show or hide password">
+                                                <i class="ri-eye-line"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Minimum 8 characters. This password will be emailed to the Client.</div>
+                                    </div>
+
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                                        <label for="client-confirm-password" class="form-label">Confirm Temporary Password</label>
+                                        <input type="password" class="form-control" id="client-confirm-password" name="cpassword"
+                                            placeholder="Re-enter temporary password" minlength="8" autocomplete="new-password" required>
+                                        <div id="password-match-feedback" class="form-text"></div>
                                     </div>
                                    
                                     
@@ -143,6 +163,50 @@
     </div>
 
     
+
+<script>
+    (function () {
+        const form = document.querySelector('form[action="/new-client"]');
+        const password = document.getElementById('client-password');
+        const confirmPassword = document.getElementById('client-confirm-password');
+        const feedback = document.getElementById('password-match-feedback');
+        const toggle = document.getElementById('toggle-client-password');
+
+        function updatePasswordFeedback() {
+            if (!confirmPassword.value) {
+                feedback.textContent = '';
+                confirmPassword.setCustomValidity('');
+                return;
+            }
+
+            const matches = password.value === confirmPassword.value;
+            feedback.textContent = matches ? 'Passwords match.' : 'Passwords do not match.';
+            feedback.className = matches ? 'form-text text-success' : 'form-text text-danger';
+            confirmPassword.setCustomValidity(matches ? '' : 'Passwords do not match.');
+        }
+
+        password.addEventListener('input', updatePasswordFeedback);
+        confirmPassword.addEventListener('input', updatePasswordFeedback);
+
+        toggle.addEventListener('click', function () {
+            const showPassword = password.type === 'password';
+            password.type = showPassword ? 'text' : 'password';
+            confirmPassword.type = showPassword ? 'text' : 'password';
+            toggle.innerHTML = showPassword
+                ? '<i class="ri-eye-off-line"></i>'
+                : '<i class="ri-eye-line"></i>';
+        });
+
+        form.addEventListener('submit', function (event) {
+            updatePasswordFeedback();
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                form.reportValidity();
+            }
+        });
+    })();
+</script>
 <!-- Scroll To Top -->
 <div class="scrollToTop">
     <span class="arrow lh-1"><i class="ri-rocket-line align-middle fs-18"></i></span>
