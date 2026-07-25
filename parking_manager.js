@@ -78,14 +78,49 @@ app.post('/parking-manager/:id/toggle', requireWebUser, async (req, res) => {
 
 app.post('/parking-manager/:id/delete', requireWebUser, async (req, res) => {
   try {
-    const zone = await ParkingManager.findOne({ _id: req.params.id, companyId: companyIdFor(req) });
-    if (!zone) return res.redirect('/parking-manager?error=Parking+zone+not+found');
-    if ((zone.records || []).length) { zone.isActive = false; await zone.save(); return res.redirect('/parking-manager?success=Zone+archived+to+preserve+history'); }
+    const zone = await ParkingManager.findOne({
+      _id: req.params.id,
+      companyId: companyIdFor(req),
+    });
+
+    if (!zone) {
+      return res.redirect('/parking-manager?error=Parking+zone+not+found');
+    }
+
     await zone.deleteOne();
-    res.redirect('/parking-manager?success=Parking+zone+deleted');
-  } catch (_) { res.redirect('/parking-manager?error=Unable+to+delete+parking+zone'); }
+    return res.redirect('/parking-manager?success=Parking+zone+and+all+results+deleted');
+  } catch (error) {
+    console.error('Delete parking zone error:', error);
+    return res.redirect('/parking-manager?error=Unable+to+delete+parking+zone');
+  }
 });
 
+
+app.post('/parking-manager/:zoneId/record/:recordId/delete', requireWebUser, async (req, res) => {
+  try {
+    const zone = await ParkingManager.findOne({
+      _id: req.params.zoneId,
+      companyId: companyIdFor(req),
+    });
+
+    if (!zone) {
+      return res.redirect('/parking-manager?error=Parking+zone+not+found');
+    }
+
+    const record = zone.records.id(req.params.recordId);
+    if (!record) {
+      return res.redirect('/parking-manager?error=Parking+record+not+found');
+    }
+
+    record.deleteOne();
+    await zone.save();
+
+    return res.redirect('/parking-manager?success=Parking+record+deleted');
+  } catch (error) {
+    console.error('Delete parking record error:', error);
+    return res.redirect('/parking-manager?error=Unable+to+delete+parking+record');
+  }
+});
 app.post('/parking-manager/:zoneId/record/:recordId/resolve', requireWebUser, async (req, res) => {
   try {
     const zone = await ParkingManager.findOne({ _id: req.params.zoneId, companyId: companyIdFor(req) });

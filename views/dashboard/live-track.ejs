@@ -319,7 +319,9 @@
 
             </div>
         
-      <script>
+      <%- include("../includes/location-permission-modal"); -%>
+
+<script>
 const companyId = <%- JSON.stringify(String(userInfo.assignedCompanyID || "")) %>;
 const currentUserName = <%- JSON.stringify(userInfo.fullname || userInfo.username || "Current User") %>;
 const rawUserType = <%- JSON.stringify(userInfo.userType || "User") %>;
@@ -551,11 +553,18 @@ function startCurrentUserTracking() {
    */
   navigator.geolocation.getCurrentPosition(
     (position) => {
+      if (window.WatchTeamLocationPermission) {
+        window.WatchTeamLocationPermission.granted();
+      }
       updateCurrentUserLocation(position);
       beginContinuousLocationUpdates();
     },
     (error) => {
       handleLocationError(error);
+
+      if (error.code === 1 && window.WatchTeamLocationPermission) {
+        window.WatchTeamLocationPermission.denied();
+      }
 
       /*
        * Start watching after a non-permission error so the page can recover
@@ -770,7 +779,11 @@ window.addEventListener("pagehide", () => {
   navigator.sendBeacon("/api/tracking/web-offline", new Blob([payload], { type: "application/json" }));
 });
 
-startCurrentUserTracking();
+if (window.WatchTeamLocationPermission) {
+  window.WatchTeamLocationPermission.initialise(startCurrentUserTracking);
+} else {
+  startCurrentUserTracking();
+}
 </script>
        
         <!-- End::app-content -->

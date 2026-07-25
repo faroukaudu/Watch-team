@@ -118,20 +118,49 @@ app.post("/vehicle-patrol/:id/toggle", requireWebUser, async (req, res) => {
 
 app.post("/vehicle-patrol/:id/delete", requireWebUser, async (req, res) => {
   try {
-    const patrol = await VehiclePatrol.findOne({ _id: req.params.id, companyId: companyIdFor(req) });
-    if (!patrol) return res.redirect("/vehicle-patrol?error=Patrol+not+found");
-    if ((patrol.sessions || []).length) {
-      patrol.isActive = false;
-      await patrol.save();
-      return res.redirect("/vehicle-patrol?success=Patrol+archived+to+preserve+history");
+    const patrol = await VehiclePatrol.findOne({
+      _id: req.params.id,
+      companyId: companyIdFor(req),
+    });
+
+    if (!patrol) {
+      return res.redirect("/vehicle-patrol?error=Patrol+not+found");
     }
+
     await patrol.deleteOne();
-    res.redirect("/vehicle-patrol?success=Patrol+deleted");
+    return res.redirect("/vehicle-patrol?success=Patrol+template+and+all+results+deleted");
   } catch (error) {
-    res.redirect("/vehicle-patrol?error=Unable+to+delete+patrol");
+    console.error("Delete vehicle patrol error:", error);
+    return res.redirect("/vehicle-patrol?error=Unable+to+delete+patrol");
   }
 });
 
+
+app.post("/vehicle-patrol/:patrolId/session/:sessionId/delete", requireWebUser, async (req, res) => {
+  try {
+    const patrol = await VehiclePatrol.findOne({
+      _id: req.params.patrolId,
+      companyId: companyIdFor(req),
+    });
+
+    if (!patrol) {
+      return res.redirect("/vehicle-patrol?error=Patrol+not+found");
+    }
+
+    const session = patrol.sessions.id(req.params.sessionId);
+    if (!session) {
+      return res.redirect("/vehicle-patrol?error=Patrol+result+not+found");
+    }
+
+    session.deleteOne();
+    await patrol.save();
+
+    return res.redirect("/vehicle-patrol?success=Patrol+result+deleted");
+  } catch (error) {
+    console.error("Delete patrol result error:", error);
+    return res.redirect("/vehicle-patrol?error=Unable+to+delete+patrol+result");
+  }
+});
 // MOBILE: list patrol options for a guard/post site
 app.get("/api/mobile/vehicle-patrol", async (req, res) => {
   try {

@@ -28,7 +28,12 @@
   <div class="container-fluid">
     <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
       <div><h1 class="page-title fw-medium fs-18 mb-2">Tracking History</h1><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a href="/live-tracking">GPS Tracker</a></li><li class="breadcrumb-item active">Tracking History</li></ol></div>
-      <a href="/live-tracking" class="btn btn-primary btn-sm"><i class="ri-map-pin-line me-1"></i> Live Tracking</a>
+      <div class="d-flex gap-2">
+        <button id="clearTrackingHistory" type="button" class="btn btn-danger btn-sm">
+          <i class="ri-delete-bin-line me-1"></i> Clear All History
+        </button>
+        <a href="/live-tracking" class="btn btn-primary btn-sm"><i class="ri-map-pin-line me-1"></i> Live Tracking</a>
+      </div>
     </div>
 
     <div class="history-hero mb-3">
@@ -58,7 +63,23 @@
   const formatHistoryTime=(value)=>{const d=new Date(value);return Number.isNaN(d.getTime())?"—":d.toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"});};
   function renderHistory(rows){const body=document.getElementById("historyRows");if(!rows.length){body.innerHTML='<tr><td colspan="6" class="history-empty">No records match these filters.</td></tr>';return;}body.innerHTML=rows.map(row=>{const status=row.status==="online"?"online":"offline";const source=row.source==="guard"?"Guard App":"Web Dashboard";const icon=row.source==="guard"?"ri-shield-user-line":"ri-computer-line";const location=row.locationLabel||((row.latitude!=null&&row.longitude!=null)?`${Number(row.latitude).toFixed(6)}, ${Number(row.longitude).toFixed(6)}`:"Location unavailable");return `<tr><td><div class="history-user"><span class="history-avatar"><i class="${icon}"></i></span><div><div class="history-name">${escapeHistory(row.userName||"User")}</div><div class="history-role">${escapeHistory(row.userType||"User")}</div></div></div></td><td>${source}</td><td><span class="history-event">${escapeHistory(row.eventType||"location")}</span></td><td><span class="history-status ${status}">${status}</span></td><td><div class="history-location" title="${escapeHistory(location)}">${escapeHistory(location)}</div></td><td>${formatHistoryTime(row.recordedAt)}</td></tr>`;}).join("");}
   async function loadHistory(page=1){historyPage=page;const params=new URLSearchParams({page:String(page),limit:"50"});const source=document.getElementById("historySource").value,status=document.getElementById("historyStatus").value,from=document.getElementById("historyFrom").value,to=document.getElementById("historyTo").value;if(source)params.set("source",source);if(status)params.set("status",status);if(from)params.set("from",from);if(to)params.set("to",to);const response=await fetch(`/api/tracking/history?${params}`);const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||"Unable to load history");historyPages=Math.max(data.pages||1,1);renderHistory(data.rows||[]);document.getElementById("historySummary").textContent=`Page ${data.page} of ${historyPages} • ${data.total} records`;document.getElementById("historyPrev").disabled=data.page<=1;document.getElementById("historyNext").disabled=data.page>=historyPages;}
-  document.getElementById("applyHistoryFilters").addEventListener("click",()=>loadHistory(1));document.getElementById("historyPrev").addEventListener("click",()=>loadHistory(Math.max(historyPage-1,1)));document.getElementById("historyNext").addEventListener("click",()=>loadHistory(Math.min(historyPage+1,historyPages)));loadHistory().catch(error=>{document.getElementById("historyRows").innerHTML=`<tr><td colspan="6" class="history-empty">${escapeHistory(error.message)}</td></tr>`;});
+  document.getElementById("applyHistoryFilters").addEventListener("click", () => loadHistory(1));
+  document.getElementById("historyPrev").addEventListener("click", () => loadHistory(Math.max(historyPage - 1, 1)));
+  document.getElementById("historyNext").addEventListener("click", () => loadHistory(Math.min(historyPage + 1, historyPages)));
+  document.getElementById("clearTrackingHistory").addEventListener("click", async () => {
+    if (!window.confirm("Permanently clear all tracking history for this company? This cannot be undone.")) return;
+    const response = await fetch("/api/tracking/history/clear", { method: "DELETE" });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      alert(data.message || "Unable to clear tracking history");
+      return;
+    }
+    alert(`${data.deletedCount || 0} tracking records deleted.`);
+    loadHistory(1);
+  });
+  loadHistory().catch((error) => {
+    document.getElementById("historyRows").innerHTML = `<tr><td colspan="6" class="history-empty">${escapeHistory(error.message)}</td></tr>`;
+  });
 </script>
 <%- include("../includes/footer"); -%>
 

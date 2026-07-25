@@ -443,6 +443,31 @@ app.get("/api/tracking/history", requireTrackingAuth, async (req, res) => {
   }
 });
 
+app.delete("/api/tracking/history/clear", requireTrackingAuth, async (req, res) => {
+  try {
+    const companyId = String(req.user.assignedCompanyID || req.user._id || "");
+
+    if (isClientUser(req.user)) {
+      return res.status(403).json({
+        ok: false,
+        message: "Only company administrators can clear tracking history",
+      });
+    }
+
+    const result = await TrackingLog.deleteMany({ companyId });
+    return res.json({
+      ok: true,
+      deletedCount: result.deletedCount || 0,
+    });
+  } catch (error) {
+    console.error("Clear tracking history error:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "Unable to clear tracking history",
+    });
+  }
+});
+
 app.get(
   "/live-tracking",
   requirePremiumWebFeature("GPS Tracking"),

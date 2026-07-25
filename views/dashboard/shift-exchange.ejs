@@ -157,6 +157,7 @@
                 <th>Received By</th>
                 <th>Status</th>
                 <th>Response Date</th>
+                <th class="text-end">Action</th>
               </tr>
             </thead>
 
@@ -221,11 +222,19 @@
                         <span class="text-muted">No response yet</span>
                       <% } %>
                     </td>
+
+                    <td class="text-end">
+                      <form method="POST" action="/shift-exchange/<%= item._id %>/delete" class="d-inline" onsubmit="return confirm('Delete this shift exchange request?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete exchange">
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="7" class="text-center py-5">
+                  <td colspan="8" class="text-center py-5">
                     <i class="ri-swap-line" style="font-size:48px;color:#94a3b8;"></i>
                     <h6 class="mt-2 mb-1">No Shift Exchange Found</h6>
                     <p class="text-muted mb-0">Exchange requests from guards will appear here.</p>

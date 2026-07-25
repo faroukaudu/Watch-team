@@ -101,7 +101,7 @@
             </div>
             <div class="d-flex gap-2">
               <form method="POST" action="/vehicle-patrol/<%= patrol._id %>/toggle" class="flex-grow-1"><button class="btn btn-outline-info w-100"><%= patrol.isActive ? 'Archive' : 'Restore' %></button></form>
-              <form method="POST" action="/vehicle-patrol/<%= patrol._id %>/delete" onsubmit="return confirm('Delete this patrol option? Existing session history will be preserved by archiving it.')"><button class="btn btn-outline-danger"><i class="ri-delete-bin-line"></i></button></form>
+              <form method="POST" action="/vehicle-patrol/<%= patrol._id %>/delete" onsubmit="return confirm('Permanently delete this patrol template and every mobile patrol result under it? This cannot be undone.')"><button class="btn btn-outline-danger"><i class="ri-delete-bin-line"></i></button></form>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@
                 <th>Counter</th>
                 <th>Duration</th>
                 <th>Started</th>
-                <th class="text-center pe-4">View</th>
+                <th class="text-center pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -174,6 +174,16 @@
                       data-paused="<%= session.pausedAt ? new Date(session.pausedAt).toLocaleString() : '—' %>"
                       data-notes="<%= session.notes || 'No notes entered by the guard.' %>"
                     ><i class="ri-eye-line"></i></button>
+                    <form
+                      method="POST"
+                      action="/vehicle-patrol/<%= session.patrolId %>/session/<%= session._id %>/delete"
+                      class="d-inline ms-1"
+                      onsubmit="return confirm('Permanently delete this patrol result?')"
+                    >
+                      <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete patrol result">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </form>
                   </td>
                 </tr>
               <% }) %>

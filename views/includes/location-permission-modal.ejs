@@ -1,0 +1,310 @@
+<style>
+  .wt-location-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(4, 20, 54, 0.78);
+    backdrop-filter: blur(8px);
+  }
+
+  .wt-location-overlay.is-visible { display: flex; }
+
+  .wt-location-card {
+    width: min(560px, 100%);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 28px 80px rgba(0,0,0,.35);
+    color: #0b2454;
+    text-align: center;
+  }
+
+  .wt-location-visual {
+    position: relative;
+    height: 230px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #eaf2ff 0%, #f7faff 55%, #dfeaff 100%);
+  }
+
+  .wt-location-grid {
+    position: absolute;
+    inset: -20px;
+    opacity: .45;
+    background-image:
+      linear-gradient(rgba(13,110,253,.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(13,110,253,.14) 1px, transparent 1px);
+    background-size: 38px 38px;
+    transform: rotate(-8deg) scale(1.15);
+  }
+
+  .wt-location-road {
+    position: absolute;
+    left: 4%;
+    top: 45%;
+    width: 92%;
+    height: 76px;
+    border: 4px dashed rgba(13,110,253,.34);
+    border-color: rgba(13,110,253,.34) transparent transparent transparent;
+    border-radius: 50%;
+    transform: rotate(-8deg);
+  }
+
+  .wt-location-pin {
+    position: absolute;
+    left: 12%;
+    top: 55%;
+    width: 42px;
+    height: 42px;
+    border-radius: 50% 50% 50% 0;
+    background: #0d6efd;
+    transform: rotate(-45deg);
+    box-shadow: 0 10px 25px rgba(13,110,253,.34);
+    animation: wtTravel 4.2s ease-in-out infinite;
+  }
+
+  .wt-location-pin::after {
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    left: 13px;
+    top: 13px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .wt-location-pulse {
+    position: absolute;
+    left: 78%;
+    top: 39%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(13,110,253,.22);
+    animation: wtPulse 1.6s ease-out infinite;
+  }
+
+  .wt-location-destination {
+    position: absolute;
+    left: calc(78% - 7px);
+    top: calc(39% - 7px);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #0d6efd;
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(13,110,253,.28);
+  }
+
+  .wt-location-browser-arrow {
+    position: fixed;
+    left: 18px;
+    top: 14px;
+    z-index: 20002;
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    color: #fff;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+  }
+
+  .wt-location-overlay.is-awaiting .wt-location-browser-arrow { display: flex; }
+
+  .wt-location-arrow-shape {
+    font-size: 64px;
+    line-height: .8;
+    transform: rotate(-28deg);
+    animation: wtArrowNudge .85s ease-in-out infinite alternate;
+  }
+
+  .wt-location-arrow-copy {
+    max-width: 270px;
+    margin-top: 42px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(6, 32, 78, .92);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .wt-location-content { padding: 28px 34px 32px; }
+  .wt-location-kicker { color: #0d6efd; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .wt-location-title { margin: 7px 0 10px; font-size: clamp(24px, 4vw, 32px); font-weight: 800; }
+  .wt-location-text { margin: 0 auto 22px; max-width: 450px; color: #5f7192; font-size: 15px; line-height: 1.65; }
+
+  .wt-location-button {
+    width: 100%;
+    min-height: 52px;
+    border: 0;
+    border-radius: 14px;
+    background: #0d6efd;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 10px 24px rgba(13,110,253,.30);
+  }
+
+  .wt-location-button:hover { background: #0b5ed7; transform: translateY(-1px); }
+  .wt-location-help { display: none; margin-top: 14px; color: #60708f; font-size: 13px; line-height: 1.55; }
+  .wt-location-overlay.is-denied .wt-location-help { display: block; }
+
+  @keyframes wtTravel {
+    0%, 10% { left: 12%; top: 55%; }
+    45% { left: 44%; top: 38%; }
+    80%, 100% { left: 76%; top: 34%; }
+  }
+
+  @keyframes wtPulse {
+    from { transform: scale(.6); opacity: 1; }
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  @keyframes wtArrowNudge {
+    from { transform: rotate(-28deg) translate(0, 0); }
+    to { transform: rotate(-28deg) translate(-8px, -8px); }
+  }
+
+  @media (max-width: 600px) {
+    .wt-location-overlay { padding: 14px; }
+    .wt-location-visual { height: 190px; }
+    .wt-location-content { padding: 24px 20px 26px; }
+    .wt-location-browser-arrow { left: 8px; top: 8px; }
+    .wt-location-arrow-copy { max-width: 210px; font-size: 12px; }
+  }
+</style>
+
+<div id="wtLocationOverlay" class="wt-location-overlay" role="dialog" aria-modal="true" aria-labelledby="wtLocationTitle">
+  <div class="wt-location-browser-arrow" aria-hidden="true">
+    <div class="wt-location-arrow-shape">↖</div>
+    <div class="wt-location-arrow-copy">Select <strong>Allow</strong> in Chrome’s location prompt.</div>
+  </div>
+
+  <div class="wt-location-card">
+    <div class="wt-location-visual" aria-hidden="true">
+      <div class="wt-location-grid"></div>
+      <div class="wt-location-road"></div>
+      <div class="wt-location-pin"></div>
+      <div class="wt-location-pulse"></div>
+      <div class="wt-location-destination"><i class="ri-map-pin-user-fill"></i></div>
+    </div>
+
+    <div class="wt-location-content">
+      <div class="wt-location-kicker">WatchTeam Location</div>
+      <h2 id="wtLocationTitle" class="wt-location-title">Allow location sharing</h2>
+      <p id="wtLocationText" class="wt-location-text">
+        WatchTeam uses your location for live tracking, attendance verification, and guard safety. Chrome will ask you for permission next.
+      </p>
+      <button id="wtLocationAction" type="button" class="wt-location-button">Understood</button>
+      <div id="wtLocationHelp" class="wt-location-help">
+        Click the site controls or lock icon beside the address bar, set <strong>Location</strong> to <strong>Allow</strong>, then click “Check Again.”
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const overlay = document.getElementById("wtLocationOverlay");
+  const title = document.getElementById("wtLocationTitle");
+  const text = document.getElementById("wtLocationText");
+  const action = document.getElementById("wtLocationAction");
+  let requestLocation = null;
+
+  function show(mode) {
+    overlay.classList.remove("is-awaiting", "is-denied");
+    overlay.classList.add("is-visible");
+
+    if (mode === "awaiting") {
+      overlay.classList.add("is-awaiting");
+      title.textContent = "Allow location in Chrome";
+      text.textContent = "Look at Chrome’s location prompt near the top-left of your browser and select Allow so WatchTeam can share your location.";
+      action.style.display = "none";
+      return;
+    }
+
+    if (mode === "denied") {
+      overlay.classList.add("is-denied");
+      title.textContent = "Location access is blocked";
+      text.textContent = "WatchTeam cannot access your location until permission is enabled in Chrome’s site settings.";
+      action.textContent = "Check Again";
+      action.style.display = "block";
+      return;
+    }
+
+    title.textContent = "Allow location sharing";
+    text.textContent = "WatchTeam uses your location for live tracking, attendance verification, and guard safety. Chrome will ask you for permission next.";
+    action.textContent = "Understood";
+    action.style.display = "block";
+  }
+
+  function hide() {
+    overlay.classList.remove("is-visible", "is-awaiting", "is-denied");
+  }
+
+  async function getPermissionState() {
+    if (!navigator.permissions || !navigator.permissions.query) return "prompt";
+    try {
+      const result = await navigator.permissions.query({ name: "geolocation" });
+      return result.state;
+    } catch (_) {
+      return "prompt";
+    }
+  }
+
+  async function initialise(locationRequestFunction) {
+    requestLocation = locationRequestFunction;
+
+    if (!navigator.geolocation) {
+      show("denied");
+      title.textContent = "Location is not supported";
+      text.textContent = "This browser does not support the location services required by WatchTeam.";
+      action.style.display = "none";
+      return;
+    }
+
+    const state = await getPermissionState();
+    if (state === "granted") {
+      hide();
+      requestLocation();
+    } else if (state === "denied") {
+      show("denied");
+    } else {
+      show("intro");
+    }
+  }
+
+  action.addEventListener("click", async function () {
+    const state = await getPermissionState();
+
+    if (state === "granted") {
+      hide();
+      if (requestLocation) requestLocation();
+      return;
+    }
+
+    if (state === "denied") {
+      show("denied");
+      return;
+    }
+
+    show("awaiting");
+    if (requestLocation) requestLocation();
+  });
+
+  window.WatchTeamLocationPermission = {
+    initialise,
+    granted: hide,
+    denied: function () { show("denied"); },
+    awaiting: function () { show("awaiting"); }
+  };
+})();
+</script>

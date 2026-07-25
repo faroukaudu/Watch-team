@@ -429,3 +429,25 @@ app.get("/api/mobile/dispatch", async (req, res) => {
     });
   }
 });
+
+// WEB: DELETE DISPATCH
+app.post("/dispatch/:id/delete", requirePremiumWebFeature("Dispatch"), async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const companyId = String(req.user.assignedCompanyID || "");
+    const deleted = await Dispatch.findOneAndDelete({
+      _id: req.params.id,
+      companyId,
+    });
+
+    if (!deleted) {
+      return res.redirect("/dispatch?error=Dispatch+not+found");
+    }
+
+    return res.redirect("/dispatch?success=Dispatch+deleted");
+  } catch (error) {
+    console.error("Delete dispatch error:", error);
+    return res.redirect("/dispatch?error=Unable+to+delete+dispatch");
+  }
+});

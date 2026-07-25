@@ -35,7 +35,7 @@
           <div class="d-flex justify-content-between small mb-2"><span>Occupancy</span><strong><%= occupied %> / <%= zone.capacity %></strong></div><div class="progress mb-3" style="height:8px;background:#172d40"><div class="progress-bar bg-info" style="width:<%= pct %>%"></div></div>
           <div class="row g-2 small mb-3"><div class="col-6"><div class="p-2 rounded-3" style="background:#091724"><span class="pm-muted">Max stay</span><br><strong><%= zone.maxStayMinutes %> min</strong></div></div><div class="col-6"><div class="p-2 rounded-3" style="background:#091724"><span class="pm-muted">Records</span><br><strong><%= (zone.records||[]).length %></strong></div></div></div>
           <p class="pm-muted small"><%= zone.instructions || 'No special parking instructions.' %></p>
-          <div class="d-flex gap-2"><form method="post" action="/parking-manager/<%= zone._id %>/toggle"><button class="btn btn-sm btn-outline-info rounded-pill"><%= zone.isActive?'Archive':'Restore' %></button></form><form method="post" action="/parking-manager/<%= zone._id %>/delete" onsubmit="return confirm('Delete this parking zone? Zones with history will be archived instead.')"><button class="btn btn-sm btn-outline-danger rounded-pill">Delete</button></form></div>
+          <div class="d-flex gap-2"><form method="post" action="/parking-manager/<%= zone._id %>/toggle"><button class="btn btn-sm btn-outline-info rounded-pill"><%= zone.isActive?'Archive':'Restore' %></button></form><form method="post" action="/parking-manager/<%= zone._id %>/delete" onsubmit="return confirm('Permanently delete this parking zone and every mobile parking result under it? This cannot be undone.')"><button class="btn btn-sm btn-outline-danger rounded-pill">Delete</button></form></div>
         </div></div>
       <% }) %>
     </div>
@@ -85,6 +85,16 @@
                   <% if(record.type==='Violation'&&record.status==='Open Violation'){ %>
                     <form method="post" action="/parking-manager/<%= record.zoneId %>/record/<%= record._id %>/resolve" class="m-0"><button class="btn btn-sm btn-success rounded-pill">Resolve</button></form>
                   <% } %>
+                  <form
+                    method="post"
+                    action="/parking-manager/<%= record.zoneId %>/record/<%= record._id %>/delete"
+                    class="m-0"
+                    onsubmit="return confirm('Permanently delete this parking record?')"
+                  >
+                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete parking record">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                  </form>
                 </div>
               </td>
             </tr>

@@ -1117,6 +1117,8 @@
             </div>
         </div>
         <!-- End::app-content -->
+<%- include("../includes/location-permission-modal"); -%>
+
                  <script>
     const companyId = <%- JSON.stringify(String(userInfo.assignedCompanyID || "")) %>;
     const currentUserName = <%- JSON.stringify(userInfo.fullname || userInfo.username || "Current User") %>;
@@ -1373,11 +1375,18 @@
        */
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          if (window.WatchTeamLocationPermission) {
+            window.WatchTeamLocationPermission.granted();
+          }
           updateCurrentUserLocation(position);
           beginContinuousLocationUpdates();
         },
         (error) => {
           handleLocationError(error);
+
+          if (error.code === 1 && window.WatchTeamLocationPermission) {
+            window.WatchTeamLocationPermission.denied();
+          }
 
           if (error.code !== 1) {
             beginContinuousLocationUpdates();
@@ -1599,7 +1608,11 @@
       }
     });
 
-    startCurrentUserTracking();
+    if (window.WatchTeamLocationPermission) {
+      window.WatchTeamLocationPermission.initialise(startCurrentUserTracking);
+    } else {
+      startCurrentUserTracking();
+    }
     loadDashboardGuardLocations();
   </script>
 

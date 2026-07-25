@@ -33,6 +33,7 @@ function formatDateTime(value) {
 
 function buildActivity(type, item, description) {
   return {
+    id: String(item._id || ""),
     type,
     guardName: item.guardName || item.createdByName || item.guard || "Guard",
     postSiteName: item.postSiteName || item.siteName || "N/A",
@@ -157,6 +158,42 @@ app.get("/api/dar", async (req, res) => {
       success: false,
       message: "Server error loading DAR",
     });
+  }
+});
+
+app.delete("/api/dar/:type/:id/delete", async (req, res) => {
+  try {
+    if (!req.user || !req.isAuthenticated || !req.isAuthenticated()) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+
+    const companyId = String(req.user.assignedCompanyID || "");
+    const models = {
+      Event,
+      Incident: IncidentReport,
+      Passdown,
+      WatchMode,
+      TimeClock,
+    };
+
+    const Model = models[req.params.type];
+    if (!Model) {
+      return res.status(400).json({ success: false, message: "Unsupported DAR record type" });
+    }
+
+    const deleted = await Model.findOneAndDelete({
+      _id: req.params.id,
+      companyId,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "DAR record not found" });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Delete DAR record error:", error);
+    return res.status(500).json({ success: false, message: "Unable to delete DAR record" });
   }
 });
 

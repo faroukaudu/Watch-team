@@ -184,3 +184,25 @@ app.get("/passdowns", requirePremiumWebFeature("Passdown"), async (req, res) => 
     res.status(500).send("Server error loading passdowns.");
   }
 });
+
+// WEB: DELETE PASSDOWN
+app.post("/passdowns/:id/delete", requirePremiumWebFeature("Passdown"), async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const companyId = String(req.user.assignedCompanyID || "");
+    const deleted = await Passdown.findOneAndDelete({
+      _id: req.params.id,
+      companyId,
+    });
+
+    if (!deleted) {
+      return res.redirect("/passdowns?error=Passdown+not+found");
+    }
+
+    return res.redirect("/passdowns?success=Passdown+deleted");
+  } catch (error) {
+    console.error("Delete passdown error:", error);
+    return res.redirect("/passdowns?error=Unable+to+delete+passdown");
+  }
+});

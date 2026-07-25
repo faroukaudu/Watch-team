@@ -55,11 +55,12 @@
                                     <th>Guard</th>
                                     <th>Post Site</th>
                                     <th>Details</th>
+                                    <th class="text-end">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="darTableBody">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">
+                                    <td colspan="6" class="text-center text-muted py-4">
                                         Select a date and post site to load DAR.
                                     </td>
                                 </tr>
@@ -100,7 +101,7 @@
             if (!data.success) {
                 tbody.innerHTML = `
         <tr>
-          <td colspan="5" class="text-center text-danger py-4">
+          <td colspan="6" class="text-center text-danger py-4">
             Failed to load DAR.
           </td>
         </tr>`;
@@ -145,7 +146,7 @@
             if (!data.activities.length) {
                 tbody.innerHTML = `
         <tr>
-          <td colspan="5" class="text-center text-muted py-4">
+          <td colspan="6" class="text-center text-muted py-4">
             No activity found for selected date.
           </td>
         </tr>`;
@@ -159,8 +160,29 @@
         <td>${item.guardName || "Guard"}</td>
         <td>${item.postSiteName || "N/A"}</td>
         <td style="white-space: normal;">${item.description}</td>
+        <td class="text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteDARRecord('${item.type}', '${item.id}')" title="Delete DAR source record">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </td>
       </tr>
     `).join("");
+        }
+
+        async function deleteDARRecord(type, id) {
+            if (!window.confirm("Delete this DAR source record? This removes it from its original module too.")) return;
+
+            const response = await fetch(`/api/dar/${encodeURIComponent(type)}/${encodeURIComponent(id)}/delete`, {
+                method: "DELETE"
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.message || "Unable to delete DAR record");
+                return;
+            }
+
+            await loadDAR();
         }
     </script>
 

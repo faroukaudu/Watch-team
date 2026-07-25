@@ -37,7 +37,7 @@
                                     <th>Visibility</th>
                                     <th>Status</th>
                                     <th>Date</th>
-                                    <th class="text-end">View</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
 
@@ -85,6 +85,11 @@
                                                     data-index="<%= index %>">
                                                     <i class="ri-eye-line"></i>
                                                 </button>
+                                                <form method="POST" action="/passdowns/<%= item._id %>/delete" class="d-inline ms-1" onsubmit="return confirm('Delete this passdown record?')">
+                                                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete passdown">
+                                                    <i class="ri-delete-bin-line"></i>
+                                                  </button>
+                                                </form>
                                             </td>
                                         </tr>
                                         <% }) %>

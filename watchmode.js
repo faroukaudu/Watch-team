@@ -101,3 +101,25 @@ app.get("/api/watchmode/my-videos", async (req, res) => {
     });
   }
 });
+
+// WEB: DELETE WATCHMODE VIDEO
+app.post("/watchmode/:id/delete", async (req, res) => {
+  try {
+    if (!req.user) return res.redirect("/sign-in");
+
+    const companyId = String(req.user.assignedCompanyID || "");
+    const deleted = await WatchMode.findOneAndDelete({
+      _id: req.params.id,
+      companyId,
+    });
+
+    if (!deleted) {
+      return res.redirect("/watchmode?error=WatchMode+record+not+found");
+    }
+
+    return res.redirect("/watchmode?success=WatchMode+record+deleted");
+  } catch (error) {
+    console.error("Delete WatchMode error:", error);
+    return res.redirect("/watchmode?error=Unable+to+delete+WatchMode+record");
+  }
+});

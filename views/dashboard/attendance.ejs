@@ -357,6 +357,7 @@
                 <th>Clocked-Out</th>
                 <th>Work Time</th>
                 <th>Status</th>
+                <th class="text-end">Action</th>
               </tr>
             </thead>
 
@@ -422,12 +423,20 @@
                         <span class="badge bg-warning">In Progress</span>
                       <% } %>
                     </td>
+
+                    <td class="text-end">
+                      <form method="POST" action="/attendance/<%= item._id %>/delete" class="d-inline" onsubmit="return confirm('Delete this attendance record?')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete attendance">
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </form>
+                    </td>
                   </tr>
 
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="7" class="text-center py-5">
+                  <td colspan="8" class="text-center py-5">
                     <i class="ri-time-line" style="font-size:46px;color:#94a3b8;"></i>
                     <h6 class="mt-2 mb-1">No Attendance Found</h6>
                     <p class="text-muted mb-0">No guard check-in or time clock record found for this filter.</p>

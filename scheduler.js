@@ -121,6 +121,101 @@ app.post("/create-shift-template", async (req, res) => {
     }
 });
 
+
+
+// WEB: UPDATE SHIFT TEMPLATE
+app.post("/update-shift-template/:id", async (req, res) => {
+    try {
+        if (!req.user) return res.redirect("/sign-in");
+
+        const template = await ShiftTemplate.findOne({
+            _id: req.params.id,
+            companyId: String(req.user.assignedCompanyID)
+        });
+
+        if (!template) {
+            req.session.accessNotice = "Shift template not found.";
+            return res.redirect("/shift-template");
+        }
+
+        const repeatDays = normalizeArray(req.body.repeatDays);
+        const breaks = normalizeArray(req.body.breaks);
+        const guardsInput = normalizeArray(req.body.guards);
+        const [postSiteId, postSiteName] = req.body.postSiteInfo
+            ? req.body.postSiteInfo.split("&")
+            : ["", ""];
+
+        const guards = guardsInput
+            .filter(Boolean)
+            .map((g) => {
+                const [guardId, guardName, guardEmail] = g.split("&");
+                return { guardId, guardName, guardEmail };
+            });
+
+        if (isClientUser(req.user)) {
+            const { assignedPostSiteId, allowedGuardIds } = await getClientScope(req.user);
+            if (!assignedPostSiteId || String(postSiteId) !== assignedPostSiteId) {
+                req.session.accessNotice = "You can edit shifts only for your assigned post site.";
+                return res.redirect("/shift-template");
+            }
+            const invalidGuard = guards.some((guard) => !allowedGuardIds.includes(String(guard.guardId)));
+            if (invalidGuard) {
+                req.session.accessNotice = "You can select only guards assigned to your post site.";
+                return res.redirect("/shift-template");
+            }
+        }
+
+        template.shiftTitle = req.body.shiftTitle || "";
+        template.startTime = req.body.startTime || "";
+        template.endTime = req.body.endTime || "";
+        template.repeatDays = repeatDays;
+        template.repeatFor = req.body.repeatFor || "";
+        template.postSiteId = postSiteId;
+        template.postSiteName = postSiteName;
+        template.guards = guards;
+        template.breaks = breaks;
+        template.note = req.body.note || "";
+        template.status = req.body.status === "Inactive" ? "Inactive" : "Active";
+
+        await template.save();
+        res.redirect("/shift-template");
+    } catch (err) {
+        console.log("Update shift template error:", err);
+        res.redirect("/shift-template");
+    }
+});
+
+// WEB: DELETE SHIFT TEMPLATE
+app.post("/delete-shift-template/:id", async (req, res) => {
+    try {
+        if (!req.user) return res.redirect("/sign-in");
+
+        const template = await ShiftTemplate.findOne({
+            _id: req.params.id,
+            companyId: String(req.user.assignedCompanyID)
+        });
+
+        if (!template) {
+            req.session.accessNotice = "Shift template not found.";
+            return res.redirect("/shift-template");
+        }
+
+        if (isClientUser(req.user)) {
+            const { assignedPostSiteId } = await getClientScope(req.user);
+            if (String(template.postSiteId) !== assignedPostSiteId) {
+                req.session.accessNotice = "You can delete shifts only for your assigned post site.";
+                return res.redirect("/shift-template");
+            }
+        }
+
+        await ShiftTemplate.deleteOne({ _id: template._id });
+        res.redirect("/shift-template");
+    } catch (err) {
+        console.log("Delete shift template error:", err);
+        res.redirect("/shift-template");
+    }
+});
+
 // WEB: GET GUARDS FOR POST SITE
 app.get("/api/post-site-guards/:postSiteId", async (req, res) => {
     try {
@@ -914,5 +1009,73 @@ app.post("/api/notifications/clear", async (req, res) => {
     } catch (err) {
         console.log("Clear notifications error:", err);
         res.status(500).json({ success: false });
+    }
+});
+
+
+// WEB: DELETE ATTENDANCE RECORD
+app.post("/attendance/:attendanceId/delete", async (req, res) => {
+    try {
+        if (!req.user) return res.redirect("/sign-in");
+
+        const companyId = String(req.user.assignedCompanyID || "");
+        const Company = mongoose.model("Company");
+        const result = await Company.updateOne(
+            { _id: companyId },
+            { $pull: { checkedReport: { _id: req.params.attendanceId } } }
+        );
+
+        if (!result.modifiedCount) {
+            return res.redirect("/attendance?error=Attendance+record+not+found");
+        }
+
+        return res.redirect("/attendance?success=Attendance+record+deleted");
+    } catch (err) {
+        console.log("Delete attendance error:", err);
+        return res.redirect("/attendance?error=Unable+to+delete+attendance+record");
+    }
+});
+
+// WEB: DELETE SHIFT EXCHANGE
+app.post("/shift-exchange/:id/delete", async (req, res) => {
+    try {
+        if (!req.user) return res.redirect("/sign-in");
+
+        const companyId = String(req.user.assignedCompanyID || "");
+        const deleted = await ShiftExchange.findOneAndDelete({
+            _id: req.params.id,
+            companyId
+        });
+
+        if (!deleted) {
+            return res.redirect("/shift-exchange?error=Exchange+request+not+found");
+        }
+
+        return res.redirect("/shift-exchange?success=Exchange+request+deleted");
+    } catch (err) {
+        console.log("Delete shift exchange error:", err);
+        return res.redirect("/shift-exchange?error=Unable+to+delete+exchange+request");
+    }
+});
+
+// WEB: DELETE TIME OFF REQUEST
+app.post("/time-off/:id/delete", async (req, res) => {
+    try {
+        if (!req.user) return res.redirect("/sign-in");
+
+        const companyId = String(req.user.assignedCompanyID || "");
+        const deleted = await TimeOffRequest.findOneAndDelete({
+            _id: req.params.id,
+            companyId
+        });
+
+        if (!deleted) {
+            return res.redirect("/time-off?error=Time+off+request+not+found");
+        }
+
+        return res.redirect("/time-off?success=Time+off+request+deleted");
+    } catch (err) {
+        console.log("Delete time off error:", err);
+        return res.redirect("/time-off?error=Unable+to+delete+time+off+request");
     }
 });

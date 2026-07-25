@@ -128,6 +128,7 @@
                     </td>
 
                     <td class="text-end">
+                      <div class="d-inline-flex align-items-center gap-2">
                       <% if (item.status === "Pending") { %>
                         <div class="dropdown">
                           <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
@@ -159,6 +160,12 @@
                       <% } else { %>
                         <span class="text-muted">Reviewed</span>
                       <% } %>
+                        <form method="POST" action="/time-off/<%= item._id %>/delete" class="d-inline" onsubmit="return confirm('Delete this time off request?')">
+                          <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete request">
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 <% }) %>
