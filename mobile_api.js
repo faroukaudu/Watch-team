@@ -413,6 +413,7 @@ app.post("/new-guard-postSite", (req,res)=>{
 
 // DELETE GUARD
 app.post("/delete-guard", (req,res)=>{
+  console.log("this is the guard", req.body.guard_id);
   User.findByIdAndDelete(req.body.guard_id).then((d)=>{
 res.redirect("/guards");
   }).catch((err)=>{

@@ -175,10 +175,11 @@
                                                                                 aria-expanded="false">
                                                                                 <i class="fe fe-more-vertical"></i>
                                                                             </a>
-                                                                            <form action="/guard-details" method="post"
-                                                                                id="guardinfo <%=guard.id%>">
+                                                                           
 
                                                                                 <ul class="dropdown-menu" role="menu">
+                                                                                     <form action="/guard-details" method="post"
+                                                                                        id="guardinfo <%=guard.id%>">
                                                                                     <input type="hidden" name="guard_id"
                                                                                         value="<%= guard.id%>">
                                                                                     <li class=""><a
@@ -187,17 +188,38 @@
                                                                                             onclick="document.getElementById('guardinfo <%=guard.id%>').submit(); return false;"><i
                                                                                                 class="ti ti-eye"></i>
                                                                                             &nbsp; Guard Info</a></li>
-                                                                                    <li class=""><a
-                                                                                            class="dropdown-item"
-                                                                                            href="javascript:void(0);"><i
-                                                                                                class="ti ti-archive"></i>
-                                                                                            &nbsp; &nbsp;Assign
-                                                                                            PostSite</a>
-                                                                                        <!-- <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Assign PostSite</a> -->
-                                                                                    </li>
+                                                                                            </form>
+
+                                                                                            <form action="/delete-guard" method="post" id="deletingguard <%=guard.id%>">
+                                                                                                <input type="hidden" name="guard_id"  value="<%=guard.id%>">
+                                                                                            
+
+                                                                                                <li class=""><a
+                                                                                                    class="dropdown-item"
+                                                                                                    href="#"
+                                                                                                    onclick="document.getElementById('deletingguard <%=guard.id%>').submit(); return false;"><i
+                                                                                                        class="ti ti-archive"></i>
+                                                                                                    &nbsp; Delete Guard</a></li>
+                                                                                                            <!-- <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Assign PostSite</a> -->
+                                                                                                        </li>
+                                                                                            </form>
+
+                                                                                            <form action="/block-guard" method="post" id="blockguard <%=guard.id%>">
+                                                                                                <input type="hidden" name="guard_id"  value="<%=guard.id%>">
+                                                                                            
+
+                                                                                                <li class=""><a
+                                                                                                    class="dropdown-item"
+                                                                                                    href="#"
+                                                                                                    onclick="document.getElementById('blockguard <%=guard.id%>').submit(); return false;"><i
+                                                                                                        class="ti ti-share-3"></i>
+                                                                                                    &nbsp; <%= guard.status ? 'Block Guard': 'Unblock Guard'%></a></li>
+                                                                                                            <!-- <li class=""><a class="dropdown-item" href="javascript:void(0);"><i class="ti ti-archive"></i> &nbsp; &nbsp;Assign PostSite</a> -->
+                                                                                                        </li>
+                                                                                            </form>
 
                                                                                 </ul>
-                                                                            </form>
+                                                                            
                                                                         </div>
                                                                     </td>
 

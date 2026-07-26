@@ -140,14 +140,14 @@
                                             <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" id="floatingInput" name="fname"
-                                                        placeholder="John"> 
+                                                        placeholder="John" required> 
                                                     <label for="floatingInput">First Name</label>
                                                 </div>
                                             </div>
                                             <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" id="floatingInput" name="lname"
-                                                        placeholder="nunu">
+                                                        placeholder="nunu" required>
                                                     <label for="floatingInput">Last Name</label>
                                                 </div>
                                             </div>
@@ -193,14 +193,14 @@
                                              <div id="emailCol" class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control emailClass" id="floatingInput" name="email"
-                                                        placeholder="gg@gmail.com">
+                                                        placeholder="gg@gmail.com" required>
                                                     <label for="floatingInput">Email</label>
                                                 </div>
                                             </div>
                                             <!-- Email End -->
                                             <div  class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                                                 <div class="form-floating">
-                                                    <select id="clientSelect-2" class="form-select clientSelect"
+                                                    <select id="clientSelect-2" class="form-select clientSelect" required
                                                         name="clientId">
                                                         <option value="">-- Select Client --</option>
                                                         <% myClients.forEach(c=> { %>
@@ -217,7 +217,7 @@
                                             <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                                                 <div class="form-floating">
                                                     <select id="siteSelect-2" class="form-select siteSelect"
-                                                        name="siteId" disabled>
+                                                        name="siteId" disabled required>
                                                         <option value="">-- Select a client first --</option>
                                                     </select>
                                                     <label for="siteSelect-2">Assign Post</label>
@@ -303,13 +303,13 @@
                                     <form action="/add-guard" method="post" class="row gy-4 assign-form">
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                             <div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="floatingInput" name="fname">
+                                                <input type="text" class="form-control" id="floatingInput" name="fname" required>
                                                 <label for="floatingInput">First Name</label>
                                             </div>
                                         </div>
                                         <div class="col-xl- col-lg-6 col-md-6 col-sm-12">
                                             <div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="floatingInput" name="lname">
+                                                <input type="text" class="form-control" id="floatingInput" name="lname" required>
                                                 <label for="floatingInput">Last Name</label>
                                             </div>
                                         </div>
@@ -319,7 +319,7 @@
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                             <div class="form-floating mb-3">
                                                 <input type="email" class="form-control" id="floatingInput"
-                                                    name="username">
+                                                    name="username" required>
                                                 <label for="floatingInput">Email</label>
                                             </div>
                                         </div>
@@ -327,20 +327,20 @@
                                             <div style="height: 75%; margin-top: -26px;">
                                                 <label for="phone" class="form-label ">Mobile Number</label>
                                                 <input type="text" class="form-control phone-input w-100" id="phone2"
-                                                    type="tel" name="phone">
+                                                    type="tel" name="phone" required>
                                             </div>
                                         </div>
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                             <div class="form-floating mb-3">
                                                 <input type="password" id="inputPassword5" class="form-control"
-                                                    aria-describedby="passwordHelpBlock" name="password">
+                                                    aria-describedby="passwordHelpBlock" name="password" required>
                                                 <label for="floatingInput">Password</label>
                                             </div>
                                         </div>
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                             <div class="form-floating mb-3">
                                                 <input type="password" id="inputPassword5" class="form-control"
-                                                    aria-describedby="passwordHelpBlock" name="cpassword">
+                                                    aria-describedby="passwordHelpBlock" name="cpassword" required>
                                                 <label for="floatingInput">Re-type Password</label>
                                             </div>
                                         </div>
@@ -353,7 +353,7 @@
                                             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                                 <div class="form-floating">
                                                     <select id="clientSelect-1" class="form-select clientSelect"
-                                                        name="clientId">
+                                                        name="clientId" required>
                                                         <option value="">-- Select Client --</option>
                                                         <% myClients.forEach(c=> { %>
                                                             <option value="<%= c._id%>">
@@ -370,7 +370,7 @@
                                             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                                                 <div class="form-floating">
                                                     <select id="siteSelect-1" class="form-select siteSelect"
-                                                        name="siteId" disabled>
+                                                        name="siteId" disabled required>
                                                         <option value="">-- Select a client first --</option>
                                                     </select>
                                                     <label for="siteSelect-1">Assign Post</label>
