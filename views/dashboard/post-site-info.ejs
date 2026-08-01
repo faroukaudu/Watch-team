@@ -1199,6 +1199,17 @@
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control"></textarea>
           </div>
+          <div class="mb-3">
+            <label class="form-label">Duration</label>
+            <select name="duration" class="form-select" required>
+              <option value="1_week">1 Week</option>
+              <option value="1_month">1 Month</option>
+              <option value="3_months">3 Months</option>
+              <option value="6_months">6 Months</option>
+              <option value="1_year">1 Year</option>
+            </select>
+            <small class="text-muted">The tour will be available once every day for the selected duration.</small>
+          </div>
 
           <div class="mb-3">
             <label class="form-label">Checkpoints</label>
@@ -1246,6 +1257,17 @@
           <div class="mb-3">
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Duration</label>
+            <select name="duration" class="form-select" required>
+              <option value="1_week">1 Week</option>
+              <option value="1_month">1 Month</option>
+              <option value="3_months">3 Months</option>
+              <option value="6_months">6 Months</option>
+              <option value="1_year">1 Year</option>
+            </select>
+            <small class="text-muted">The tour will be available once every day for the selected duration.</small>
           </div>
 
           <div class="mb-3">
@@ -1417,9 +1439,152 @@
       document.getElementById("editTourForm").action = `/site-tours/${tour._id}/update`;
       document.getElementById("editTourName").value = tour.tourName || "";
       document.getElementById("editTourDescription").value = tour.description || "";
+      document.getElementById("editTourDuration").value = tour.durationKey || "1_year";
       document.getElementById("editTourCheckpoints").value = (tour.checkpoints || []).map(p => p.name || "").join("\n");
       new bootstrap.Modal(document.getElementById("editTourModal")).show();
     }
+
+    function openNewCheckpointSetup(tour, checkpointIds) {
+      if (!tour || !Array.isArray(checkpointIds) || checkpointIds.length === 0) {
+        return;
+      }
+
+      const idSet = new Set(checkpointIds.map(function (id) {
+        return String(id);
+      }));
+
+      const newCheckpoints = (tour.checkpoints || []).filter(function (checkpoint) {
+        return idSet.has(String(checkpoint._id));
+      });
+
+      if (newCheckpoints.length === 0) {
+        return;
+      }
+
+      document.getElementById("tourQrModalTitle").innerText =
+        (tour.tourName || "Site Tour") + " - Set Up New Checkpoints";
+
+      const wrapper = document.getElementById("tourQrWrapper");
+      wrapper.innerHTML = "";
+
+      newCheckpoints.forEach(function (point, index) {
+        const nfcValue = point.nfcTagValue || "";
+        const isNfcCheckpoint = nfcValue !== "";
+        const col = document.createElement("div");
+        col.className = "col-md-4 col-sm-6";
+
+        if (isNfcCheckpoint) {
+          const escapedNfcValue = String(nfcValue).replace(/'/g, "\\'");
+          col.innerHTML =
+            '<div class="border rounded p-3 text-center h-100">' +
+            '<div class="fw-semibold mb-2">' + (index + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+            '<i class="ri-nfc-line text-success" style="font-size:70px;"></i>' +
+            '<div class="small text-muted mb-2" style="word-break:break-all;">' + safeText(nfcValue, "") + '</div>' +
+            '<span id="nfc-status-' + point._id + '" class="badge mb-2 ' + (point.nfcWritten ? 'bg-success' : 'bg-secondary') + '">' +
+            (point.nfcWritten ? 'Written' : 'Pending') + '</span><br>' +
+            '<button type="button" class="btn btn-sm btn-success" onclick="writeNfcTag(\'' + tour._id + '\', \'' + point._id + '\', \'' + escapedNfcValue + '\')">' +
+            '<i class="ri-nfc-line me-1"></i> Write New Tag</button>' +
+            '</div>';
+        } else {
+          const qrValue = encodeURIComponent(point.qrCodeValue || "");
+          col.innerHTML =
+            '<div class="border rounded p-3 text-center h-100">' +
+            '<div class="fw-semibold mb-2">' + (index + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+            '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + qrValue + '" class="img-fluid mb-2" style="max-width:160px;" alt="QR Code">' +
+            '<div class="small text-muted" style="word-break:break-all;">' + safeText(point.qrCodeValue, "") + '</div>' +
+            '</div>';
+        }
+
+        wrapper.appendChild(col);
+      });
+
+      bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("viewTourQrModal")
+      ).show();
+    }
+
+    async function submitTourEdit(event) {
+      event.preventDefault();
+
+      const form = event.currentTarget;
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalText = submitButton ? submitButton.innerHTML : "";
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="ri-loader-4-line me-1"></i> Saving...';
+      }
+
+      try {
+        const formData = new FormData(form);
+        const requestBody = new URLSearchParams();
+
+        formData.forEach(function (value, key) {
+          requestBody.append(key, value);
+        });
+
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          body: requestBody.toString(),
+        });
+
+        const responseText = await response.text();
+        let data;
+
+        try {
+          data = responseText ? JSON.parse(responseText) : {};
+        } catch (_) {
+          throw new Error(
+            responseText || "The server returned an invalid response."
+          );
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to update site tour.");
+        }
+
+        bootstrap.Modal.getOrCreateInstance(
+          document.getElementById("editTourModal")
+        ).hide();
+
+        await loadSiteTours();
+
+        if (Array.isArray(data.newlyAddedCheckpointIds) &&
+            data.newlyAddedCheckpointIds.length > 0) {
+          openNewCheckpointSetup(data.tour, data.newlyAddedCheckpointIds);
+        } else {
+          Swal.fire({
+            icon: "success",
+            title: "Site Tour Updated",
+            text: data.message || "The site tour was updated successfully.",
+            timer: 1800,
+            showConfirmButton: false,
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          text: error.message || "Unable to update site tour.",
+        });
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalText;
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const editTourForm = document.getElementById("editTourForm");
+      if (editTourForm) {
+        editTourForm.addEventListener("submit", submitTourEdit);
+      }
+    });
 
     async function deleteTour(index) {
       const tour = window.loadedSiteTours[index];
@@ -1446,15 +1611,31 @@
 
       checkpoints.forEach(function (point, idx) {
         const qrValue = encodeURIComponent(point.qrCodeValue || "");
+        const nfcValue = point.nfcTagValue || "";
+        const isNfcCheckpoint = nfcValue !== "";
         const col = document.createElement("div");
         col.className = "col-md-3 col-sm-6";
 
-        col.innerHTML =
-          '<div class="border rounded p-3 text-center h-100">' +
-          '<div class="fw-semibold mb-2">' + (idx + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
-          '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + qrValue + '" class="img-fluid mb-2" style="max-width:160px;" alt="QR Code">' +
-          '<div class="small text-muted" style="word-break:break-all;">' + safeText(point.qrCodeValue, "") + '</div>' +
-          '</div>';
+        if (isNfcCheckpoint) {
+          const escapedNfcValue = String(nfcValue).replace(/'/g, "\\'");
+          col.innerHTML =
+            '<div class="border rounded p-3 text-center h-100">' +
+            '<div class="fw-semibold mb-2">' + (idx + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+            '<i class="ri-nfc-line text-success" style="font-size:70px;"></i>' +
+            '<div class="small text-muted mb-2" style="word-break:break-all;">' + safeText(nfcValue, "") + '</div>' +
+            '<span id="nfc-status-' + point._id + '" class="badge mb-2 ' + (point.nfcWritten ? 'bg-success' : 'bg-secondary') + '">' +
+            (point.nfcWritten ? 'Written' : 'Pending') + '</span><br>' +
+            '<button type="button" class="btn btn-sm btn-success" onclick="writeNfcTag(\'' + tour._id + '\', \'' + point._id + '\', \'' + escapedNfcValue + '\')">' +
+            '<i class="ri-nfc-line me-1"></i> Write Tag</button>' +
+            '</div>';
+        } else {
+          col.innerHTML =
+            '<div class="border rounded p-3 text-center h-100">' +
+            '<div class="fw-semibold mb-2">' + (idx + 1) + '. ' + safeText(point.name, "Checkpoint") + '</div>' +
+            '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + qrValue + '" class="img-fluid mb-2" style="max-width:160px;" alt="QR Code">' +
+            '<div class="small text-muted" style="word-break:break-all;">' + safeText(point.qrCodeValue, "") + '</div>' +
+            '</div>';
+        }
 
         wrapper.appendChild(col);
       });
@@ -1466,58 +1647,98 @@
       const tour = window.loadedSiteTours[index];
       if (!tour) return;
 
-      document.getElementById("tourProgressModalTitle").innerText = (tour.tourName || "Site Tour") + " - Progress";
+      document.getElementById("tourProgressModalTitle").innerText =
+        (tour.tourName || "Site Tour") + " - Activity by Date";
 
       const wrapper = document.getElementById("tourProgressWrapper");
-      const progress = tour.progress || [];
-      const checkpoints = tour.checkpoints || [];
+      const progress = [...(tour.progress || [])].sort(function (a, b) {
+        return new Date(b.startedAt || 0) - new Date(a.startedAt || 0);
+      });
 
       if (progress.length === 0) {
-        wrapper.innerHTML = '<div class="text-center py-5 text-muted"><i class="ri-map-pin-time-line" style="font-size:45px;"></i><h6 class="mt-2">No Scan Activity Yet</h6><p class="mb-0">No guard has started this tour.</p></div>';
+        wrapper.innerHTML =
+          '<div class="text-center py-5 text-muted">' +
+          '<i class="ri-map-pin-time-line" style="font-size:45px;"></i>' +
+          '<h6 class="mt-2">No Scan Activity Yet</h6>' +
+          '<p class="mb-0">No guard has started this tour.</p>' +
+          '</div>';
         new bootstrap.Modal(document.getElementById("viewTourProgressModal")).show();
         return;
       }
 
-      let html = "";
+      let html = '<div class="accordion" id="tourProgressAccordion">';
 
-      progress.forEach(function (p) {
-        const scanned = p.scannedCheckpoints || [];
-        const percent = checkpoints.length > 0 ? Math.round((scanned.length / checkpoints.length) * 100) : 0;
+      progress.forEach(function (item, itemIndex) {
+        const scanned = item.scannedCheckpoints || [];
+        const snapshot = item.checkpointSnapshot && item.checkpointSnapshot.length
+          ? item.checkpointSnapshot
+          : (tour.checkpoints || []).map(function (checkpoint) {
+              return {
+                checkpointId: checkpoint._id,
+                checkpointName: checkpoint.name,
+                order: checkpoint.order
+              };
+            });
+        const percent = snapshot.length > 0
+          ? Math.min(100, Math.round((scanned.length / snapshot.length) * 100))
+          : 0;
+        const dateValue = item.dateKey || (item.startedAt
+          ? new Date(item.startedAt).toISOString().slice(0, 10)
+          : "Unknown Date");
+        const headingId = "tourProgressHeading" + itemIndex;
+        const collapseId = "tourProgressCollapse" + itemIndex;
+        const statusClass = item.status === "Completed" ? "bg-success" : "bg-warning";
 
         html +=
-          '<div class="border rounded p-3 mb-3">' +
-          '<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">' +
-          '<div>' +
-          '<h6 class="fw-bold mb-1">' + safeText(p.guardName, "Guard") + '</h6>' +
-          '<small class="text-muted">Started: ' + (p.startedAt ? new Date(p.startedAt).toLocaleString() : "N/A") +
-          (p.completedAt ? ' | Completed: ' + new Date(p.completedAt).toLocaleString() : '') + '</small>' +
+          '<div class="accordion-item">' +
+          '<h2 class="accordion-header" id="' + headingId + '">' +
+          '<button class="accordion-button ' + (itemIndex === 0 ? '' : 'collapsed') + '" type="button" ' +
+          'data-bs-toggle="collapse" data-bs-target="#' + collapseId + '" ' +
+          'aria-expanded="' + (itemIndex === 0 ? 'true' : 'false') + '" aria-controls="' + collapseId + '">' +
+          '<div class="d-flex justify-content-between align-items-center w-100 me-3 flex-wrap gap-2">' +
+          '<span><strong>' + safeText(dateValue, "Date") + '</strong> - ' + safeText(item.guardName, "Guard") + '</span>' +
+          '<span class="badge ' + statusClass + '">' + safeText(item.status, "In Progress") + '</span>' +
           '</div>' +
-          '<span class="badge ' + (p.status === "Completed" ? "bg-success" : "bg-warning") + '">' + safeText(p.status, "In Progress") + '</span>' +
+          '</button>' +
+          '</h2>' +
+          '<div id="' + collapseId + '" class="accordion-collapse collapse ' + (itemIndex === 0 ? 'show' : '') + '" ' +
+          'aria-labelledby="' + headingId + '" data-bs-parent="#tourProgressAccordion">' +
+          '<div class="accordion-body">' +
+          '<div class="row g-2 mb-3">' +
+          '<div class="col-md-4"><small class="text-muted d-block">Guard</small><strong>' + safeText(item.guardName, "Guard") + '</strong></div>' +
+          '<div class="col-md-4"><small class="text-muted d-block">Started</small><strong>' + (item.startedAt ? new Date(item.startedAt).toLocaleString() : "N/A") + '</strong></div>' +
+          '<div class="col-md-4"><small class="text-muted d-block">Completed</small><strong>' + (item.completedAt ? new Date(item.completedAt).toLocaleString() : "Not completed") + '</strong></div>' +
           '</div>' +
-          '<div class="mt-3">' +
-          '<div class="d-flex justify-content-between"><small>' + scanned.length + '/' + checkpoints.length + ' checkpoints</small><small>' + percent + '%</small></div>' +
-          '<div class="progress progress-xs mt-1"><div class="progress-bar bg-success" style="width:' + percent + '%"></div></div>' +
-          '</div>' +
-          '<div class="table-responsive mt-3">' +
+          '<div class="d-flex justify-content-between"><small>' + scanned.length + '/' + snapshot.length + ' checkpoints</small><small>' + percent + '%</small></div>' +
+          '<div class="progress progress-xs mt-1 mb-3"><div class="progress-bar bg-success" style="width:' + percent + '%"></div></div>' +
+          '<div class="table-responsive">' +
           '<table class="table table-sm table-bordered mb-0">' +
           '<thead><tr><th>Checkpoint</th><th>Status</th><th>Scanned At</th></tr></thead><tbody>';
 
-        checkpoints.forEach(function (cp) {
-          const scannedItem = scanned.find(function (s) {
-            return String(s.checkpointId) === String(cp._id);
+        snapshot.forEach(function (checkpoint) {
+          const checkpointId = checkpoint.checkpointId || checkpoint._id;
+          const checkpointName = checkpoint.checkpointName || checkpoint.name || "Checkpoint";
+          const scannedItem = scanned.find(function (scan) {
+            return String(scan.checkpointId) === String(checkpointId);
           });
 
           html +=
             '<tr>' +
-            '<td>' + safeText(cp.name, "Checkpoint") + '</td>' +
-            '<td>' + (scannedItem ? '<span class="badge bg-success">Scanned</span>' : '<span class="badge bg-secondary">Pending</span>') + '</td>' +
-            '<td>' + (scannedItem && scannedItem.scannedAt ? new Date(scannedItem.scannedAt).toLocaleString() : "N/A") + '</td>' +
+            '<td>' + safeText(checkpointName, "Checkpoint") + '</td>' +
+            '<td>' + (scannedItem
+              ? '<span class="badge bg-success">Scanned</span>'
+              : '<span class="badge bg-secondary">Pending</span>') + '</td>' +
+            '<td>' + (scannedItem && scannedItem.scannedAt
+              ? new Date(scannedItem.scannedAt).toLocaleString()
+              : "N/A") + '</td>' +
             '</tr>';
         });
 
-        html += '</tbody></table></div></div>';
+        html +=
+          '</tbody></table></div></div></div></div>';
       });
 
+      html += '</div>';
       wrapper.innerHTML = html;
       new bootstrap.Modal(document.getElementById("viewTourProgressModal")).show();
     }
@@ -2290,13 +2511,39 @@ const scheduleRecipients =
   <div class="modal fade" id="editTourModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <form method="POST" class="modal-content" id="editTourForm">
-        <div class="modal-header"><h5 class="modal-title">Edit Site Tour</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body">
-          <div class="mb-3"><label class="form-label">Tour Name</label><input type="text" name="tourName" id="editTourName" class="form-control" required></div>
-          <div class="mb-3"><label class="form-label">Description</label><textarea name="description" id="editTourDescription" class="form-control" rows="3"></textarea></div>
-          <div class="mb-3"><label class="form-label">Checkpoints</label><textarea name="checkpoints" id="editTourCheckpoints" class="form-control" rows="7" required></textarea><small class="text-muted">One checkpoint per line.</small></div>
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Site Tour</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Tour Name</label>
+            <input type="text" name="tourName" id="editTourName" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" id="editTourDescription" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Duration</label>
+            <select name="duration" id="editTourDuration" class="form-select" required>
+              <option value="1_week">1 Week</option>
+              <option value="1_month">1 Month</option>
+              <option value="3_months">3 Months</option>
+              <option value="6_months">6 Months</option>
+              <option value="1_year">1 Year</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Checkpoints</label>
+            <textarea name="checkpoints" id="editTourCheckpoints" class="form-control" rows="7" required></textarea>
+            <small class="text-muted">One checkpoint per line. New NFC checkpoints will require a new tag to be written.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
       </form>
     </div>
   </div>

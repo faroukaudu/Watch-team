@@ -12,7 +12,7 @@ const siteTourCheckpointSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-        nfcTagValue: {
+    nfcTagValue: {
       type: String,
       default: "",
     },
@@ -35,6 +35,11 @@ const siteTourCheckpointSchema = new mongoose.Schema(
 
 const siteTourProgressSchema = new mongoose.Schema(
   {
+    dateKey: {
+      type: String,
+      default: "",
+      index: true,
+    },
     guardId: String,
     guardName: String,
     startedAt: Date,
@@ -44,6 +49,13 @@ const siteTourProgressSchema = new mongoose.Schema(
       enum: ["Not Started", "In Progress", "Completed"],
       default: "Not Started",
     },
+    checkpointSnapshot: [
+      {
+        checkpointId: String,
+        checkpointName: String,
+        order: Number,
+      },
+    ],
     scannedCheckpoints: [
       {
         checkpointId: String,
@@ -83,12 +95,19 @@ const siteTourSchema = new mongoose.Schema(
     },
     description: String,
 
+    durationKey: {
+      type: String,
+      enum: ["1_week", "1_month", "3_months", "6_months", "1_year"],
+      default: "1_year",
+    },
+    scheduleStartDate: Date,
+    scheduleEndDate: Date,
+
     createdById: String,
     createdByName: String,
     createdByUserType: String,
 
     checkpoints: [siteTourCheckpointSchema],
-
     progress: [siteTourProgressSchema],
 
     isActive: {

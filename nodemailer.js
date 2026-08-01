@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+require('dotenv').config();
 
 /**
  * Send an application email and resolve only after the SMTP provider

@@ -95,6 +95,18 @@
         </div>
 
         <div class="mb-3">
+          <label class="form-label">Duration</label>
+          <select name="duration" class="form-select" required>
+            <option value="1_week">1 Week</option>
+            <option value="1_month">1 Month</option>
+            <option value="3_months">3 Months</option>
+            <option value="6_months">6 Months</option>
+            <option value="1_year">1 Year</option>
+          </select>
+          <small class="text-muted">The tour will be available once every day for the selected duration.</small>
+        </div>
+
+        <div class="mb-3">
           <label class="form-label">Checkpoints / Junctions</label>
           <textarea
             name="checkpoints"

@@ -144,116 +144,320 @@ app.get("/func", async (req, res) => {
 });
 
 
-app.post("/checking", (req, res) => {
-  const { time, guardInfo, guardComp } = req.body;
 
+function getActiveGuardSession(company, guardId) {
+  return company.checkedReport.find((report) =>
+    String(report.guardId) === String(guardId) && report.checkIn === true
+  );
+}
 
-  console.log(time, guardInfo.guardClients[0]._id);
+function getActiveClock(report) {
+  if (!report || !Array.isArray(report.clock)) return null;
+  return report.clock.find((clock) => clock.isActive === true) || null;
+}
 
+function serializeActiveSession(report) {
+  if (!report) return null;
+  const activeClock = getActiveClock(report);
+  return {
+    reportId: String(report._id),
+    guardId: String(report.guardId || ""),
+    postSiteId: String(report.postSite || ""),
+    clientId: String(report.client || ""),
+    checkedIn: report.checkIn === true,
+    checkInAt: report.checkInAt || report.checkInTime || null,
+    checkInTime: report.checkInTime || null,
+    clockedIn: Boolean(activeClock),
+    clockId: activeClock ? String(activeClock._id) : null,
+    clockInAt: activeClock?.clockInAt || activeClock?.clockInTime || null,
+    clockInTime: activeClock?.clockInTime || null,
+    isOnBreak: activeClock?.isOnBreak === true,
+    breakStartedAt: activeClock?.breakStartedAt || null,
+    totalBreakSeconds: Number(activeClock?.totalBreakSeconds || 0),
+    selectedShift: activeClock ? {
+      _id: activeClock.shiftTemplateId || null,
+      shiftTitle: activeClock.shiftTitle || null,
+      startTime: activeClock.shiftStartTime || null,
+      endTime: activeClock.shiftEndTime || null,
+      postSiteId: String(report.postSite || ""),
+    } : null,
+  };
+}
 
+app.get("/guard-active-session", async (req, res) => {
+  try {
+    const companyId = String(req.query.companyId || "");
+    const guardId = String(req.query.guardId || "");
+    if (!companyId || !guardId) {
+      return res.status(400).json({ success: false, message: "companyId and guardId are required." });
+    }
 
-  console.log("AUTHOK");
-  Company.findById(guardInfo.assignedCompanyID).then(async (cFound) => {
-    console.log("I Have Found the Company");
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ success: false, message: "Company not found." });
+    }
 
+    const activeReport = getActiveGuardSession(company, guardId);
+    return res.json({ success: true, activeSession: serializeActiveSession(activeReport) });
+  } catch (error) {
+    console.error("ACTIVE SESSION ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to retrieve active session." });
+  }
+});
+
+app.post("/checking", async (req, res) => {
+  try {
+    const { time, guardInfo, postSiteId, clientId } = req.body;
+    const companyId = guardInfo?.assignedCompanyID;
+    const guardId = guardInfo?._id;
+
+    if (!companyId || !guardId || !postSiteId) {
+      return res.status(400).json({
+        success: false,
+        message: "Guard, company and post site information are required.",
+      });
+    }
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ success: false, message: "Company not found." });
+    }
+
+    const activeReport = getActiveGuardSession(company, guardId);
+    if (activeReport) {
+      const samePost = String(activeReport.postSite) === String(postSiteId);
+      return res.status(409).json({
+        success: false,
+        activeSessionExists: true,
+        message: samePost
+          ? "You are already checked in at this post site."
+          : "You are already checked in at another post site.",
+        activeSession: serializeActiveSession(activeReport),
+      });
+    }
+
+    const checkInAt = time ? new Date(time) : new Date();
     const reportNew = {
-      client: guardInfo.guardClients[0]._id, postSite: guardInfo.guardPostSite[0].postSiteID,
-      guardName: guardInfo.fullname, guardId: guardInfo._id, checkIn: true, checkout: false,
-      checkInTime: time
+      client: String(clientId || ""),
+      postSite: String(postSiteId),
+      guardName: guardInfo.fullname,
+      guardId: String(guardId),
+      checkIn: true,
+      checkout: false,
+      checkInTime: checkInAt.toISOString(),
+      checkInAt,
     };
 
+    company.checkedReport.push(reportNew);
+    const addedReport = company.checkedReport[company.checkedReport.length - 1];
+    const activity = notification(guardInfo.fullname, guardInfo.username, "Check In", addedReport._id);
+    activity.message = `${guardInfo.fullname} checked in`;
+    company.activity.push(activity);
+    await company.save();
 
-    notification(guardInfo.fullname, guardInfo.username, "Check In",)
-    console.log(reportNew);
-    cFound.checkedReport.push(reportNew);
-    const savedCompany = await cFound.save();
-    console.log("After Pushing");
-
-    // console.log(savedCompany);
-
-    // console.log();
-    // Get last added report
-    const addedReport = savedCompany.checkedReport[savedCompany.checkedReport.length - 1];
-
-
-    // Get its ID
-    const newReportId = addedReport._id;
-    const activity = notification(guardInfo.fullname, guardInfo.username, "Check In", newReportId);
-    await cFound.activity.push(activity);
-    cFound.save();
-
-    console.log("New CheckedReport ID:", newReportId);
-
-
-
-    // console.log(reportNew);
-    res.json({
+    return res.json({
       success: true,
-      message: 'Success for CheckediN',
-      reportId: newReportId,
-      // processedValue,
-      // receivedAt: new Date().toISOString(),
+      message: "Guard successfully checked in.",
+      reportId: String(addedReport._id),
+      activeSession: serializeActiveSession(addedReport),
     });
+  } catch (error) {
+    console.error("CHECK IN ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to check in guard." });
+  }
+});
 
+app.post("/checkingout", async (req, res) => {
+  try {
+    const { dbId, guardInfo, checkouttime } = req.body;
+    const company = await Company.findById(guardInfo?.assignedCompanyID);
+    if (!company) {
+      return res.status(404).json({ success: false, message: "Company not found." });
+    }
 
-    // cFound.checkedReport.push(reportNew);
-    // cFound.save();
+    const report = company.checkedReport.id(dbId);
+    if (!report) {
+      return res.status(404).json({ success: false, message: "Active check-in record not found." });
+    }
 
+    const activeClock = getActiveClock(report);
+    if (activeClock) {
+      return res.status(409).json({
+        success: false,
+        message: "Clock out before checking out from the post site.",
+        activeSession: serializeActiveSession(report),
+      });
+    }
 
-  }).catch((err) => {
-    res.json({
-      success: false,
-      message: 'Error for CheckediN',
-      // processedValue,
-      // receivedAt: new Date().toISOString(),
-    });
-
-
-  })
-
-
-})
-
-app.post("/checkingout", (req, res) => {
-
-  const { dbId, guardInfo, checkouttime } = req.body;
-  console.log("I am Cheking Out Now>>>>>");
-  console.log(dbId, checkouttime);
-
-
-
-  Company.findById(guardInfo.assignedCompanyID).then((cFound) => {
-    const cReport = cFound.checkedReport.id(dbId);
-    cReport.checkIn = false;
-    cReport.checkOutTime = checkouttime;
+    const checkedOutAt = checkouttime ? new Date(checkouttime) : new Date();
+    report.checkIn = false;
+    report.checkOutTime = checkedOutAt.toISOString();
+    report.checkedOutAt = checkedOutAt;
 
     const activity = notification(guardInfo.fullname, guardInfo.username, "Check Out", dbId);
-    cFound.activity.push(activity);
-    // cFound.save();
+    activity.message = `${guardInfo.fullname} checked out`;
+    company.activity.push(activity);
+    await company.save();
 
-    cFound.save();
-    res.json({
-      success: true,
-      message: 'Successfully for CheckedOUT',
-      // reportId: newReportId,
-      // processedValue,
-      // receivedAt: new Date().toISOString(),
+    return res.json({ success: true, message: "Guard successfully checked out.", activeSession: null });
+  } catch (error) {
+    console.error("CHECK OUT ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to check out guard." });
+  }
+});
+
+app.post("/clocking", async (req, res) => {
+  try {
+    const { reportId, guardInfo, clockInAt, shiftTemplateId, shiftTitle, shiftStartTime, shiftEndTime } = req.body;
+    const company = await Company.findById(guardInfo?.assignedCompanyID);
+    if (!company) return res.status(404).json({ success: false, message: "Company not found." });
+
+    const activeReport = getActiveGuardSession(company, guardInfo?._id);
+    if (!activeReport) {
+      return res.status(409).json({ success: false, message: "Check in before clocking in." });
+    }
+    if (String(activeReport._id) !== String(reportId)) {
+      return res.status(409).json({
+        success: false,
+        message: "You are checked in at another post site.",
+        activeSession: serializeActiveSession(activeReport),
+      });
+    }
+    if (getActiveClock(activeReport)) {
+      return res.status(409).json({
+        success: false,
+        message: "You are already clocked in.",
+        activeSession: serializeActiveSession(activeReport),
+      });
+    }
+
+    const startedAt = clockInAt ? new Date(clockInAt) : new Date();
+    activeReport.clock.push({
+      clockInTime: startedAt.toISOString(),
+      clockInAt: startedAt,
+      isActive: true,
+      isOnBreak: false,
+      totalBreakSeconds: 0,
+      shiftTemplateId,
+      shiftTitle,
+      shiftStartTime,
+      shiftEndTime,
     });
+    const clock = activeReport.clock[activeReport.clock.length - 1];
+    await company.save();
 
-
-  }).catch((err) => {
-    console.log("ERROR FINDING", err);
-    res.json({
+    return res.json({
       success: true,
-      message: 'Company Not Found!',
-      // reportId: newReportId,
-      // processedValue,
-      // receivedAt: new Date().toISOString(),
+      message: "Guard successfully clocked in.",
+      clockId: String(clock._id),
+      activeSession: serializeActiveSession(activeReport),
     });
+  } catch (error) {
+    console.error("CLOCK IN ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to clock in guard." });
+  }
+});
 
-  })
+app.post("/clockingout", async (req, res) => {
+  try {
+    const { reportId, guardInfo, clockOutAt } = req.body;
+    const company = await Company.findById(guardInfo?.assignedCompanyID);
+    if (!company) return res.status(404).json({ success: false, message: "Company not found." });
 
-})
+    const report = company.checkedReport.id(reportId);
+    const clock = getActiveClock(report);
+    if (!report || !clock) {
+      return res.status(404).json({ success: false, message: "Active clock session not found." });
+    }
+
+    const endedAt = clockOutAt ? new Date(clockOutAt) : new Date();
+    let totalBreakSeconds = Number(clock.totalBreakSeconds || 0);
+    if (clock.isOnBreak && clock.breakStartedAt) {
+      totalBreakSeconds += Math.max(0, Math.floor((endedAt - new Date(clock.breakStartedAt)) / 1000));
+    }
+    const totalSeconds = Math.max(0, Math.floor((endedAt - new Date(clock.clockInAt || clock.clockInTime)) / 1000));
+    const workSeconds = Math.max(0, totalSeconds - totalBreakSeconds);
+    const formatSeconds = (value) => {
+      const h = Math.floor(value / 3600);
+      const m = String(Math.floor((value % 3600) / 60)).padStart(2, "0");
+      const sec = String(value % 60).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
+    };
+
+    let assignedSeconds = 0;
+    if (clock.shiftStartTime && clock.shiftEndTime) {
+      const [sh, sm] = String(clock.shiftStartTime).split(":").map(Number);
+      const [eh, em] = String(clock.shiftEndTime).split(":").map(Number);
+      let startSeconds = (sh * 3600) + (sm * 60);
+      let endSeconds = (eh * 3600) + (em * 60);
+      if (endSeconds < startSeconds) endSeconds += 86400;
+      assignedSeconds = endSeconds - startSeconds;
+    }
+    const overtimeSeconds = assignedSeconds > 0 ? Math.max(0, workSeconds - assignedSeconds) : 0;
+
+    clock.clockOutAt = endedAt;
+    clock.clockOutTime = endedAt.toISOString();
+    clock.isActive = false;
+    clock.isOnBreak = false;
+    clock.breakStartedAt = null;
+    clock.totalBreakSeconds = totalBreakSeconds;
+    clock.workTime = formatSeconds(workSeconds);
+    clock.breakTime = formatSeconds(totalBreakSeconds);
+    clock.duration = formatSeconds(totalSeconds);
+    clock.overtimeSeconds = overtimeSeconds;
+    clock.overtime = formatSeconds(overtimeSeconds);
+
+    const activity = notification(guardInfo.fullname, guardInfo.username, "Clock Out", reportId);
+    activity.message = `${guardInfo.fullname} clocked out`;
+    company.activity.push(activity);
+    await company.save();
+
+    return res.json({
+      success: true,
+      message: "Guard successfully clocked out.",
+      companyInfo: company,
+      activeSession: serializeActiveSession(report),
+    });
+  } catch (error) {
+    console.error("CLOCK OUT ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to clock out guard." });
+  }
+});
+
+app.post("/clock-break", async (req, res) => {
+  try {
+    const { reportId, guardInfo, action, at } = req.body;
+    const company = await Company.findById(guardInfo?.assignedCompanyID);
+    const report = company?.checkedReport.id(reportId);
+    const clock = getActiveClock(report);
+    if (!company || !report || !clock) {
+      return res.status(404).json({ success: false, message: "Active clock session not found." });
+    }
+
+    const eventAt = at ? new Date(at) : new Date();
+    if (action === "start") {
+      if (!clock.isOnBreak) {
+        clock.isOnBreak = true;
+        clock.breakStartedAt = eventAt;
+      }
+    } else if (action === "end") {
+      if (clock.isOnBreak && clock.breakStartedAt) {
+        clock.totalBreakSeconds = Number(clock.totalBreakSeconds || 0) +
+          Math.max(0, Math.floor((eventAt - new Date(clock.breakStartedAt)) / 1000));
+      }
+      clock.isOnBreak = false;
+      clock.breakStartedAt = null;
+    } else {
+      return res.status(400).json({ success: false, message: "Break action must be start or end." });
+    }
+
+    await company.save();
+    return res.json({ success: true, activeSession: serializeActiveSession(report) });
+  } catch (error) {
+    console.error("BREAK ERROR:", error);
+    return res.status(500).json({ success: false, message: "Unable to update break." });
+  }
+});
 
 app.get("/guard-report", (req, res) => {
   if (req.isAuthenticated()) {

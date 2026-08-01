@@ -18,6 +18,7 @@ const Company = mongoose.model("Company", companyInfo);
 const sendingMails = require('./nodemailer.js');
 const handlebars = require("handlebars");
 const fs = require('fs');
+const path = require('path');
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const MobileReport = require("./src/models/report.js");
@@ -26,26 +27,69 @@ const cron = require("node-cron");
 const ScheduledPostSiteReport = require("./src/models/ScheduledPostSiteReport");
 const ScheduledPostSiteReportLog = require("./src/models/ScheduledPostSiteReportLog");
 
-app.post("/add-guard-invite", async (req,res)=>{
-    console.log("sumbit invite");
-    
-    const {fname, lname, email, phone, companyID, phonetwo, invite, siteId} = req.body;
+app.post("/add-guard-invite", async (req, res) => {
+  console.log("Submit guard invite");
 
-    if(invite === "sms"){
-        console.log("We sedning SMS");
-        console.log(fname, lname, email, phonetwo, companyID, invite, siteId);
-        
-    }else{
-        console.log(fname, lname, email, companyID, invite, siteId);
-        const sendM = await guardVerify({username:fname+" "+lname, email:email, compId:companyID, postSite:siteId, fullname:fname+" "+lname});
-        if(sendM === "Successful"){
-            res.send("Mail Send Suucessfully")
-        }else{
-            res.send("Mail Failed.");
-        }
-        
+  try {
+    const {
+      fname,
+      lname,
+      email,
+      phone,
+      companyID,
+      phonetwo,
+      invite,
+      siteId,
+    } = req.body;
+
+    if (invite === "sms") {
+      console.log("Sending SMS invite");
+      console.log(fname, lname, email, phonetwo, companyID, invite, siteId);
+
+      req.session.guardtoast = {
+        status: false,
+        message: "SMS guard invitation is not available yet.",
+      };
+
+      return res.redirect("/guards");
     }
-})
+
+    const fullname = `${String(fname || "").trim()} ${String(
+      lname || ""
+    ).trim()}`.trim();
+
+    const sendM = await guardVerify({
+      username: fullname,
+      email,
+      compId: companyID,
+      postSite: siteId,
+      fullname,
+    });
+
+    if (sendM === "Successful") {
+      req.session.guardtoast = {
+        status: true,
+        message: "Guard verification email sent successfully!",
+      };
+    } else {
+      req.session.guardtoast = {
+        status: false,
+        message: "Guard verification email failed to send.",
+      };
+    }
+
+    return res.redirect("/guards");
+  } catch (err) {
+    console.error("POST /add-guard-invite error:", err);
+
+    req.session.guardtoast = {
+      status: false,
+      message: `Unable to send guard verification email: ${err.message}`,
+    };
+
+    return res.redirect("/guards");
+  }
+});
 
 // Whatsapp
 app.get("/whatsapp", (req,res)=>{
@@ -85,86 +129,150 @@ sendTemplateWhatsappMsg();
 
 
 // Email
-async function guardVerify({username:name, email:email, compId:companyId, postSite:siteId, fullname:fulln}){
-    console.log("Senidng mail to: "+ email +"& Name is"+ name);
-    const link = `https://app.watch-team.com/verify-guard/${companyId}/${siteId}/${encodeURIComponent(name)}/${encodeURIComponent(email)}`;
-    const source = fs.readFileSync('email_template.html', 'utf-8').toString();
+async function guardVerify({
+  username: name,
+  email,
+  compId: companyId,
+  postSite: siteId,
+  fullname: fulln,
+}) {
+  try {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+
+    if (!cleanEmail) {
+      throw new Error("Guard email address is required.");
+    }
+
+    if (!companyId) {
+      throw new Error("Company ID is required.");
+    }
+
+    if (!siteId) {
+      throw new Error("Post-site ID is required.");
+    }
+
+    console.log(`Sending mail to: ${cleanEmail} & Name is ${name}`);
+
+    const link =
+      `https://app.watch-team.com/verify-guard/` +
+      `${encodeURIComponent(companyId)}/` +
+      `${encodeURIComponent(siteId)}/` +
+      `${encodeURIComponent(name)}/` +
+      `${encodeURIComponent(cleanEmail)}`;
+
+    const source = fs.readFileSync(
+      path.join(__dirname, "email_template.html"),
+      "utf-8"
+    );
     const template = handlebars.compile(source);
     const replacements = {
-        username: name,
-        email: email,
-        // guard_id:iD
-        // compId:companyId,
-        // postSite:siteId,
-        url:link
+      username: name,
+      email: cleanEmail,
+      url: link,
     };
 
     const htmlToSend = template(replacements);
 
-    try {
-        await sendingMails.emailSent({sendTo:email, title:"Guard Verification",
-    message:"We are testing this mail", template:htmlToSend, emailType:"Guard Registration Successfull"});
+    await sendingMails.emailSent({
+      sendTo: cleanEmail,
+      title: "Guard Verification",
+      message: "Complete your guard registration.",
+      template: htmlToSend,
+      emailType: "Guard Registration Successful",
+    });
+
     return "Successful";
-    
-    } catch (err) {
-        res.send(err);
-        return 0;
-    }
+  } catch (err) {
+    console.error("Guard verification email failed:", err);
+    return 0;
+  }
 }
 
 // Email-New-Admin-Create-Password-Link
-async function adminCreatePassword({email:email, userID:id, fullname:fulln}){
-    console.log("Senidng mail to: "+ email +"& Name is"+ fulln);
-    const link = `http://localhost:9000/create-password/${encodeURIComponent(id)}/${encodeURIComponent(fulln)}`;
-    const source = fs.readFileSync('admin-create-pass.html', 'utf-8').toString();
+async function adminCreatePassword({ email, userID: id, fullname: fulln }) {
+  try {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+
+    if (!cleanEmail) {
+      throw new Error("Admin email address is required.");
+    }
+
+    console.log(`Sending mail to: ${cleanEmail} & Name is ${fulln}`);
+
+    const baseUrl = process.env.PUBLIC_BASE_URL || "http://localhost:9000";
+    const link = `${baseUrl}/create-password/${encodeURIComponent(
+      id
+    )}/${encodeURIComponent(fulln)}`;
+
+    const source = fs.readFileSync(
+      path.join(__dirname, "admin-create-pass.html"),
+      "utf-8"
+    );
     const template = handlebars.compile(source);
     const replacements = {
-        username: fulln,
-        email: email,
-        // guard_id:iD
-        // compId:companyId,
-        // postSite:siteId,
-        url:link
+      username: fulln,
+      email: cleanEmail,
+      url: link,
     };
 
     const htmlToSend = template(replacements);
 
-    try {
-        await sendingMails.emailSent({sendTo:email, title:"Admin User Created",
-    message:"We are testing this mail", template:htmlToSend, emailType:"Admin Registration Successfull"});
+    await sendingMails.emailSent({
+      sendTo: cleanEmail,
+      title: "Admin User Created",
+      message: "Create your account password.",
+      template: htmlToSend,
+      emailType: "Admin Registration Successful",
+    });
+
     return "Successful";
-    
-    } catch (err) {
-        res.send(err);
-        return 0;
-    }
+  } catch (err) {
+    console.error("Admin create-password email failed:", err);
+    return 0;
+  }
 }
 
-async function fakeEmail({email:email, userID:id, fullname:fulln}){
-    console.log("Senidng mail to: "+ email +"& Name is"+ fulln);
-    const link = `http://localhost:9000/create-password/${encodeURIComponent(id)}/${encodeURIComponent(fulln)}`;
-    const source = fs.readFileSync('admin-create-pass.html', 'utf-8').toString();
+async function fakeEmail({ email, userID: id, fullname: fulln }) {
+  try {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+
+    if (!cleanEmail) {
+      throw new Error("Recipient email address is required.");
+    }
+
+    console.log(`Sending mail to: ${cleanEmail} & Name is ${fulln}`);
+
+    const baseUrl = process.env.PUBLIC_BASE_URL || "http://localhost:9000";
+    const link = `${baseUrl}/create-password/${encodeURIComponent(
+      id
+    )}/${encodeURIComponent(fulln)}`;
+
+    const source = fs.readFileSync(
+      path.join(__dirname, "admin-create-pass.html"),
+      "utf-8"
+    );
     const template = handlebars.compile(source);
     const replacements = {
-        username: fulln,
-        email: email,
-        // guard_id:iD
-        // compId:companyId,
-        // postSite:siteId,
-        // url:link
+      username: fulln,
+      email: cleanEmail,
+      url: link,
     };
 
     const htmlToSend = template(replacements);
 
-    try {
-        await sendingMails.emailSent({sendTo:email, title:"Admin User Created",
-    message:"We are testing this mail", template:htmlToSend, emailType:"Admin Registration Successfull"});
+    await sendingMails.emailSent({
+      sendTo: cleanEmail,
+      title: "Admin User Created",
+      message: "Create your account password.",
+      template: htmlToSend,
+      emailType: "Admin Registration Successful",
+    });
+
     return "Successful";
-    
-    } catch (err) {
-        res.send(err);
-        return 0;
-    }
+  } catch (err) {
+    console.error("Test email failed:", err);
+    return 0;
+  }
 }
 
 
@@ -188,10 +296,10 @@ try {
        console.log(result);
        
 
-       res.render("auth/guard-reg", {results:result, name:fullname , comID:companyId, email:guardEmail});
+       res.render("auth/guard-reg", {results:result, name:fullname , comID:companyId, email:_.capitalize(guardEmail)});
 
 } catch (error) {
-    console.error(err);
+    console.error(error);
     res.status(500).send("Server Error");
     
 }
@@ -222,7 +330,6 @@ app.post("/guard-new", async (req,res)=>{
     
         try {
           const createdGuard = await User.register(newGuard, password);
-          await Company.a // 👈 No auto-login
           await addingGuardstoPostSite(createdGuard, comp_id);
     
         //   req.session.guardtoast = {
@@ -241,21 +348,41 @@ app.post("/guard-new", async (req,res)=>{
 });
 
 
-app.post("/send-fake", async (req,res)=>{
-    if(req.isAuthenticated()){
-        console.log(req.body.email);
-        console.log(req.body.cname);
-        const sendM = await fakeEmail({email:'fagzy98@gmail.com', userID:req.user._id, fullname:req.body.cname});
-        if(sendM === "Successful"){
-            res.send("Mail Send Suucessfully")
-        }else{
-            res.send("Mail Failed.");
-        }
-        
-        console.log(req.user);
-        
-    }
-})
+app.post("/send-fake", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect("/sign-in");
+  }
+
+  try {
+    console.log(req.body.email);
+    console.log(req.body.cname);
+
+    const sendM = await fakeEmail({
+      email: req.body.email || "fagzy98@gmail.com",
+      userID: req.user._id,
+      fullname: req.body.cname,
+    });
+
+    req.session.guardtoast = {
+      status: sendM === "Successful",
+      message:
+        sendM === "Successful"
+          ? "Email sent successfully!"
+          : "Email failed to send.",
+    };
+
+    return res.redirect("/guards");
+  } catch (err) {
+    console.error("POST /send-fake error:", err);
+
+    req.session.guardtoast = {
+      status: false,
+      message: `Email failed to send: ${err.message}`,
+    };
+
+    return res.redirect("/guards");
+  }
+});
 
 
 // //////////////////////////////////////////////////////////////////

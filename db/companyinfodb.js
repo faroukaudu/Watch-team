@@ -73,9 +73,14 @@ const reportSchema = new mongoose.Schema({
 });
 
 const clockReportSchema = new mongoose.Schema({
-
     clockInTime:String,
     clockOutTime:String,
+    clockInAt:Date,
+    clockOutAt:Date,
+    isActive:{ type:Boolean, default:false },
+    isOnBreak:{ type:Boolean, default:false },
+    breakStartedAt:Date,
+    totalBreakSeconds:{ type:Number, default:0 },
     duration:String,
     workTime:String,
     breakTime:String,
@@ -85,9 +90,6 @@ const clockReportSchema = new mongoose.Schema({
     shiftEndTime:String,
     overtime:String,
     overtimeSeconds:Number,
-    
-
-    
 });
 
 const checkedReportSchema = new mongoose.Schema({
@@ -97,8 +99,10 @@ const checkedReportSchema = new mongoose.Schema({
     guardId:String,
     checkIn:Boolean,
     checkInTime:String,
+    checkInAt:Date,
     // checkOut:Boolean,
     checkOutTime:String,
+    checkedOutAt:Date,
     // clockInTime:String,
     // clockOutTime:String,
     clock:[clockReportSchema],

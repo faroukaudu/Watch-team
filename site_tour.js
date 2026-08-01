@@ -14,6 +14,71 @@ function buildNfcValue(tourId, checkpointId) {
   return `WT_NFC_TOUR|${tourId}|${checkpointId}`;
 }
 
+function normalizeDurationKey(value) {
+  const allowed = new Set(["1_week", "1_month", "3_months", "6_months", "1_year"]);
+  return allowed.has(String(value)) ? String(value) : "1_year";
+}
+
+function calculateScheduleEnd(startDate, durationKey) {
+  const end = new Date(startDate);
+  switch (normalizeDurationKey(durationKey)) {
+    case "1_week":
+      end.setUTCDate(end.getUTCDate() + 7);
+      break;
+    case "1_month":
+      end.setUTCMonth(end.getUTCMonth() + 1);
+      break;
+    case "3_months":
+      end.setUTCMonth(end.getUTCMonth() + 3);
+      break;
+    case "6_months":
+      end.setUTCMonth(end.getUTCMonth() + 6);
+      break;
+    default:
+      end.setUTCFullYear(end.getUTCFullYear() + 1);
+      break;
+  }
+  return end;
+}
+
+function getDateKey(date = new Date()) {
+  return new Date(date).toISOString().slice(0, 10);
+}
+
+function getScheduleState(tour, now = new Date()) {
+  const start = tour.scheduleStartDate ? new Date(tour.scheduleStartDate) : new Date(tour.createdAt || now);
+  const end = tour.scheduleEndDate
+    ? new Date(tour.scheduleEndDate)
+    : calculateScheduleEnd(start, tour.durationKey || "1_year");
+  return {
+    start,
+    end,
+    isScheduledToday: now >= start && now < end && tour.isActive !== false,
+    isExpired: now >= end,
+  };
+}
+
+function decorateTourForClient(tour, now = new Date()) {
+  const plain = typeof tour.toObject === "function" ? tour.toObject() : { ...tour };
+  const dateKey = getDateKey(now);
+  const schedule = getScheduleState(plain, now);
+  const progress = Array.isArray(plain.progress) ? plain.progress : [];
+  const todayProgress = progress.find((item) => item.dateKey === dateKey) || null;
+  plain.scheduleStartDate = schedule.start;
+  plain.scheduleEndDate = schedule.end;
+  plain.isScheduledToday = schedule.isScheduledToday;
+  plain.isExpired = schedule.isExpired;
+  plain.todayDateKey = dateKey;
+  plain.todayProgress = todayProgress;
+  plain.todayStatus = todayProgress?.status || (schedule.isScheduledToday ? "Not Started" : "No Schedule");
+  plain.completedToday = todayProgress?.status === "Completed";
+  return plain;
+}
+
+function normalizeCheckpointName(name) {
+  return String(name || "").trim().toLowerCase();
+}
+
 
 
 // WEB: Create site tour
@@ -26,6 +91,7 @@ app.post("/site-tours/create", async (req, res) => {
       tourName,
       description,
       checkpoints,
+      duration,
     } = req.body;
 
     if (!companyId || !postSiteId || !tourName) {
@@ -61,6 +127,9 @@ app.post("/site-tours/create", async (req, res) => {
       postSiteName: postSiteName || "",
       tourName: String(tourName).trim(),
       description: description || "",
+      durationKey: normalizeDurationKey(duration),
+      scheduleStartDate: new Date(),
+      scheduleEndDate: calculateScheduleEnd(new Date(), duration),
       checkpoints: checkpointList.map((name, index) => ({
         name,
         description: "",
@@ -107,7 +176,16 @@ app.post("/site-tours/:id/update", async (req, res) => {
       companyId: String(req.user.assignedCompanyID),
     });
 
-    if (!tour) return res.status(404).send("Site tour not found.");
+    if (!tour) {
+      const wantsJson = String(req.headers.accept || "").includes("application/json");
+      if (wantsJson) {
+        return res.status(404).json({
+          success: false,
+          message: "Site tour not found.",
+        });
+      }
+      return res.status(404).send("Site tour not found.");
+    }
 
     const checkpointNames = String(req.body.checkpoints || "")
       .split(/\r?\n/)
@@ -115,21 +193,55 @@ app.post("/site-tours/:id/update", async (req, res) => {
       .filter(Boolean);
 
     if (!checkpointNames.length) {
+      const wantsJson = String(req.headers.accept || "").includes("application/json");
+      if (wantsJson) {
+        return res.status(400).json({
+          success: false,
+          message: "At least one checkpoint is required.",
+        });
+      }
       return res.status(400).send("At least one checkpoint is required.");
     }
 
     tour.tourName = String(req.body.tourName || "").trim();
     tour.description = req.body.description || "";
+    tour.durationKey = normalizeDurationKey(req.body.duration || tour.durationKey);
+    const scheduleStart = tour.scheduleStartDate || tour.createdAt || new Date();
+    tour.scheduleStartDate = scheduleStart;
+    tour.scheduleEndDate = calculateScheduleEnd(scheduleStart, tour.durationKey);
 
     const oldCheckpoints = tour.checkpoints || [];
+    const oldByName = new Map(
+      oldCheckpoints.map((checkpoint) => [normalizeCheckpointName(checkpoint.name), checkpoint])
+    );
+    const isNfcTour = oldCheckpoints.some((checkpoint) =>
+      Boolean(checkpoint.nfcTagValue)
+    );
+
+    const newlyAddedCheckpointIds = [];
+
     tour.checkpoints = checkpointNames.map((name, index) => {
-      const old = oldCheckpoints[index];
+      const old = oldByName.get(normalizeCheckpointName(name));
+      const checkpointId = old ? old._id : new mongoose.Types.ObjectId();
+
+      if (!old) {
+        newlyAddedCheckpointIds.push(String(checkpointId));
+      }
+
       return {
-        _id: old ? old._id : new mongoose.Types.ObjectId(),
+        _id: checkpointId,
         name,
         description: old ? old.description : "",
-        qrCodeValue: old ? old.qrCodeValue : "PENDING",
-        nfcTagValue: old ? old.nfcTagValue : "",
+        qrCodeValue: old
+          ? old.qrCodeValue
+          : isNfcTour
+            ? "NFC_ONLY"
+            : buildQrValue(tour._id, checkpointId),
+        nfcTagValue: old
+          ? old.nfcTagValue
+          : isNfcTour
+            ? buildNfcValue(tour._id, checkpointId)
+            : "",
         nfcWritten: old ? old.nfcWritten : false,
         nfcWrittenAt: old ? old.nfcWrittenAt : null,
         order: index + 1,
@@ -137,16 +249,36 @@ app.post("/site-tours/:id/update", async (req, res) => {
       };
     });
 
-    tour.checkpoints.forEach((point) => {
-      if (!point.qrCodeValue || point.qrCodeValue === "PENDING") {
-        point.qrCodeValue = buildQrValue(tour._id, point._id);
-      }
-    });
-
     await tour.save();
+
+    const wantsJson =
+      req.xhr ||
+      String(req.headers.accept || "").includes("application/json") ||
+      String(req.headers["content-type"] || "").includes("application/json");
+
+    if (wantsJson) {
+      return res.json({
+        success: true,
+        message: newlyAddedCheckpointIds.length
+          ? "Site tour updated. Set up the newly added checkpoint tags."
+          : "Site tour updated successfully.",
+        tour,
+        newlyAddedCheckpointIds,
+      });
+    }
+
     return res.redirect("back");
   } catch (error) {
     console.error("Update site tour error:", error);
+
+    const wantsJson = String(req.headers.accept || "").includes("application/json");
+    if (wantsJson) {
+      return res.status(500).json({
+        success: false,
+        message: "Server error updating site tour.",
+      });
+    }
+
     return res.redirect("back");
   }
 });
@@ -178,6 +310,7 @@ app.post("/site-tours/create-nfc", async (req, res) => {
       tourName,
       description,
       checkpoints,
+      duration,
     } = req.body;
 
     if (!companyId || !postSiteId || !tourName) {
@@ -208,6 +341,9 @@ app.post("/site-tours/create-nfc", async (req, res) => {
       postSiteName: postSiteName || "",
       tourName: String(tourName).trim(),
       description: description || "",
+      durationKey: normalizeDurationKey(duration),
+      scheduleStartDate: new Date(),
+      scheduleEndDate: calculateScheduleEnd(new Date(), duration),
       checkpoints: checkpointList.map((name, index) => ({
         name,
         description: "",
@@ -350,16 +486,40 @@ app.post("/api/site-tours/nfc-scan", async (req, res) => {
       });
     }
 
-    let guardProgress = siteTour.progress.find(
-      (p) => String(p.guardId) === String(guardId) && p.status !== "Completed"
-    );
+    const now = new Date();
+    const schedule = getScheduleState(siteTour, now);
+    if (!schedule.isScheduledToday) {
+      return res.status(409).json({
+        success: false,
+        message: schedule.isExpired
+          ? "No site tours scheduled. This tour duration has ended."
+          : "This site tour is not scheduled for today.",
+      });
+    }
+
+    const dateKey = getDateKey(now);
+    let guardProgress = siteTour.progress.find((p) => p.dateKey === dateKey);
+
+    if (guardProgress && guardProgress.status === "Completed") {
+      return res.status(409).json({
+        success: false,
+        message: "Site tour completed for today. Come back tomorrow.",
+        completed: true,
+      });
+    }
 
     if (!guardProgress) {
       siteTour.progress.push({
+        dateKey,
         guardId,
         guardName,
-        startedAt: new Date(),
+        startedAt: now,
         status: "In Progress",
+        checkpointSnapshot: siteTour.checkpoints.map((item) => ({
+          checkpointId: String(item._id),
+          checkpointName: item.name,
+          order: item.order,
+        })),
         scannedCheckpoints: [],
       });
 
@@ -444,7 +604,7 @@ app.get("/api/site-tours", async (req, res) => {
 
     return res.json({
       success: true,
-      tours,
+      tours: tours.map((tour) => decorateTourForClient(tour)),
     });
   } catch (error) {
     console.error("Fetch site tours error:", error);
@@ -508,16 +668,40 @@ app.post("/api/site-tours/scan", async (req, res) => {
       });
     }
 
-    let guardProgress = siteTour.progress.find(
-      (p) => String(p.guardId) === String(guardId) && p.status !== "Completed"
-    );
+    const now = new Date();
+    const schedule = getScheduleState(siteTour, now);
+    if (!schedule.isScheduledToday) {
+      return res.status(409).json({
+        success: false,
+        message: schedule.isExpired
+          ? "No site tours scheduled. This tour duration has ended."
+          : "This site tour is not scheduled for today.",
+      });
+    }
+
+    const dateKey = getDateKey(now);
+    let guardProgress = siteTour.progress.find((p) => p.dateKey === dateKey);
+
+    if (guardProgress && guardProgress.status === "Completed") {
+      return res.status(409).json({
+        success: false,
+        message: "Site tour completed for today. Come back tomorrow.",
+        completed: true,
+      });
+    }
 
     if (!guardProgress) {
       siteTour.progress.push({
+        dateKey,
         guardId,
         guardName,
-        startedAt: new Date(),
+        startedAt: now,
         status: "In Progress",
+        checkpointSnapshot: siteTour.checkpoints.map((item) => ({
+          checkpointId: String(item._id),
+          checkpointName: item.name,
+          order: item.order,
+        })),
         scannedCheckpoints: [],
       });
 
@@ -605,7 +789,7 @@ app.get("/api/site-tours/detail", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      siteTour,
+      siteTour: decorateTourForClient(siteTour),
     });
   } catch (error) {
     console.error("Fetch site tour detail error:", error);

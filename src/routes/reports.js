@@ -95,7 +95,7 @@ async function sendCodeRedReportEmail({
   });
 
   const baseUrl =
-    process.env.PUBLIC_BASE_URL ||
+    process.env.APP_BASE_URL ||
     "http://localhost:9000";
 
   const publicReportLink =
