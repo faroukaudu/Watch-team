@@ -486,7 +486,12 @@ async function createPublicBatchAndSendEmail({
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure: true,
+    secure: false,
+    requireTLS: true,
+    tls: {
+      rejectUnauthorized: true,
+      servername: "smtp.gmail.com",
+    },
     auth: {
       user: process.env.SERVER_EMAIL,
       pass: process.env.SERVER_PASSWORD,
@@ -566,7 +571,8 @@ async function createPublicBatchAndSendEmail({
   `;
 
   await transporter.sendMail({
-    from: process.env.MAIL_FROM || "Watch Team Security <Secure@watch_team.com>",
+    from: process.env.WATCHTEAM_EMAIL_FROM || "Watch Team Security <Secure@watch_team.com>",
+    
     to: mainRecipient,
     cc: ccRecipients.length ? ccRecipients.join(",") : undefined,
     subject: reportTitle,
