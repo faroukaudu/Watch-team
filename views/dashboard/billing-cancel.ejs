@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Subscription Cancelled | WatchTeam</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"
+    rel="stylesheet"
+  >
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      overflow: hidden;
+
+      background:
+        radial-gradient(
+          circle at 20% 20%,
+          rgba(220, 38, 38, 0.22),
+          transparent 35%
+        ),
+        radial-gradient(
+          circle at 85% 80%,
+          rgba(127, 29, 29, 0.18),
+          transparent 38%
+        ),
+        linear-gradient(
+          135deg,
+          #090909 0%,
+          #160b0b 50%,
+          #090909 100%
+        );
+
+      color: #ffffff;
+    }
+
+
+    /* =========================
+       PAGE
+    ========================== */
+
+    .cancel-page {
+      position: relative;
+
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 25px;
+
+      overflow: hidden;
+    }
+
+
+    /* =========================
+       BACKGROUND GRID
+    ========================== */
+
+    .grid {
+      position: absolute;
+      inset: 0;
+
+      background-image:
+        linear-gradient(
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px
+        );
+
+      background-size: 45px 45px;
+
+      animation: moveGrid 18s linear infinite;
+    }
+
+
+    /* =========================
+       RED GLOWS
+    ========================== */
+
+    .glow {
+      position: absolute;
+
+      border-radius: 50%;
+
+      filter: blur(90px);
+
+      pointer-events: none;
+    }
+
+    .glow.one {
+      width: 360px;
+      height: 360px;
+
+      background: rgba(220, 38, 38, 0.25);
+
+      top: -110px;
+      left: -90px;
+
+      animation: glowOne 8s ease-in-out infinite alternate;
+    }
+
+    .glow.two {
+      width: 420px;
+      height: 420px;
+
+      background: rgba(153, 27, 27, 0.20);
+
+      right: -120px;
+      bottom: -150px;
+
+      animation: glowTwo 10s ease-in-out infinite alternate;
+    }
+
+
+    /* =========================
+       PARTICLES
+    ========================== */
+
+    .particle {
+      position: absolute;
+
+      width: 5px;
+      height: 5px;
+
+      border-radius: 50%;
+
+      background: rgba(248, 113, 113, 0.75);
+
+      box-shadow:
+        0 0 10px rgba(239, 68, 68, 0.75),
+        0 0 22px rgba(239, 68, 68, 0.35);
+
+      animation: floatParticle 7s ease-in-out infinite;
+    }
+
+    .p1 {
+      top: 20%;
+      left: 15%;
+    }
+
+    .p2 {
+      bottom: 18%;
+      left: 24%;
+      animation-delay: 2s;
+    }
+
+    .p3 {
+      top: 24%;
+      right: 16%;
+      animation-delay: 1s;
+    }
+
+    .p4 {
+      bottom: 20%;
+      right: 22%;
+      animation-delay: 3s;
+    }
+
+
+    /* =========================
+       CONTENT
+    ========================== */
+
+    .cancel-container {
+      position: relative;
+
+      z-index: 10;
+
+      width: 100%;
+      max-width: 440px;
+
+      text-align: center;
+    }
+
+
+    /* =========================
+       GLASS PANEL
+    ========================== */
+
+    .cancel-card {
+      position: relative;
+
+      overflow: hidden;
+
+      padding: 42px 32px 32px;
+
+      border-radius: 26px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,0.075),
+          rgba(255,255,255,0.025)
+        );
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      border: 1px solid rgba(248,113,113,0.12);
+
+      box-shadow:
+        0 35px 80px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+
+      animation: cardEnter .65s ease;
+    }
+
+
+    .cancel-card::before {
+      content: "";
+
+      position: absolute;
+
+      top: 0;
+      left: -40%;
+
+      width: 180%;
+      height: 2px;
+
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(239,68,68,.25),
+        #ef4444,
+        rgba(239,68,68,.25),
+        transparent
+      );
+
+      animation: topGlow 4s linear infinite;
+    }
+
+
+    /* =========================
+       ICON
+    ========================== */
+
+    .cancel-icon {
+      width: 82px;
+      height: 82px;
+
+      margin: 0 auto 22px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 50%;
+
+      color: #fca5a5;
+
+      font-size: 40px;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(239,68,68,.20),
+          rgba(127,29,29,.10)
+        );
+
+      border: 1px solid rgba(248,113,113,.22);
+
+      box-shadow:
+        0 0 0 9px rgba(239,68,68,.035),
+        0 15px 40px rgba(239,68,68,.10);
+
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+
+
+    /* =========================
+       BADGE
+    ========================== */
+
+    .cancel-badge {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      margin-bottom: 14px;
+
+      padding: 6px 12px;
+
+      border-radius: 50px;
+
+      color: #fca5a5;
+
+      background: rgba(239,68,68,.08);
+
+      border: 1px solid rgba(239,68,68,.15);
+
+      font-size: 10px;
+
+      font-weight: 700;
+
+      letter-spacing: .8px;
+
+      text-transform: uppercase;
+    }
+
+
+    /* =========================
+       TEXT
+    ========================== */
+
+    .cancel-title {
+      color: #ffffff;
+
+      font-size: 27px;
+
+      font-weight: 750;
+
+      margin-bottom: 11px;
+    }
+
+
+    .cancel-text {
+      max-width: 340px;
+
+      margin: 0 auto;
+
+      color: rgba(255,255,255,.52);
+
+      font-size: 13px;
+
+      line-height: 1.75;
+    }
+
+
+    .divider {
+      height: 1px;
+
+      margin: 27px 0;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255,255,255,.08),
+          transparent
+        );
+    }
+
+
+    /* =========================
+       INFO MESSAGE
+    ========================== */
+
+    .cancel-info {
+      display: flex;
+
+      align-items: flex-start;
+
+      gap: 10px;
+
+      margin-bottom: 22px;
+
+      padding: 13px 14px;
+
+      border-radius: 14px;
+
+      text-align: left;
+
+      background: rgba(239,68,68,.045);
+
+      border: 1px solid rgba(239,68,68,.09);
+
+      color: rgba(255,255,255,.48);
+
+      font-size: 11px;
+
+      line-height: 1.65;
+    }
+
+
+    .cancel-info i {
+      flex-shrink: 0;
+
+      margin-top: 1px;
+
+      color: #f87171;
+
+      font-size: 16px;
+    }
+
+
+    /* =========================
+       PRICING BUTTON
+    ========================== */
+
+    .pricing-button {
+      position: relative;
+
+      width: 100%;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 8px;
+
+      padding: 14px 20px;
+
+      overflow: hidden;
+
+      border-radius: 14px;
+
+      color: #ffffff;
+
+      text-decoration: none;
+
+      background:
+        linear-gradient(
+          110deg,
+          #dc2626,
+          #ef4444,
+          #b91c1c
+        );
+
+      box-shadow:
+        0 12px 30px rgba(220,38,38,.24);
+
+      font-size: 13px;
+
+      font-weight: 650;
+
+      transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+    }
+
+
+    .pricing-button::before {
+      content: "";
+
+      position: absolute;
+
+      top: 0;
+      left: -100%;
+
+      width: 50%;
+      height: 100%;
+
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.25),
+        transparent
+      );
+
+      transform: skewX(-20deg);
+
+      animation: buttonShine 3.5s ease-in-out infinite;
+    }
+
+
+    .pricing-button:hover {
+      color: #ffffff;
+
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 18px 40px rgba(220,38,38,.35);
+    }
+
+
+    .bottom-text {
+      margin-top: 17px;
+
+      color: rgba(255,255,255,.25);
+
+      font-size: 10px;
+    }
+
+
+    /* =========================
+       ANIMATIONS
+    ========================== */
+
+    @keyframes moveGrid {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 90px 90px;
+      }
+    }
+
+
+    @keyframes glowOne {
+      from {
+        transform: translate(0,0);
+      }
+
+      to {
+        transform: translate(80px,55px);
+      }
+    }
+
+
+    @keyframes glowTwo {
+      from {
+        transform: translate(0,0);
+      }
+
+      to {
+        transform: translate(-70px,-55px);
+      }
+    }
+
+
+    @keyframes floatParticle {
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: .4;
+      }
+
+      50% {
+        transform: translateY(-27px) scale(1.4);
+        opacity: 1;
+      }
+    }
+
+
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+
+    @keyframes iconPulse {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+
+    @keyframes topGlow {
+      from {
+        transform: translateX(-20%);
+      }
+
+      to {
+        transform: translateX(20%);
+      }
+    }
+
+
+    @keyframes buttonShine {
+      0% {
+        left: -100%;
+      }
+
+      45%,
+      100% {
+        left: 150%;
+      }
+    }
+
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 576px) {
+
+      .cancel-page {
+        padding: 18px;
+      }
+
+      .cancel-card {
+        padding: 35px 22px 27px;
+        border-radius: 22px;
+      }
+
+      .cancel-title {
+        font-size: 23px;
+      }
+
+      .cancel-icon {
+        width: 70px;
+        height: 70px;
+
+        font-size: 34px;
+      }
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <div class="cancel-page">
+
+    <!-- BACKGROUND -->
+
+    <div class="grid"></div>
+
+    <div class="glow one"></div>
+    <div class="glow two"></div>
+
+    <span class="particle p1"></span>
+    <span class="particle p2"></span>
+    <span class="particle p3"></span>
+    <span class="particle p4"></span>
+
+
+    <!-- CONTENT -->
+
+    <div class="cancel-container">
+
+      <div class="cancel-card">
+
+
+        <div class="cancel-icon">
+          <i class="ri-close-line"></i>
+        </div>
+
+
+        <div class="cancel-badge">
+          <i class="ri-close-circle-line"></i>
+          Checkout Cancelled
+        </div>
+
+
+        <h1 class="cancel-title">
+          Subscription Cancelled
+        </h1>
+
+
+        <p class="cancel-text">
+          Your subscription checkout has been cancelled.
+          No new subscription was created and you have not been charged.
+        </p>
+
+
+        <div class="divider"></div>
+
+
+        <div class="cancel-info">
+
+          <i class="ri-information-line"></i>
+
+          <div>
+            You can return to the pricing page and choose a WatchTeam
+            subscription whenever you're ready.
+          </div>
+
+        </div>
+
+
+        <a
+          href="/pricing"
+          class="pricing-button"
+        >
+
+          <i class="ri-price-tag-3-line"></i>
+
+          Back to Pricing
+
+          <i class="ri-arrow-right-line"></i>
+
+        </a>
+
+
+        <div class="bottom-text">
+          WatchTeam Secure Billing
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

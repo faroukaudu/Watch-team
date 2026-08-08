@@ -26,6 +26,13 @@
       </div>
     </div>
 
+    <% if (typeof subscriptionNotice !== "undefined" && subscriptionNotice) { %>
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="ri-information-line me-1"></i> <%= subscriptionNotice %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+
     <% if (!subscription) { %>
       <div class="row justify-content-center">
         <div class="col-xl-8">
@@ -138,6 +145,17 @@
                     <a href="/billing/paypal/manage" class="btn btn-warning btn-wave">
                       <i class="ri-paypal-line me-1"></i> Manage PayPal Subscription
                     </a>
+                  <% } %>
+
+                  <% if (subscription.isActive) { %>
+                    <button
+                      type="button"
+                      class="btn btn-danger-light btn-wave w-100"
+                      data-bs-toggle="modal"
+                      data-bs-target="#cancelSubscriptionModal"
+                    >
+                      <i class="ri-close-circle-line me-1"></i> Cancel Subscription
+                    </button>
                   <% } %>
                 </div>
               </div>
@@ -268,6 +286,17 @@
                     <i class="ri-paypal-line me-1"></i> PayPal Manage
                   </a>
                 <% } %>
+
+                <% if (subscription.isActive) { %>
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-wave"
+                    data-bs-toggle="modal"
+                    data-bs-target="#cancelSubscriptionModal"
+                  >
+                    <i class="ri-close-circle-line me-1"></i> Cancel Subscription
+                  </button>
+                <% } %>
               </div>
             </div>
           </div>
@@ -277,6 +306,43 @@
     <% } %>
   </div>
 </div>
+
+<% if (subscription && subscription.isActive) {
+     const expiryTime = subscription.expiresAt ? new Date(subscription.expiresAt).getTime() : Date.now();
+     const remainingMs = Math.max(0, expiryTime - Date.now());
+     const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+%>
+<div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="cancelSubscriptionModalLabel">Cancel Subscription?</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning mb-3">
+          <i class="ri-alert-line me-1"></i>
+          You still have <strong><%= remainingDays %> day<%= remainingDays === 1 ? "" : "s" %></strong> remaining on your current subscription.
+        </div>
+        <p class="mb-2">
+          Cancelling now will render your current subscription <strong>void immediately</strong>.
+        </p>
+        <p class="text-muted mb-0">
+          You will lose access to the features included in this plan, even though time remains in the current billing period. This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Keep Subscription</button>
+        <form action="/billing/cancel-subscription" method="POST" class="m-0">
+          <button type="submit" class="btn btn-danger">
+            Yes, Cancel Subscription
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
 
 <%- include("../includes/footer"); -%>
 

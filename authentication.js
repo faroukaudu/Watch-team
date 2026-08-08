@@ -214,7 +214,9 @@ app.post("/sign-up", async (req, res) => {
     const pending = req.session.pendingSuperAdminRegistration;
 
     if (!pending) {
-      return res.status(400).send("Registration session expired. Please start again.");
+      return res
+        .status(400)
+        .send("Registration session expired. Please start again.");
     }
 
     if (
@@ -222,113 +224,262 @@ app.post("/sign-up", async (req, res) => {
       String(code).trim() !== String(req.session.superAdminSignupCode) ||
       Date.now() > req.session.superAdminSignupCodeExpires
     ) {
-     return res.render("auth/signup-verify", {
-  email: pending.username,
-  error: "Invalid or expired verification code."
-});
+      return res.render("auth/signup-verify", {
+        email: pending.username,
+        error: "Invalid or expired verification code."
+      });
     }
 
-    const existingUser = await User.findOne({ username: pending.username });
+    // Normalize signup email
+    const signupEmail = String(pending.username || "")
+      .trim()
+      .toLowerCase();
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      username: signupEmail
+    });
 
     if (existingUser) {
-      return res.status(400).send("This email is already registered.");
+      return res
+        .status(400)
+        .send("This email is already registered.");
     }
 
+    // ==========================================
+    // PLATFORM ADMIN ROLE CHECK
+    // ==========================================
+
+    const admin1 = String(process.env.S_ADMIN1 || "")
+      .trim()
+      .toLowerCase();
+
+    const admin2 = String(process.env.S_ADMIN2 || "")
+      .trim()
+      .toLowerCase();
+
+    const isPlatformAdmin =
+      signupEmail === admin1 ||
+      signupEmail === admin2;
+
+    const userType = isPlatformAdmin
+      ? "Platform Admin"
+      : "Super Admin";
+
+    console.log("Signup role check:", {
+      signupEmail,
+      isPlatformAdmin,
+      userType
+    });
+
+    // ==========================================
+    // CREATE USER
+    // ==========================================
+
     const newUser = new User({
-      username: pending.username,
+      username: signupEmail,
       fullname: _.capitalize(pending.full_name),
       compName: _.capitalize(pending.company_name),
-      email: pending.username,
-      userType: "Super Admin",
+      email: signupEmail,
+      userType: userType,
       status: true,
       emailVerified: true
     });
 
-    User.register(newUser, pending.password, async function (err, user) {
-      if (err) {
-        console.log("Registration error:", err);
-        return res.send(err);
-      }
+    User.register(
+      newUser,
+      pending.password,
+      async function (err, user) {
+        if (err) {
+          console.log("Registration error:", err);
+          return res.status(500).send(err);
+        }
 
-      try {
-        const createNewCompany = {
-          companyName: user.compName,
-          backOfficeUser: {
-            bUserID: user._id,
-            bUsername: user.fullname,
-            bEmail: user.email
-          },
-          companyJoinCode: "ABC123"
-        };
+        try {
+          // ==========================================
+          // CREATE COMPANY
+          // ==========================================
 
-        const comp = await Company.create(createNewCompany);
+          const createNewCompany = {
+            companyName: user.compName,
 
-        user.assignedCompanyID = String(comp._id);
-        await user.save();
+            backOfficeUser: {
+              bUserID: user._id,
+              bUsername: user.fullname,
+              bEmail: user.email
+            },
 
-        const loginUrl = `${process.env.PUBLIC_BASE_URL || "http://localhost:9000"}/sign-in`;
+            companyJoinCode: "ABC123"
+          };
 
-        const welcomeHtml = `
-          <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:24px;">
-            <div style="max-width:650px;margin:auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;">
-              <div style="background:#0F3DFF;color:#ffffff;padding:24px;">
-                <h2 style="margin:0;">Welcome to Watch Team</h2>
-              </div>
+          const comp = await Company.create(createNewCompany);
 
-              <div style="padding:26px;color:#222;">
-                <p>Hello ${user.fullname || "there"},</p>
+          // Assign company to new user
+          user.assignedCompanyID = String(comp._id);
 
-                <p>
-                  Thank you for joining Watch Team. We are excited to help your company improve security operations,
-                  manage guards, track reports, and strengthen site protection.
-                </p>
+          await user.save();
 
-                <p>
-                  To start enjoying Watch Team services, please log in and subscribe to a plan.
-                </p>
+          // ==========================================
+          // LOGIN URL
+          // ==========================================
 
-                <div style="text-align:center;margin:28px 0;">
-                  <a href="${loginUrl}"
-                     style="background:#0F3DFF;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:bold;display:inline-block;">
-                    Login and Subscribe
-                  </a>
+          const loginUrl = `${
+            process.env.PUBLIC_BASE_URL ||
+            "http://localhost:9000"
+          }/sign-in`;
+
+          // ==========================================
+          // WELCOME EMAIL
+          // ==========================================
+
+          const welcomeHtml = `
+            <div
+              style="
+                font-family: Arial, sans-serif;
+                background: #f4f7fb;
+                padding: 24px;
+              "
+            >
+              <div
+                style="
+                  max-width: 650px;
+                  margin: auto;
+                  background: #ffffff;
+                  border-radius: 14px;
+                  overflow: hidden;
+                  border: 1px solid #e5e7eb;
+                "
+              >
+
+                <div
+                  style="
+                    background: #0F3DFF;
+                    color: #ffffff;
+                    padding: 24px;
+                  "
+                >
+                  <h2 style="margin: 0;">
+                    Welcome to Watch Team
+                  </h2>
                 </div>
 
-                <p style="font-size:13px;color:#6b7280;">
-                  If the button does not work, copy and paste this link into your browser:<br>
-                  ${loginUrl}
-                </p>
+                <div
+                  style="
+                    padding: 26px;
+                    color: #222;
+                  "
+                >
+
+                  <p>
+                    Hello ${user.fullname || "there"},
+                  </p>
+
+                  <p>
+                    Thank you for joining Watch Team.
+                    We are excited to help your company
+                    improve security operations,
+                    manage guards, track reports,
+                    and strengthen site protection.
+                  </p>
+
+                  <p>
+                    ${
+                      user.userType === "Platform Admin"
+                        ? `
+                          Your account has been created as a
+                          <strong>Platform Administrator</strong>.
+                        `
+                        : `
+                          To start enjoying Watch Team services,
+                          please log in and subscribe to a plan.
+                        `
+                    }
+                  </p>
+
+                  <div
+                    style="
+                      text-align: center;
+                      margin: 28px 0;
+                    "
+                  >
+                    <a
+                      href="${loginUrl}"
+                      style="
+                        background: #0F3DFF;
+                        color: #ffffff;
+                        text-decoration: none;
+                        padding: 14px 24px;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        display: inline-block;
+                      "
+                    >
+                      Login to Watch Team
+                    </a>
+                  </div>
+
+                  <p
+                    style="
+                      font-size: 13px;
+                      color: #6b7280;
+                    "
+                  >
+                    If the button does not work,
+                    copy and paste this link into your browser:
+                    <br>
+
+                    ${loginUrl}
+                  </p>
+
+                </div>
+
               </div>
             </div>
-          </div>
-        `;
+          `;
 
-        await emailSent({
-          sendTo: user.email,
-          title: "Welcome to Watch Team",
-          message: "Thank you for joining Watch Team. Please login and subscribe to a plan.",
-          template: welcomeHtml,
-          emailType: "super_admin_welcome"
-        });
+          await emailSent({
+            sendTo: user.email,
+            title: "Welcome to Watch Team",
+            message:
+              "Thank you for joining Watch Team.",
+            template: welcomeHtml,
+            emailType:
+              user.userType === "Platform Admin"
+                ? "platform_admin_welcome"
+                : "super_admin_welcome"
+          });
 
-        delete req.session.pendingSuperAdminRegistration;
-        delete req.session.superAdminSignupCode;
-        delete req.session.superAdminSignupCodeExpires;
+          // ==========================================
+          // CLEAR REGISTRATION SESSION
+          // ==========================================
 
-        return res.redirect("/sign-in");
+          delete req.session.pendingSuperAdminRegistration;
+          delete req.session.superAdminSignupCode;
+          delete req.session.superAdminSignupCodeExpires;
 
-      } catch (err) {
-        console.log("Company creation failed:", err);
-        return res.status(500).send("Company creation failed");
+          return res.redirect("/sign-in");
+
+        } catch (err) {
+          console.log(
+            "Company creation / welcome email failed:",
+            err
+          );
+
+          return res
+            .status(500)
+            .send("Company creation failed");
+        }
       }
-    });
+    );
 
   } catch (err) {
     console.log("Verify signup error:", err);
-    return res.status(500).send("Registration failed.");
+
+    return res
+      .status(500)
+      .send("Registration failed.");
   }
 });
-
 
 // Client Registration
 app.post("/new-client", async (req, res) => {

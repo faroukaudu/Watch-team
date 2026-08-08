@@ -84,35 +84,65 @@ app.post("/webhooks/stripe", require("express").raw({ type: "application/json" }
 
       if (session.mode === "subscription" && session.subscription) {
         const stripeSub = await stripe.subscriptions.retrieve(session.subscription);
-        const metadata = stripeSub.metadata || session.metadata || {};
+        const metadata = { ...(session.metadata || {}), ...(stripeSub.metadata || {}) };
+        const plan = PLAN_CONFIG[metadata.planCode || ""];
+        const isPaidAndUsable = ["active", "trialing"].includes(stripeSub.status);
 
-        const now = new Date();
-        const expiresAt = new Date(now);
-        expiresAt.setDate(expiresAt.getDate() + 30); // your current test rule
+        // Never replace a currently active plan with an incomplete/pending
+        // checkout. The old plan remains valid until Stripe confirms success.
+        if (plan && isPaidAndUsable) {
+          const now = new Date();
+          const expiresAt = stripeSub.current_period_end
+            ? new Date(stripeSub.current_period_end * 1000)
+            : (() => {
+                const d = new Date(now);
+                if (plan.billingCycle === "yearly") d.setFullYear(d.getFullYear() + 1);
+                else d.setMonth(d.getMonth() + 1);
+                return d;
+              })();
 
-        await UserSubscription.findOneAndUpdate(
-          {
-            userId: metadata.userId,
-            companyId: String(metadata.companyId || ""),
-          },
-          {
-            $set: {
-              username: metadata.username || "",
-              email: metadata.email || "",
-              gateway: "stripe",
-              planCode: metadata.planCode || "",
-              subscriptionStatus: stripeSub.status || "active",
-              isActive: ["active", "trialing"].includes(stripeSub.status),
-              stripeCustomerId: stripeSub.customer || "",
-              stripeSubscriptionId: stripeSub.id || "",
-              startsAt: now,
-              expiresAt,
-              canceledAt: null,
-              rawGatewayPayload: stripeSub,
+          await UserSubscription.findOneAndUpdate(
+            {
+              userId: metadata.userId,
+              companyId: String(metadata.companyId || ""),
             },
-          },
-          { upsert: true, new: true }
-        );
+            {
+              $set: {
+                userId: metadata.userId,
+                companyId: String(metadata.companyId || ""),
+                username: metadata.username || "",
+                email: metadata.email || "",
+                gateway: "stripe",
+                planCode: metadata.planCode || "",
+                planName: plan.planName,
+                billingCycle: plan.billingCycle,
+                amount: plan.amount,
+                currency: plan.currency,
+                commitmentMonths: plan.commitmentMonths || 1,
+                features: plan.features,
+                subscriptionStatus: stripeSub.status,
+                isActive: true,
+                stripeCheckoutSessionId: session.id || "",
+                stripeCustomerId: stripeSub.customer || "",
+                stripeSubscriptionId: stripeSub.id || "",
+                startsAt: now,
+                expiresAt,
+                canceledAt: null,
+                rawGatewayPayload: stripeSub,
+              },
+            },
+            { upsert: true, new: true }
+          );
+
+          const previousId = String(metadata.previousStripeSubscriptionId || "");
+          if (previousId && previousId !== stripeSub.id) {
+            try {
+              await stripe.subscriptions.cancel(previousId);
+            } catch (cancelError) {
+              console.error("Unable to cancel previous Stripe subscription:", cancelError.message);
+            }
+          }
+        }
       }
     }
 
@@ -122,34 +152,58 @@ app.post("/webhooks/stripe", require("express").raw({ type: "application/json" }
     ) {
       const stripeSub = dataObject;
       const metadata = stripeSub.metadata || {};
+      const plan = PLAN_CONFIG[metadata.planCode || ""];
+      const usable = ["active", "trialing"].includes(stripeSub.status);
 
-      const now = new Date();
-      const expiresAt = new Date(now);
-      expiresAt.setDate(expiresAt.getDate() + 30); // current test rule
+      // A newly-created Checkout subscription can briefly be "incomplete".
+      // Do not let that transient state deactivate the customer's old plan.
+      const current = await UserSubscription.findOne({
+        userId: metadata.userId,
+        companyId: String(metadata.companyId || ""),
+      }).lean();
+      const eventBelongsToCurrent = current?.stripeSubscriptionId === stripeSub.id;
 
-      await UserSubscription.findOneAndUpdate(
-        {
-          userId: metadata.userId,
-          companyId: String(metadata.companyId || ""),
-        },
-        {
-          $set: {
-            username: metadata.username || "",
-            email: metadata.email || "",
-            gateway: "stripe",
-            planCode: metadata.planCode || "",
-            subscriptionStatus: stripeSub.status || "active",
-            isActive: ["active", "trialing"].includes(stripeSub.status),
-            stripeCustomerId: stripeSub.customer || "",
-            stripeSubscriptionId: stripeSub.id || "",
-            startsAt: new Date(),
-            expiresAt,
-            canceledAt: null,
-            rawGatewayPayload: stripeSub,
+      if (plan && (usable || eventBelongsToCurrent)) {
+        const now = new Date();
+        const expiresAt = stripeSub.current_period_end
+          ? new Date(stripeSub.current_period_end * 1000)
+          : (() => {
+              const d = new Date(now);
+              if (plan.billingCycle === "yearly") d.setFullYear(d.getFullYear() + 1);
+              else d.setMonth(d.getMonth() + 1);
+              return d;
+            })();
+
+        await UserSubscription.findOneAndUpdate(
+          {
+            userId: metadata.userId,
+            companyId: String(metadata.companyId || ""),
           },
-        },
-        { upsert: true, new: true }
-      );
+          {
+            $set: {
+              username: metadata.username || current?.username || "",
+              email: metadata.email || current?.email || "",
+              gateway: "stripe",
+              planCode: metadata.planCode || current?.planCode || "",
+              planName: plan.planName,
+              billingCycle: plan.billingCycle,
+              amount: plan.amount,
+              currency: plan.currency,
+              commitmentMonths: plan.commitmentMonths || 1,
+              features: plan.features,
+              subscriptionStatus: stripeSub.status || "active",
+              isActive: usable,
+              stripeCustomerId: stripeSub.customer || "",
+              stripeSubscriptionId: stripeSub.id || "",
+              startsAt: current?.startsAt || now,
+              expiresAt,
+              canceledAt: usable ? null : current?.canceledAt || null,
+              rawGatewayPayload: stripeSub,
+            },
+          },
+          { upsert: usable, new: true }
+        );
+      }
     }
 
     if (event.type === "invoice.paid") {

@@ -16,7 +16,7 @@ async function emailSent({
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     service: process.env.SERVER_SERVICE,
-    // port: 587,
+    port: process.env.EMAIL_PORT,
     tls: {
       rejectUnauthorized: true,
       servername: process.env.SERVER_NAME,

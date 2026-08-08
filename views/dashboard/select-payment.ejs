@@ -1,47 +1,849 @@
 <%- include("../includes/header", { user: userInfo }); -%>
 
-<div class="main-content app-content">
-  <div class="container-fluid">
-    <div class="my-4">
-      <h1 class="page-title fw-medium fs-18 mb-2">Choose Payment Gateway</h1>
-      <p class="text-muted mb-4">
-        Plan: <strong><%= selectedPlan.planName %></strong> -
-        <strong><%= selectedPlan.billingCycle %></strong> -
-        <strong>$<%= selectedPlan.amount %></strong>
+<style>
+  /* =========================
+     PAGE / BACKGROUND
+  ========================== */
+.payment-page {
+  position: relative;
+
+  /* Fill the available dashboard content area */
+  width: 100%;
+
+  /* Account for top navigation */
+  min-height: calc(100vh - 70px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  padding: 35px 20px;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(99, 91, 255, 0.20),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 85% 75%,
+      rgba(130, 80, 255, 0.18),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #090d19 0%,
+      #101629 50%,
+      #090d19 100%
+    );
+
+  box-sizing: border-box;
+}
+
+
+  /* Moving grid */
+  .payment-grid {
+    position: absolute;
+    inset: 0;
+
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+
+    background-size: 45px 45px;
+
+    animation: moveGrid 15s linear infinite;
+  }
+
+  /* Background glowing blobs */
+  .payment-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+
+  .payment-glow.one {
+    width: 320px;
+    height: 320px;
+    background: rgba(99, 91, 255, 0.25);
+    top: -90px;
+    left: -70px;
+    animation: glowMoveOne 8s ease-in-out infinite alternate;
+  }
+
+  .payment-glow.two {
+    width: 380px;
+    height: 380px;
+    background: rgba(145, 70, 255, 0.20);
+    right: -100px;
+    bottom: -130px;
+    animation: glowMoveTwo 10s ease-in-out infinite alternate;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(160, 140, 255, 0.75);
+
+    box-shadow:
+      0 0 10px rgba(130, 100, 255, 0.8),
+      0 0 22px rgba(130, 100, 255, 0.4);
+
+    animation: particleFloat 7s ease-in-out infinite;
+  }
+
+  .particle.p1 {
+    left: 12%;
+    top: 30%;
+  }
+
+  .particle.p2 {
+    left: 22%;
+    bottom: 18%;
+    animation-delay: 2s;
+  }
+
+  .particle.p3 {
+    right: 16%;
+    top: 22%;
+    animation-delay: 1s;
+  }
+
+  .particle.p4 {
+    right: 23%;
+    bottom: 22%;
+    animation-delay: 3s;
+  }
+
+
+  /* =========================
+     MAIN CONTAINER
+  ========================== */
+
+
+
+  /* =========================
+     PAGE TITLE
+  ========================== */
+  .gateway-heading {
+    margin-bottom: 18px;
+  }
+
+  .gateway-heading h1 {
+    color: #ffffff;
+
+    font-size: 25px;
+    font-weight: 750;
+
+    margin-bottom: 7px;
+  }
+
+  .gateway-heading p {
+    color: rgba(255,255,255,0.52);
+
+    font-size: 13px;
+
+    margin: 0;
+  }
+
+
+  /* =========================
+     GLASS PAYMENT PANEL
+  ========================== */
+  .payment-panel {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 28px 28px 26px;
+
+    border-radius: 24px;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(255,255,255,0.09),
+        rgba(255,255,255,0.035)
+      );
+
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+
+    border: 1px solid rgba(255,255,255,0.11);
+
+    box-shadow:
+      0 30px 70px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+
+    animation: panelEnter 0.7s cubic-bezier(.2,.8,.2,1);
+  }
+
+
+  /* Animated top glow */
+  .payment-panel::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -40%;
+
+    width: 180%;
+    height: 1px;
+
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(120,100,255,0.2),
+      #9b8cff,
+      rgba(120,100,255,0.2),
+      transparent
+    );
+
+    animation: topGlow 4s linear infinite;
+  }
+
+
+  /* Subtle inner futuristic glow */
+  .payment-panel::after {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    border-radius: 50%;
+
+    top: -120px;
+    right: -70px;
+
+    background: rgba(99, 91, 255, 0.18);
+
+    filter: blur(40px);
+
+    pointer-events: none;
+  }
+
+
+  /* =========================
+     ICON
+  ========================== */
+  .stripe-icon {
+    position: relative;
+    z-index: 2;
+
+    width: 56px;
+    height: 56px;
+
+    margin: 0 auto 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 17px;
+
+    color: #ffffff;
+
+    font-size: 23px;
+
+    background:
+      linear-gradient(
+        135deg,
+        rgba(110, 94, 255, 0.95),
+        rgba(130, 73, 255, 0.95)
+      );
+
+    box-shadow:
+      0 10px 30px rgba(99,91,255,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.25);
+
+    animation: iconFloat 3s ease-in-out infinite;
+  }
+
+
+  /* =========================
+     LABEL
+  ========================== */
+  .secure-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    margin-bottom: 10px;
+
+    padding: 5px 10px;
+
+    border-radius: 50px;
+
+    border: 1px solid rgba(145,125,255,0.20);
+
+    background: rgba(99,91,255,0.10);
+
+    color: #b9afff;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .7px;
+    text-transform: uppercase;
+  }
+
+
+  /* =========================
+     TITLE
+  ========================== */
+  .panel-title {
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: 700;
+
+    margin-bottom: 5px;
+  }
+
+  .panel-subtitle {
+    color: rgba(255,255,255,0.50);
+
+    font-size: 12px;
+
+    margin-bottom: 18px;
+  }
+
+
+  /* =========================
+     PLAN SUMMARY
+  ========================== */
+  .plan-box {
+    position: relative;
+    z-index: 2;
+
+    padding: 17px 18px;
+
+    margin-bottom: 18px;
+
+    border-radius: 17px;
+
+    text-align: left;
+
+    background: rgba(255,255,255,0.045);
+
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+
+  .plan-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+  }
+
+
+  .plan-info {
+    min-width: 0;
+  }
+
+
+  .plan-name {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 650;
+
+    margin-bottom: 3px;
+  }
+
+
+  .plan-cycle {
+    color: rgba(255,255,255,0.42);
+
+    font-size: 11px;
+  }
+
+
+  .plan-tag {
+    flex-shrink: 0;
+
+    padding: 4px 9px;
+
+    border-radius: 50px;
+
+    color: #b9afff;
+
+    background: rgba(99,91,255,0.12);
+
+    border: 1px solid rgba(145,125,255,0.14);
+
+    font-size: 9px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .5px;
+  }
+
+
+  /* =========================
+     PRICE
+  ========================== */
+  .price-area {
+    margin-top: 15px;
+
+    padding-top: 14px;
+
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+
+  .price-label {
+    display: block;
+
+    color: rgba(255,255,255,0.35);
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 5px;
+  }
+
+
+  .price-row {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 6px;
+  }
+
+
+  .price {
+    color: #ffffff;
+
+    font-size: 39px;
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing: -1.5px;
+
+    text-shadow: 0 0 25px rgba(130,110,255,0.18);
+  }
+
+
+  .price-period {
+    color: rgba(255,255,255,0.40);
+
+    font-size: 11px;
+
+    padding-bottom: 4px;
+  }
+
+
+  /* =========================
+     STRIPE BUTTON
+  ========================== */
+  .stripe-button {
+    position: relative;
+
+    width: 100%;
+
+    border: none;
+
+    overflow: hidden;
+
+    padding: 13px 18px;
+
+    border-radius: 13px;
+
+    color: #ffffff;
+
+    background:
+      linear-gradient(
+        110deg,
+        #635bff,
+        #7f5cff,
+        #6d49ff
+      );
+
+    font-size: 13px;
+    font-weight: 650;
+
+    box-shadow:
+      0 10px 25px rgba(99,91,255,0.25);
+
+    transition:
+      transform .25s ease,
+      box-shadow .25s ease;
+  }
+
+
+  .stripe-button::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -100%;
+
+    width: 50%;
+    height: 100%;
+
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.28),
+      transparent
+    );
+
+    transform: skewX(-20deg);
+
+    animation: buttonLight 3.5s ease-in-out infinite;
+  }
+
+
+  .stripe-button:hover {
+    color: #ffffff;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+      0 15px 35px rgba(99,91,255,0.38);
+  }
+
+
+  /* =========================
+     SECURITY
+  ========================== */
+  .security {
+    margin-top: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    color: rgba(255,255,255,0.32);
+
+    font-size: 10px;
+  }
+
+
+  .security-dot {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #47d78a;
+
+    box-shadow: 0 0 9px rgba(71,215,138,.7);
+
+    animation: dotPulse 2s infinite;
+  }
+
+
+  /* =========================
+     ANIMATIONS
+  ========================== */
+
+  @keyframes moveGrid {
+    from {
+      background-position: 0 0;
+    }
+
+    to {
+      background-position: 90px 90px;
+    }
+  }
+
+
+  @keyframes glowMoveOne {
+    from {
+      transform: translate(0, 0);
+    }
+
+    to {
+      transform: translate(80px, 60px);
+    }
+  }
+
+
+  @keyframes glowMoveTwo {
+    from {
+      transform: translate(0, 0);
+    }
+
+    to {
+      transform: translate(-70px, -50px);
+    }
+  }
+
+
+  @keyframes particleFloat {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: .4;
+    }
+
+    50% {
+      transform: translateY(-25px) scale(1.4);
+      opacity: 1;
+    }
+  }
+
+
+  @keyframes panelEnter {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+
+  @keyframes iconFloat {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+
+  @keyframes topGlow {
+    0% {
+      transform: translateX(-20%);
+    }
+
+    100% {
+      transform: translateX(20%);
+    }
+  }
+
+
+  @keyframes buttonLight {
+    0% {
+      left: -100%;
+    }
+
+    45%,
+    100% {
+      left: 150%;
+    }
+  }
+
+
+  @keyframes dotPulse {
+    0%,
+    100% {
+      opacity: .6;
+    }
+
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 14px rgba(71,215,138,.9);
+    }
+  }
+
+
+  /* =========================
+     MOBILE
+  ========================== */
+  @media (max-width: 576px) {
+
+    .payment-page {
+      min-height: 68vh;
+      padding: 30px 15px;
+    }
+
+    .payment-container {
+      max-width: 390px;
+    }
+
+    .payment-panel {
+      padding: 24px 20px;
+      border-radius: 20px;
+    }
+
+    .gateway-heading h1 {
+      font-size: 22px;
+    }
+
+    .price {
+      font-size: 34px;
+    }
+  }
+</style>
+
+
+<div class="payment-page">
+
+  <!-- Background effects -->
+  <div class="payment-grid"></div>
+
+  <div class="payment-glow one"></div>
+  <div class="payment-glow two"></div>
+
+  <span class="particle p1"></span>
+  <span class="particle p2"></span>
+  <span class="particle p3"></span>
+  <span class="particle p4"></span>
+
+
+  <div class="payment-container" >
+
+    <!-- PAGE HEADER -->
+    <div class="gateway-heading">
+
+      <h1>
+        Choose Payment Gateway
+      </h1>
+
+      <p>
+        Securely complete your WatchTeam subscription within minutes.
       </p>
 
-      <div class="row justify-content-center">
-        <div class="col-md-5">
-          <div class="card custom-card">
-            <div class="card-body text-center p-4">
-              <h4 class="mb-2">Stripe</h4>
-              <p class="text-muted">Use Stripe hosted subscription checkout.</p>
-
-              <form action="/billing/stripe/checkout" method="POST">
-                <input type="hidden" name="planCode" value="<%= planCode %>">
-                <button type="submit" class="btn btn-primary w-100">
-                  Continue with Stripe
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-5">
-          <div class="card custom-card">
-            <div class="card-body text-center p-4">
-              <h4 class="mb-2">PayPal</h4>
-              <p class="text-muted">Use PayPal hosted subscription approval.</p>
-
-              <a href="/billing/paypal/checkout?planCode=<%= encodeURIComponent(planCode) %>" class="btn btn-warning w-100">
-                Continue with PayPal
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
+
+
+    <!-- GLASS PAYMENT PANEL -->
+    <div class="payment-panel">
+
+      <div class="stripe-icon">
+        <i class="ri-bank-card-line"></i>
+      </div>
+
+
+      <div class="secure-badge">
+        <i class="ri-shield-check-line"></i>
+        Secure Checkout
+      </div>
+
+
+      <h3 class="panel-title">
+        Complete Your Subscription
+      </h3>
+
+
+      <p class="panel-subtitle">
+        Review your selected plan before continuing to Stripe.
+      </p>
+
+
+      <!-- PLAN DETAILS -->
+      <div class="plan-box">
+
+        <div class="plan-top">
+
+          <div class="plan-info">
+
+            <div class="plan-name">
+              <%= selectedPlan.planName %>
+            </div>
+
+            <div class="plan-cycle">
+              <%= selectedPlan.billingCycle %> subscription
+            </div>
+
+          </div>
+
+
+          <div class="plan-tag">
+            Selected Plan
+          </div>
+
+        </div>
+
+
+        <div class="price-area">
+
+          <span class="price-label">
+            Amount Due
+          </span>
+
+
+          <div class="price-row">
+
+            <div class="price">
+              $<%= selectedPlan.amount %>
+            </div>
+
+            <div class="price-period">
+              / <%= selectedPlan.billingCycle %>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- STRIPE -->
+      <form
+        action="/billing/stripe/checkout"
+        method="POST"
+      >
+
+        <input
+          type="hidden"
+          name="planCode"
+          value="<%= planCode %>"
+        >
+
+
+        <button
+          type="submit"
+          class="stripe-button"
+        >
+
+          <i class="ri-lock-2-line me-2"></i>
+
+          Pay $<%= selectedPlan.amount %> Securely
+
+          <i class="ri-arrow-right-line ms-2"></i>
+
+        </button>
+
+      </form>
+
+
+      <div class="security">
+
+        <span class="security-dot"></span>
+
+        <span>
+          Encrypted payment powered by Stripe
+        </span>
+
+      </div>
+
+    </div>
+
   </div>
+
 </div>
+
 
 <%- include("../includes/footer"); -%>
