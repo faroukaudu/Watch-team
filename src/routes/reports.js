@@ -8,6 +8,7 @@ const ReportTemplate = require("../models/reportTemplate");
 const { emailSent } = require("../../nodemailer");
 const crypto = require("crypto");
 const PublicReportBatch = require("../models/PublicReportBatch");
+const SiteTour = require("../models/SiteTour");
 
 const Company = mongoose.model("Company", companyInfo);
 
@@ -345,6 +346,16 @@ app.post("/reports/:id/resend-code-red-email",
         companyID: comFound._id,
         status: false,
       });
+
+      // Link NFC/site-tour reports to today's tour progress so the completed tour
+      // and the client activity report can reference the exact submitted report.
+      if (fields?.siteTourId && fields?.tourDateKey && userInfo?._id) {
+        await SiteTour.updateOne(
+          { _id: fields.siteTourId, companyId: String(comFound._id), "progress.dateKey": String(fields.tourDateKey) },
+          { $addToSet: { "progress.$[p].nfcReportIds": String(report._id) } },
+          { arrayFilters: [{ "p.dateKey": String(fields.tourDateKey), "p.guardId": String(userInfo._id) }] }
+        ).catch((err) => console.error("NFC report link error:", err.message));
+      }
 
       try {
         const postSiteId = String((fields && (fields.postSiteId || fields.postSiteID || fields.postSite)) || "");

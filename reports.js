@@ -11,6 +11,7 @@ var companyInfo = require(__dirname + "/db/companyinfodb.js");
 const { ObjectId } = require("mongodb");
 const MobileReport = require("./src/models/report.js");
 const ReportTemplate = require("./src/models/reportTemplate");
+const ShiftTemplate = require("./src/models/ShiftTemplate");
 const { requireActiveSubscription, requireFeature, requireNumericFeature } = require("./src/middleware/requireSubscription");
 const { isClientUser, getClientScope } = require("./src/utils/clientScope");
 
@@ -145,6 +146,40 @@ app.get("/func", async (req, res) => {
 
 
 
+
+function parseShiftTimeForDate(timeText, baseDate = new Date()) {
+  const parts = String(timeText || "").trim().split(":");
+  if (parts.length < 2) return null;
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  const d = new Date(baseDate);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
+
+function resolveShiftWindow(startText, endText, now = new Date()) {
+  let start = parseShiftTimeForDate(startText, now);
+  let end = parseShiftTimeForDate(endText, now);
+  if (!start || !end) return { start: null, end: null };
+  if (end <= start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+  if (now < start && now.getHours() < 12 && end.getDate() !== start.getDate()) {
+    start = new Date(start.getTime() - 24 * 60 * 60 * 1000);
+    end = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+  }
+  return { start, end };
+}
+
+function distanceMeters(lat1, lon1, lat2, lon2) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371000;
+  const p1 = toRad(lat1), p2 = toRad(lat2);
+  const dp = toRad(lat2 - lat1), dl = toRad(lon2 - lon1);
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function getActiveGuardSession(company, guardId) {
   return company.checkedReport.find((report) =>
     String(report.guardId) === String(guardId) && report.checkIn === true
@@ -207,7 +242,7 @@ app.get("/guard-active-session", async (req, res) => {
 
 app.post("/checking", async (req, res) => {
   try {
-    const { time, guardInfo, postSiteId, clientId } = req.body;
+    const { time, guardInfo, postSiteId, clientId, latitude, longitude, selectedShift } = req.body;
     const companyId = guardInfo?.assignedCompanyID;
     const guardId = guardInfo?._id;
 
@@ -221,6 +256,31 @@ app.post("/checking", async (req, res) => {
     const company = await Company.findById(companyId);
     if (!company) {
       return res.status(404).json({ success: false, message: "Company not found." });
+    }
+
+    const shift = selectedShift && typeof selectedShift === "object" ? selectedShift : null;
+    if (!shift || !shift._id) return res.status(409).json({ success: false, message: "Please select an open shift before checking in." });
+    const dbShift = await ShiftTemplate.findById(shift._id).lean();
+    if (!dbShift) return res.status(409).json({ success: false, message: "Selected shift no longer exists." });
+    if (String(dbShift.companyId || dbShift.assignedCompanyID || companyId) !== String(companyId)) return res.status(403).json({ success: false, message: "Selected shift does not belong to this company." });
+    if (String(dbShift.postSiteId || "") !== String(postSiteId)) return res.status(409).json({ success: false, message: "This selected shift is not assigned to this post site." });
+    const now = new Date();
+    const window = resolveShiftWindow(dbShift.startTime, dbShift.endTime, now);
+    if (window.start && now < new Date(window.start.getTime() - 10 * 60 * 1000)) return res.status(409).json({ success: false, message: "Shift not started yet" });
+    if (window.end && now > window.end) return res.status(409).json({ success: false, message: "Shift has already ended" });
+
+    const post = Array.isArray(company.postSite)
+      ? company.postSite.find((p) => String(p._id || p.id) === String(postSiteId))
+      : null;
+    const siteLat = Number(post?.lat);
+    const siteLng = Number(post?.long ?? post?.lng);
+    const guardLat = Number(latitude);
+    const guardLng = Number(longitude);
+    if (!Number.isFinite(siteLat) || !Number.isFinite(siteLng) || !Number.isFinite(guardLat) || !Number.isFinite(guardLng)) {
+      return res.status(409).json({ success: false, message: "Guard location or post site location is unavailable." });
+    }
+    if (distanceMeters(guardLat, guardLng, siteLat, siteLng) > 30) {
+      return res.status(409).json({ success: false, message: "Guard is not at post site location" });
     }
 
     const activeReport = getActiveGuardSession(company, guardId);
@@ -324,12 +384,15 @@ app.post("/clocking", async (req, res) => {
       });
     }
     if (getActiveClock(activeReport)) {
-      return res.status(409).json({
-        success: false,
-        message: "You are already clocked in.",
-        activeSession: serializeActiveSession(activeReport),
-      });
+      return res.status(409).json({ success: false, message: "You are already clocked in.", activeSession: serializeActiveSession(activeReport) });
     }
+    const dbShift = shiftTemplateId ? await ShiftTemplate.findById(shiftTemplateId).lean() : null;
+    if (!dbShift) return res.status(409).json({ success: false, message: "Please select a valid shift before clocking in." });
+    if (String(dbShift.postSiteId || "") !== String(activeReport.postSite || "")) return res.status(409).json({ success: false, message: "Selected shift does not match this post site." });
+    const now = new Date();
+    const window = resolveShiftWindow(dbShift.startTime, dbShift.endTime, now);
+    if (window.start && now < new Date(window.start.getTime() - 10 * 60 * 1000)) return res.status(409).json({ success: false, message: "Shift not started yet" });
+    if (window.end && now > window.end) return res.status(409).json({ success: false, message: "Shift has already ended" });
 
     const startedAt = clockInAt ? new Date(clockInAt) : new Date();
     activeReport.clock.push({

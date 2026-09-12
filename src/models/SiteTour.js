@@ -46,7 +46,7 @@ const siteTourProgressSchema = new mongoose.Schema(
     completedAt: Date,
     status: {
       type: String,
-      enum: ["Not Started", "In Progress", "Completed"],
+      enum: ["Not Started", "In Progress", "Ready to Finish", "Completed"],
       default: "Not Started",
     },
     checkpointSnapshot: [
@@ -56,6 +56,11 @@ const siteTourProgressSchema = new mongoose.Schema(
         order: Number,
       },
     ],
+    completionComment: { type: String, default: "" },
+    completionImages: { type: [String], default: [] },
+    nfcReportIds: { type: [String], default: [] },
+    finishedByGuardId: { type: String, default: "" },
+    finishedByGuardName: { type: String, default: "" },
     scannedCheckpoints: [
       {
         checkpointId: String,
@@ -97,8 +102,8 @@ const siteTourSchema = new mongoose.Schema(
 
     durationKey: {
       type: String,
-      enum: ["1_week", "1_month", "3_months", "6_months", "1_year"],
-      default: "1_year",
+      enum: ["1_week", "1_month", "3_months", "6_months", "1_year", "forever"],
+      default: "forever",
     },
     scheduleStartDate: Date,
     scheduleEndDate: Date,

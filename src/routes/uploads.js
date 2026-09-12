@@ -38,7 +38,7 @@ const cloudinary = require("../cloudinary");
 module.exports = function registerUploadRoutes(app) {
   app.post("/uploads/cloudinary-sign", (req, res) => {
   try {
-    const { reportId, dispatchId, visitorTempId, kind, moduleType } = req.body;
+    const { reportId, dispatchId, visitorTempId, siteTourId, guardId, dateKey, kind, moduleType } = req.body;
 
     if (!kind) {
       return res.status(400).json({ error: "kind is required" });
@@ -61,14 +61,20 @@ module.exports = function registerUploadRoutes(app) {
       folder = `watch-team/visitors/${visitorTempId}/${kind}`;
 
     } else if (moduleType === "watchmode") {
-  const { watchModeTempId } = req.body;
+      const { watchModeTempId } = req.body;
 
-  if (!watchModeTempId) {
-    return res.status(400).json({ error: "watchModeTempId is required" });
-  }
-folder = `watch-team/watchmode/${watchModeTempId}/${kind}`;
-    
-}else {
+      if (!watchModeTempId) {
+        return res.status(400).json({ error: "watchModeTempId is required" });
+      }
+      folder = `watch-team/watchmode/${watchModeTempId}/${kind}`;
+
+    } else if (moduleType === "site_tour") {
+      if (!siteTourId || !guardId || !dateKey) {
+        return res.status(400).json({ error: "siteTourId, guardId and dateKey are required" });
+      }
+      folder = `watch-team/site-tours/${siteTourId}/${dateKey}/${guardId}/${kind}`;
+
+    } else {
       if (!reportId) {
         return res.status(400).json({ error: "reportId is required" });
       }

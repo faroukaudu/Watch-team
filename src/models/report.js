@@ -42,6 +42,12 @@ const ReportSchema = new mongoose.Schema(
 
     status: { type: Boolean, default: false },
 
+    systemGenerated: { type: Boolean, default: false, index: true },
+    systemReportType: { type: String, default: "" },
+    systemDateKey: { type: String, default: "", index: true },
+    postSiteId: { type: String, default: "", index: true },
+    guardId: { type: String, default: "", index: true },
+
     publicShareToken: { type: String, default: null, index: true },
     publicShareEnabled: { type: Boolean, default: false },
     publicShareExpiresAt: { type: Date, default: null },

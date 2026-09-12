@@ -26,6 +26,17 @@ const PublicReportBatch = require("./src/models/PublicReportBatch");
 const cron = require("node-cron");
 const ScheduledPostSiteReport = require("./src/models/ScheduledPostSiteReport");
 const ScheduledPostSiteReportLog = require("./src/models/ScheduledPostSiteReportLog");
+const SiteTour = require("./src/models/SiteTour");
+const WatchMode = require("./src/models/WatchMode");
+const Note = require("./src/models/note");
+const Passdown = require("./src/models/Passdown");
+const Dispatch = require("./src/models/Dispatch");
+const Visitor = require("./src/models/Visitor");
+const VehiclePatrol = require("./src/models/VehiclePatrol");
+const Checklist = require("./src/models/Checklist");
+const PostSiteTask = require("./src/models/PostSiteTask");
+const ParkingManager = require("./src/models/ParkingManager");
+
 
 app.post("/add-guard-invite", async (req, res) => {
   console.log("Submit guard invite");
@@ -386,6 +397,100 @@ app.post("/send-fake", async (req, res) => {
 
 
 // //////////////////////////////////////////////////////////////////
+
+function dateKeyFor(value) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+}
+
+function fmt(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+}
+
+function secsFromDuration(value) {
+  const parts = String(value || "0:0:0").split(":").map(Number);
+  return Math.max(0, (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0));
+}
+function fmtHours(seconds) {
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+async function buildOperationalActivityReports({ companyId, postSiteId, startDate, endDate }) {
+  const start = new Date(startDate), end = new Date(endDate);
+  const company = await Company.findById(companyId).lean();
+  if (!company) return [];
+
+  const attendance = (company.checkedReport || []).filter(r => {
+    const when = new Date(r.checkInAt || r.checkInTime || 0);
+    return String(r.postSite || "") === String(postSiteId) && when >= start && when <= end;
+  });
+  const guardIds = [...new Set(attendance.map(r => String(r.guardId || "")).filter(Boolean))];
+  const range = { $gte: start, $lte: end };
+  const [submitted, tours, watches, notes, passdowns, dispatches, visitors, patrols, checklists, tasks, parkingZones] = await Promise.all([
+    MobileReport.find({ companyID: String(companyId), "fields.postSiteId": String(postSiteId), createdAt: range, systemGenerated: { $ne: true } }).lean().catch(()=>[]),
+    SiteTour.find({ companyId: String(companyId), postSiteId: String(postSiteId) }).lean().catch(()=>[]),
+    WatchMode.find({ companyId: String(companyId), guardId: { $in: guardIds }, createdAt: range }).lean().catch(()=>[]),
+    Note.find({ companyID: String(companyId), postSiteID: String(postSiteId), createdAt: range }).lean().catch(()=>[]),
+    Passdown.find({ companyId: String(companyId), postSiteId: String(postSiteId), createdAt: range }).lean().catch(()=>[]),
+    Dispatch.find({ companyId: String(companyId), postSiteId: String(postSiteId), createdAt: range }).lean().catch(()=>[]),
+    Visitor.find({ companyId: String(companyId), postSiteId: String(postSiteId), createdAt: range }).lean().catch(()=>[]),
+    VehiclePatrol.find({ companyId: String(companyId), postSiteId: String(postSiteId) }).lean().catch(()=>[]),
+    Checklist.find({ companyId: String(companyId), postSiteId: String(postSiteId) }).lean().catch(()=>[]),
+    PostSiteTask.find({ companyId: String(companyId), postSiteId: String(postSiteId) }).lean().catch(()=>[]),
+    ParkingManager.find({ companyId: String(companyId), postSiteId: String(postSiteId) }).lean().catch(()=>[]),
+  ]);
+
+  const groups = new Map();
+  const getGroup = (guardId, guardName, day) => {
+    const key = `${guardId}|${day}`;
+    if (!groups.has(key)) groups.set(key, { guardId, guardName: guardName || "Guard", day, fields: {} });
+    return groups.get(key);
+  };
+
+  for (const a of attendance) {
+    const day = dateKeyFor(a.checkInAt || a.checkInTime); if (!day) continue;
+    const g = getGroup(String(a.guardId||""), a.guardName, day);
+    g.fields['Check In'] = fmt(a.checkInAt || a.checkInTime);
+    if (a.checkedOutAt || a.checkOutTime) g.fields['Check Out'] = fmt(a.checkedOutAt || a.checkOutTime);
+    let worked=0;
+    (a.clock || []).forEach((c,i)=>{
+      const n=i+1;
+      if (c.shiftTitle) g.fields[`Shift ${n}`]=c.shiftTitle;
+      if (c.clockInAt || c.clockInTime) g.fields[`Clock In ${n}`]=fmt(c.clockInAt || c.clockInTime);
+      if (c.clockOutAt || c.clockOutTime) g.fields[`Clock Out ${n}`]=fmt(c.clockOutAt || c.clockOutTime);
+      if (c.workTime) { g.fields[`Work Time ${n}`]=c.workTime; worked += secsFromDuration(c.workTime); }
+      if (c.breakTime) g.fields[`Break Time ${n}`]=c.breakTime;
+      if (c.overtime && c.overtime !== '0:00:00') g.fields[`Overtime ${n}`]=c.overtime;
+    });
+    if (worked) g.fields['Total Working Hours']=fmtHours(worked);
+  }
+
+  submitted.forEach(r=>{ const day=dateKeyFor(r.createdAt); const gid=String(r.userId||r.fields?.guardId||''); if(!day||!gid)return; const g=getGroup(gid,r.fullname,day); const arr=g.fields['Reports Submitted']||[]; arr.push(`${r.title} (${fmt(r.createdAt)})`); g.fields['Reports Submitted']=arr; });
+  tours.forEach(t=>(t.progress||[]).forEach(pr=>{ if(!pr.dateKey || pr.dateKey < dateKeyFor(start) || pr.dateKey > dateKeyFor(end) || !pr.guardId)return; const g=getGroup(String(pr.guardId),pr.guardName,pr.dateKey); const scans=(pr.scannedCheckpoints||[]).map(x=>`${x.checkpointName} - ${x.scanType||'Scan'} - ${fmt(x.scannedAt)}`); if(scans.length) g.fields[`Site Tour - ${t.tourName}`]=scans; if(pr.completionComment) g.fields[`Tour Comment - ${t.tourName}`]=pr.completionComment; if((pr.completionImages||[]).length) g.fields[`Tour Pictures - ${t.tourName}`]=pr.completionImages; }));
+  watches.forEach(x=>{const day=dateKeyFor(x.createdAt),g=getGroup(String(x.guardId),x.guardName,day); const a=g.fields['Watch Mode']||[]; a.push(`${fmt(x.createdAt)}${x.note?` - ${x.note}`:''} - ${x.videoUrl}`); g.fields['Watch Mode']=a;});
+  notes.forEach(x=>{const g=getGroup(String(x.guardID),x.guardName,dateKeyFor(x.createdAt)); const a=g.fields['Notes']||[]; a.push(`${x.title}: ${x.note}`); g.fields['Notes']=a;});
+  passdowns.forEach(x=>{const g=getGroup(String(x.guardId),x.guardName,dateKeyFor(x.createdAt)); const a=g.fields['Passdowns']||[]; a.push(`${x.title}: ${x.message}`); g.fields['Passdowns']=a;});
+  dispatches.forEach(x=>{if(!x.guardId)return; const g=getGroup(String(x.guardId),x.guardName,dateKeyFor(x.acceptedAt||x.createdAt)); const a=g.fields['Dispatch']||[]; a.push(`${x.incidentType||'Dispatch'} - ${x.status||''}${x.actionTaken?` - ${x.actionTaken}`:''}`); g.fields['Dispatch']=a;});
+  visitors.forEach(x=>{const g=getGroup(String(x.guardId),x.guardName,dateKeyFor(x.visitDateTime||x.createdAt)); const a=g.fields['Visitors']||[]; a.push(`${x.visitorName||'Visitor'} - ${x.purposeOfVisit||''}`); g.fields['Visitors']=a;});
+  patrols.forEach(x=>(x.sessions||[]).forEach(pr=>{const when=pr.completedAt||pr.startedAt; if(!when||new Date(when)<start||new Date(when)>end)return; const g=getGroup(String(pr.guardId),pr.guardName,dateKeyFor(when)); const a=g.fields['Vehicle Patrol']||[]; a.push(`${x.patrolName} - ${pr.status}${pr.notes?` - ${pr.notes}`:''}`); g.fields['Vehicle Patrol']=a;}));
+  checklists.forEach(x=>(x.progress||[]).forEach(pr=>{if(!pr.updatedAt||new Date(pr.updatedAt)<start||new Date(pr.updatedAt)>end)return; const g=getGroup(String(pr.guardId),'Guard',dateKeyFor(pr.updatedAt)); const a=g.fields['Checklists']||[]; a.push(`${x.name} - ${pr.completed?'Completed':'Updated'}`); g.fields['Checklists']=a;}));
+  tasks.forEach(x=>(x.completions||[]).forEach(pr=>{if(!pr.completedAt||new Date(pr.completedAt)<start||new Date(pr.completedAt)>end)return; const g=getGroup(String(pr.guardId),'Guard',dateKeyFor(pr.completedAt)); const a=g.fields['Tasks']||[]; a.push(`${x.taskName} - ${pr.status}`); g.fields['Tasks']=a;}));
+  parkingZones.forEach(z=>(z.records||[]).forEach(r=>{const when=r.createdAt||r.checkedInAt; if(!when||new Date(when)<start||new Date(when)>end)return; const g=getGroup(String(r.guardId),r.guardName,dateKeyFor(when)); const a=g.fields['Parking Activity']||[]; a.push(`${r.type}: ${r.plateNumber} - ${r.status}`); g.fields['Parking Activity']=a;}));
+
+  const out=[];
+  for (const g of groups.values()) {
+    if (!g.guardId || !Object.keys(g.fields).length) continue;
+    g.fields['Activity Date']=g.day;
+    const filter={companyID:String(companyId),postSiteId:String(postSiteId),guardId:g.guardId,systemGenerated:true,systemReportType:'daily_guard_activity',systemDateKey:g.day};
+    const doc=await MobileReport.findOneAndUpdate(filter,{$set:{title:`Daily Guard Activity - ${g.guardName} - ${g.day}`,category:'log',fields:g.fields,userId:g.guardId,fullname:g.guardName,status:true,postSiteId:String(postSiteId)}},{new:true,upsert:true,setDefaultsOnInsert:true});
+    out.push(doc);
+  }
+  return out;
+}
+
 /////////////////////////SENDING REPORT//////////////////////////////////
 
 
@@ -880,7 +985,7 @@ app.post("/send-post-site-report", async (req, res) => {
       .map((v) => v.trim())
       .filter(Boolean);
 
-    if (!clientEmail || !reportTitle || !startDate || !endDate || !ids.length || !postSiteId) {
+    if (!clientEmail || !reportTitle || !startDate || !endDate || !postSiteId) {
       return res.status(400).send("Missing required fields.");
     }
 
@@ -903,9 +1008,13 @@ app.post("/send-post-site-report", async (req, res) => {
       ...parsedExtraRecipients,
     ].filter(Boolean);
 
-    const reports = await MobileReport.find({
+    const selectedReports = await MobileReport.find({
       _id: { $in: ids },
-    }).select("_id title category createdAt fields");
+    }).select("_id title category createdAt fields fullname");
+    const activityReports = await buildOperationalActivityReports({
+      companyId: String(req.user.assignedCompanyID), postSiteId: String(postSiteId), startDate, endDate
+    });
+    const reports = [...selectedReports, ...activityReports];
 
     if (!reports || !reports.length) {
       return res.status(404).send("No reports found.");
@@ -1280,16 +1389,16 @@ cron.schedule("* * * * *", async () => {
 
       try {
         // 🔍 Get reports within window
-        const reports = await MobileReport.find({
+        const submittedReports = await MobileReport.find({
           companyID: String(schedule.companyId),
           "fields.postSiteId": String(schedule.postSiteId),
-          createdAt: {
-            $gt: periodStart,
-            $lte: periodEnd,
-          },
-        })
-          .select("_id title category createdAt fields")
-          .sort({ createdAt: -1 });
+          systemGenerated: { $ne: true },
+          createdAt: { $gt: periodStart, $lte: periodEnd },
+        }).select("_id title category createdAt fields fullname").sort({ createdAt: -1 });
+        const activityReports = await buildOperationalActivityReports({
+          companyId: String(schedule.companyId), postSiteId: String(schedule.postSiteId), startDate: periodStart, endDate: periodEnd
+        });
+        const reports = [...submittedReports, ...activityReports];
 
         // 🚫 If no reports → SKIP sending
         if (!reports.length) {

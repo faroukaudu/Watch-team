@@ -1059,10 +1059,10 @@ app.post("/add-guard-and-send-details", async (req, res) => {
       siteId,
     } = req.body;
 
-    const firstName = String(fname || "").trim();
-    const lastName = String(lname || "").trim();
+    const firstName = _.capitalize(String(fname || "").trim());
+    const lastName = _.capitalize(String(lname || "").trim());
     // const email = String(username || "").trim().toLowerCase();
-    const email = String(username || "").trim();
+    const email = _.capitalize(String(username || "").trim());
     const mobile = String(phone || "").trim();
     const temporaryPassword = String(password || "");
 
