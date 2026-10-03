@@ -227,7 +227,9 @@ app.get("/new-guards", async (req,res)=>{
     // const clients = await Company.find({_id:req.user.assignedCompanyID}).select('postSite').sort({siteName:1});
     const clients = await User.find({assignedCompanyID:req.user.assignedCompanyID,userType:"Client"}).select('fullname').sort({siteName:1});
     console.log("I am reading this", clients);
-    res.render("dashboard/new-guards", {userInfo:req.user, myClients:clients}); //postS
+    const errorToast = req.session.guardtoast || null;
+    delete req.session.guardtoast;
+    res.render("dashboard/new-guards", {userInfo:req.user, myClients:clients, errorToast}); //postS
     // res.send(clients[0].postSite);
     
     }else{

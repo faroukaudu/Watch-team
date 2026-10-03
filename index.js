@@ -671,7 +671,9 @@ app.get("/new-cli", async (req, res) => {
                 }
             }
 
-            return res.render("dashboard/new-client", { userInfo: req.user });
+            const errorToast = req.session.toast || null;
+            delete req.session.toast;
+            return res.render("dashboard/new-client", { userInfo: req.user, errorToast });
         } catch (err) {
             return res.send(err);
         }
@@ -959,11 +961,15 @@ app.get("/new-bo-user", async (req, res) => {
             userType: "Client"
         });
 
+        const errorToast = req.session.admin_toast || null;
+        delete req.session.admin_toast;
+
         return res.render("dashboard/new-bo-user", {
             user: req.user,
             userInfo: req.user,
             clientUsers: users,
-            password: randomString
+            password: randomString,
+            errorToast
         });
     } catch (error) {
         console.error("OPEN NEW BACK OFFICE USER ERROR:", error);

@@ -481,6 +481,41 @@ app.post("/sign-up", async (req, res) => {
   }
 });
 
+// Registration email availability check.
+// Used by registration forms before submit so duplicate-email errors do not reload the page.
+app.get("/api/check-registration-email", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ ok: false, message: "Your session has expired. Please sign in again." });
+  }
+
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ ok: false, message: "Please enter an email address." });
+    }
+
+    const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const emailPattern = new RegExp(`^${escapedEmail}$`, "i");
+    const existingUser = await User.findOne({
+      $or: [{ username: emailPattern }, { email: emailPattern }],
+    }).select("_id userType").lean();
+
+    return res.json({
+      ok: true,
+      available: !existingUser,
+      message: existingUser
+        ? "This email has already been used on this system. Please use another email."
+        : "Email is available.",
+    });
+  } catch (err) {
+    console.error("Registration email check error:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "We could not verify this email right now. Please try again.",
+    });
+  }
+});
+
 // Client Registration
 app.post("/new-client", async (req, res) => {
   if (!req.isAuthenticated()) {
@@ -557,7 +592,7 @@ app.post("/new-client", async (req, res) => {
     if (existingUser) {
       req.session.toast = {
         status: false,
-        message: "A user with this email address already exists.",
+        message: "This email has already been used on this system. Please use another email.",
       };
       return res.redirect("/new-cli");
     }
@@ -649,8 +684,8 @@ app.post("/new-client", async (req, res) => {
     req.session.toast = {
       status: false,
       message:
-        err?.name === "UserExistsError"
-          ? "A user with this email address already exists."
+        (err?.name === "UserExistsError" || err?.code === 11000)
+          ? "This email has already been used on this system. Please use another email."
           : "The client could not be created. Please review the details and try again.",
     };
 
@@ -700,11 +735,31 @@ app.post("/add-bo-user", async (req, res) => {
 
 
     const { username, super_name, password, cpassword, phone } = req.body;
+    const email = String(username || "").trim().toLowerCase();
+
+    if (!email || !String(super_name || "").trim() || !password) {
+      req.session.admin_toast = { status: false, message: "Please complete all required fields." };
+      return res.redirect("/new-bo-user");
+    }
+
+    if (password !== cpassword) {
+      req.session.admin_toast = { status: false, message: "Password and confirm password do not match." };
+      return res.redirect("/new-bo-user");
+    }
+
+    const existingUser = await User.findOne({ $or: [{ username: email }, { email }] }).lean();
+    if (existingUser) {
+      req.session.admin_toast = {
+        status: false,
+        message: "This email has already been used on this system. Please use another email."
+      };
+      return res.redirect("/new-bo-user");
+    }
 
     const newClient = new User({
-      username: _.capitalize(username),
-      fullname: _.capitalize(super_name),
-      email: _.capitalize(username), // emails should be lowercase
+      username: email,
+      fullname: _.startCase(String(super_name || "").trim()),
+      email,
       // assignedCompanyID: "Mine",
       userType: "Super Admin",
       phone,
@@ -730,8 +785,13 @@ app.post("/add-bo-user", async (req, res) => {
       // ✅ stays in admin session
     } catch (err) {
       console.error("Registration error:", err);
-      res.status(400).send("Error registering client: " + err.message);
-      // Or: res.render("error-page", { message: "Client registration failed" });
+      req.session.admin_toast = {
+        status: false,
+        message: (err?.name === "UserExistsError" || err?.code === 11000)
+          ? "This email has already been used on this system. Please use another email."
+          : "The Back Office User could not be created. Please review the details and try again."
+      };
+      return res.redirect("/new-bo-user");
     }
 
 
@@ -965,6 +1025,16 @@ app.post("/add-guard", async (req, res) => {
 
       }
 
+      const email = String(username || "").trim().toLowerCase();
+      const existingUser = await User.findOne({ $or: [{ username: email }, { email }] }).lean();
+      if (existingUser) {
+        req.session.guardtoast = {
+          status: false,
+          message: "This email has already been used on this system. Please use another email."
+        };
+        return res.redirect("/new-guards");
+      }
+
       const company = await Company.findById(companyId);
 
       const selectedPostSite = company?.postSite?.find(
@@ -974,10 +1044,10 @@ app.post("/add-guard", async (req, res) => {
       const selectedPostSiteName = selectedPostSite?.siteName || "Unknown Post Site";
 
       const newGuard = new User({
-        username: _.capitalize(username),
+        username: email,
         fullname: _.capitalize(fname) + " " + _.capitalize(lname),
         // email: String(username).toLowerCase(),
-        email: _.capitalize(username),
+        email,
         userType: "AmobileGuard",
         phone: phone,
         assignedCompanyID: companyId,
@@ -1061,10 +1131,20 @@ app.post("/add-guard-and-send-details", async (req, res) => {
 
     const firstName = _.capitalize(String(fname || "").trim());
     const lastName = _.capitalize(String(lname || "").trim());
-    // const email = String(username || "").trim().toLowerCase();
-    const email = _.capitalize(String(username || "").trim());
+    const email = String(username || "").trim().toLowerCase();
     const mobile = String(phone || "").trim();
     const temporaryPassword = String(password || "");
+
+    const existingUser = email
+      ? await User.findOne({ $or: [{ username: email }, { email }] }).lean()
+      : null;
+    if (existingUser) {
+      req.session.guardtoast = {
+        status: false,
+        message: "This email has already been used on this system. Please use another email."
+      };
+      return res.redirect("/new-guards");
+    }
 
     if (!firstName || !lastName || !email || !mobile || !temporaryPassword) {
       req.session.guardtoast = {
@@ -1205,7 +1285,9 @@ app.post("/add-guard-and-send-details", async (req, res) => {
 
     req.session.guardtoast = {
       status: false,
-      message: "Error registering Guard: " + err.message,
+      message: (err?.name === "UserExistsError" || err?.code === 11000)
+        ? "This email has already been used on this system. Please use another email."
+        : "The guard could not be created. Please review the details and try again.",
     };
 
     return res.redirect("/new-guards");

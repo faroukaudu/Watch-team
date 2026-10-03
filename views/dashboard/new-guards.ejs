@@ -1,4 +1,20 @@
 <%- include("../includes/header", {user:userInfo}); -%>
+
+<% if (typeof errorToast !== "undefined" && errorToast && errorToast.message) { %>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.Swal) {
+            Swal.fire({
+                icon: "error",
+                title: "Registration Error",
+                text: <%- JSON.stringify(errorToast.message) %>,
+                confirmButtonText: "OK",
+                confirmButtonColor: "#845adf"
+            });
+        }
+    });
+</script>
+<% } %>
 <style>.d-none{display:none!important}</style>
 
     <style>
@@ -485,7 +501,93 @@
         <div id="responsive-overlay"></div>
         <!-- Scroll To Top -->
 
-        <!-- Popper JS -->
+        
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+(function () {
+    function markEmailError(input, message) {
+        input.classList.add('is-invalid');
+        input.setAttribute('aria-invalid', 'true');
+        let feedback = input.parentElement.querySelector('.registration-email-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback registration-email-feedback';
+            input.parentElement.appendChild(feedback);
+        }
+        feedback.textContent = message;
+        input.focus();
+        try { input.select(); } catch (_) {}
+    }
+
+    function clearEmailError(input) {
+        input.classList.remove('is-invalid');
+        input.removeAttribute('aria-invalid');
+        const feedback = input.parentElement.querySelector('.registration-email-feedback');
+        if (feedback) feedback.remove();
+    }
+
+    async function verifyEmailBeforeSubmit(form, event) {
+        if (form.dataset.emailVerified === 'true') {
+            form.dataset.emailVerified = 'false';
+            return;
+        }
+
+        const input = form.querySelector('input[name="username"], input[name="email"]');
+        if (!input || input.disabled || !input.value.trim()) return;
+
+        event.preventDefault();
+        clearEmailError(input);
+
+        try {
+            const response = await fetch('/api/check-registration-email?email=' + encodeURIComponent(input.value.trim()), {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.ok) {
+                throw new Error(data.message || 'Unable to verify email.');
+            }
+
+            if (!data.available) {
+                markEmailError(input, data.message);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Email Already Used',
+                    text: data.message,
+                    confirmButtonText: 'Change Email',
+                    confirmButtonColor: '#845adf'
+                });
+                input.focus();
+                return;
+            }
+
+            form.dataset.emailVerified = 'true';
+            form.requestSubmit(event.submitter || undefined);
+        } catch (error) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Unable to Continue',
+                text: error.message || 'Something went wrong while checking the email. Please try again.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#845adf'
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form[action="/new-client"], form[action="/add-bo-user"], form[action="/add-guard"], form[action="/add-guard-invite"]').forEach(function (form) {
+            const emailInput = form.querySelector('input[name="username"], input[name="email"]');
+            if (emailInput) {
+                emailInput.addEventListener('input', function () { clearEmailError(emailInput); });
+                form.addEventListener('submit', function (event) { verifyEmailBeforeSubmit(form, event); });
+            }
+        });
+    });
+})();
+</script>
+
+<!-- Popper JS -->
         <script src="assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
         <!-- Bootstrap JS -->
